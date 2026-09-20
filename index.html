@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบตรวจสอบการขออนุมัติวัสดุ กฟภ. 2568 (Full PDF & Logo Edition)</title>
+  <title>ระบบตรวจสอบการขออนุมัติวัสดุ กฟภ. 2568 (Full Edition)</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- SheetJS สำหรับ Export Excel -->
+  <!-- SheetJS สำหรับ Export Excel (.xlsx) -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <!-- PDF.js สำหรับแปลงไฟล์ PDF ให้ AI อ่าน -->
+  <!-- PDF.js สำหรับอ่านและแปลงไฟล์ PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -49,7 +49,7 @@
         บันทึก Gemini API Key สำหรับเครื่องของคุณ
       </h3>
       <p class="text-[11px] text-slate-500 mb-3 leading-relaxed">
-        Key จะถูกบันทึกไว้ในเบราว์เซอร์ของเครื่องคุณเท่านั้น (Local Storage) ปลอดภัยต่อการแชร์ลิงก์ให้ทีมงานเปิดใช้งาน
+        Key จะถูกบันทึกไว้ในเบราว์เซอร์ของเครื่องคุณเท่านั้น (Local Storage) ไม่ส่งออกภายนอก ปลอดภัยต่อการใช้งาน
       </p>
       <input type="password" id="keyField" placeholder="AIzaSy..." class="w-full rounded border border-slate-300 px-3 py-2 text-xs mb-3 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
       <div class="flex justify-end gap-2">
@@ -181,9 +181,9 @@
                 <option value="s076500">07 65 00 แผ่นปิดรอยต่อ (Flexible Flashing)</option>
                 <option value="s079000">07 90 00 การยาแนวรอยต่อ (Joint Sealant)</option>
               </optgroup>
-              <optgroup label="หมวด 08 งานประตู-หน้าต่างและกระจก" selected>
+              <optgroup label="หมวด 08 งานประตู-หน้าต่างและกระจก">
                 <option value="s081100">08 11 00 งานประตูและวงกบเหล็ก (Metal Doors)</option>
-                <option value="s081116" selected>08 11 16 ประตูและวงกบอลูมิเนียม (วงกบ ≥ 1.75 มม.)</option>
+                <option value="s081116">08 11 16 ประตูและวงกบอลูมิเนียม (วงกบ ≥ 1.75 มม.)</option>
                 <option value="s085113">08 51 13 หน้าต่างอลูมิเนียม (กรอบบาน ≥ 2.0 มม.)</option>
                 <option value="s081400">08 14 00 ประตูไม้อัดสำเร็จรูปทนน้ำ หนา 35 มม.</option>
                 <option value="s085200">08 52 00 งานหน้าต่างไม้ (Wood Windows)</option>
@@ -193,7 +193,7 @@
                 <option value="s088000">08 80 00 กระจกโฟลต / กระจกตัดแสง / กระจกนิรภัย</option>
                 <option value="s089100">08 91 00 บานเกล็ดระบายอากาศประสิทธิภาพสูง (Louvers)</option>
               </optgroup>
-              <optgroup label="หมวด 09 งานตกแต่ง">
+              <optgroup label="หมวด 09 งานตกแต่ง" selected>
                 <option value="s092400">09 24 00 งานฉาบปูนสำเร็จรูป (Plastering)</option>
                 <option value="s093013">09 30 13 งานกระเบื้องเซรามิค (Ceramic Tiling หนา ≥ 6.8 มม.)</option>
                 <option value="s093014">09 30 14 งานกระเบื้องพอร์ซเลน (Porcelain Tiling)</option>
@@ -203,7 +203,7 @@
                 <option value="s096340">09 63 40 งานพื้นปูหินธรรมชาติ (แกรนิต หนา ≥ 20 มม.)</option>
                 <option value="s096518">09 65 18 กระเบื้องยางชนิดม้วน (Vinyl Flooring หนา ≥ 2.0 มม.)</option>
                 <option value="s096643">09 66 43 งานหินล้าง กรวดล้าง ทรายล้าง</option>
-                <option value="s099000">09 90 00 งานสีและการทำผิว (รับประกันฟิล์มสี ≥ 15 ปี)</option>
+                <option value="s099000" selected>09 90 00 งานสีและการทำผิว (รับประกันฟิล์มสี ≥ 15 ปี)</option>
                 <option value="s099643">09 96 43 งานสีป้องกันไฟ (Intumescent Fire Coatings)</option>
               </optgroup>
               <optgroup label="หมวด 10 งานก่อสร้างพิเศษ">
@@ -237,7 +237,7 @@
 
         <div id="loadingIndicator" class="hidden text-center py-2 text-xs text-indigo-700 font-medium">
           <svg class="animate-spin h-4 w-4 text-indigo-600 mx-auto mb-1" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-          AI กำลังอ่านข้อมูลในเอกสารและเทียบสเปก กฟภ. 2568...
+          AI กำลังอ่านข้อความในเอกสารและเทียบสเปก กฟภ. 2568...
         </div>
       </div>
     </div>
@@ -352,21 +352,16 @@
 
     // ฐานข้อมูลเกณฑ์ข้อกำหนดมาตรฐาน กฟภ. ฉบับปี 2568 ครบทั้ง 41 หมวดย่อย
     const PEA_MASTER_SPECS = {
-      // หมวด 01
       s011100: { name: "01 11 00 ขอบเขตงาน", desc: "ก่อสร้างถูกต้องตามแบบและรายการประกอบแบบ มีความมั่นคงถาวร ประณีตตามหลักวิชาช่างที่ดี" },
       s013000: { name: "01 30 00 การดำเนินงานและส่งตัวอย่าง", desc: "ส่งตัวอย่าง 3 ชุด และ Shop Drawing ล่วงหน้า 15-30 วัน มีสถาปนิกและวิศวกรประจำไซต์งาน" },
       s014000: { name: "01 40 00 คุณภาพและสถาบันทดสอบ", desc: "สถาบันทดสอบที่รับรอง: มอก., วสท., จุฬาฯ, มก., AIT, มจธ., สจล., กรมวิทยาศาสตร์บริการ" },
       s015000: { name: "01 50 00 สิ่งอำนวยความสะดวกชั่วคราว", desc: "รั้วสังกะสีเขียวสูง ≥ 2.40 ม., ถังดับเพลิงประจำทุกชั้น, สำนักงานสนามและห้องประชุม 4x6 ม." },
       s016000: { name: "01 60 00 วัสดุและการขอเทียบเท่า", desc: "ต้องเลิกผลิตหรือขาดตลาดจริง พร้อมมีเอกสารและผลทดสอบยืนยันเทียบเท่า อนุมัติโดยผู้ออกแบบ" },
       s017000: { name: "01 70 00 การส่งมอบงานและ As-Built", desc: "แบบจริงพิมพ์เขียวไข 1 ชุด สำเนา 2 ชุด CD CAD .dwg 1 ชุด กุญแจ Master Key ส่งมอบครบ" },
-      
-      // หมวด 02
       s020000: { name: "02 00 00 สภาพพื้นที่เดิมและการรื้อถอน", desc: "สำรวจรังวัดระดับ ถ่ายรูปอาคารข้างเคียง ป้องกันความเสียหายต่อทรัพย์สินข้างเคียงและสาธารณูปโภค" },
       s023000: { name: "02 30 00 งานดิน (Earthwork)", desc: "ขุดดินตามพิกัด รองทรายหนา 25 ซม. ใต้โครงสร้างสัมผัสดิน ถมดินเป็นชั้นๆ หนาไม่เกิน 30 ซม. บดอัดแน่น" },
       s024501: { name: "02 45 00 เสาเข็มตอก คอนกรีตอัดแรง", desc: "มอก. 396-2549 / ลูกตุ้มตอก ≥ 70% น้ำหนักเข็ม / นับ Blow Count 10 ฟุตสุดท้าย / ทำ Dynamic Load Test ≥ 2 ต้น" },
       s024502: { name: "02 45 00 เสาเข็มเจาะ", desc: "คอนกรีต fc' 28 วัน ≥ 280 ksc (Cube) หรือ 240 ksc (Cylinder) / Static Test 2 ต้น (มยผ.1251) + Seismic Test ทุกต้น 100% (มยผ.1551)" },
-      
-      // หมวด 03
       s031100: { name: "03 11 00 แบบหล่อและการถอดแบบ", desc: "อายุคอนกรีตขั้นต่ำก่อนถอดแบบ: ข้างเสา/คาน 2 วัน, ท้องพื้น/คาน 14 วัน, ท้องคานยาวเกิน 6 ม. 21 วัน และบ่มน้ำต่ออย่างน้อย 7 วัน" },
       s032101: { name: "03 21 00 เหล็กเส้นกลม (RB) ≤ 9 มม.", desc: "มอก. 20-2559 ชั้นคุณภาพ SR24 กำลังคราก ≥ 2,400 ksc ห้ามนำเหล็กรีดซ้ำ (SRR) มาใช้เด็ดขาด" },
       s032102: { name: "03 21 00 เหล็กข้ออ้อย (DB) 10-25 มม.", desc: "มอก. 24-2559 ชั้นคุณภาพ SD40 กำลังคราก ≥ 4,000 ksc ห้ามนำเหล็กรีดซ้ำ (SRR) มาใช้เด็ดขาด" },
@@ -375,20 +370,12 @@
       s033513: { name: "03 35 13 ผงขัดผิวแกร่ง (Floor Hardener)", desc: "มอก. 2704-2559 ชนิดไม่ผสมโลหะ (Non-Metallic) ความแข็ง Mohs Scale ≥ 7 อัตราโปรย ≥ 5.0 กก./ตร.ม. แบรนด์: C-TOP (ดูรากรีต), Crocodile, Lanko 243, TPI M99, Nito Flor Hardtop" },
       s033900: { name: "03 39 00 การเทและการบ่มคอนกรีต", desc: "ห้ามทิ้งเกิน 30 นาที เทชั้นละไม่เกิน 45 ซม. สั่นเขย่า 5-15 วินาที/จุด บ่มชื้นต่อเนื่องไม่น้อยกว่า 7-28 วัน" },
       s034100: { name: "03 41 00 แผ่นพื้นสำเร็จรูป (Precast Slab)", desc: "มอก. 828-2546 หรือ มอก. 576-2546 คอนกรีตทับหน้า Topping หนา 5 ซม. พร้อมตะแกรงเหล็ก มอก. 737 บ่มน้ำอย่างน้อย 3 วัน" },
-      
-      // หมวด 04
       s042113: { name: "04 21 13 ผนังก่ออิฐมอญ", desc: "อิฐมอญ มอก. 77-2545 ชั้นคุณภาพ ก สุกแกร่ง มีเสาเอ็น-ทับหลังทุกความยาว 2.00 ม. และความสูงไม่เกิน 2.00 ม. เสียบเหล็ก 6 มม. ยึดเสาทุก 30 ซม." },
       s042219: { name: "04 22 19 คอนกรีตมวลเบาอบไอน้ำ", desc: "มอก. 1505-2541 ชั้นคุณภาพ 4 (G4) ปูนก่อบาง มอก. 2706 ยึดเสาด้วย Metal Strap ทุก 2 ชั้น แบรนด์: INSEE SUPERBLOCK, Q-CON, SMART BLOCK, THAICON" },
-      
-      // หมวด 05
       s051200: { name: "05 12 00 เหล็กโครงสร้าง (Structural Steel)", desc: "มอก. 1227-2558 หรือ JIS G3101 SS400 ไร้สนิม ทาสีรองพื้นกันสนิม Zinc Chromate / Red Lead 2 ชั้น แบรนด์: SYS, สยามยามาโตะ, ทาทา" },
       s055000: { name: "05 50 00 โลหะตกแต่ง สเตนเลส SUS304", desc: "สเตนเลสเกรด SUS304 ผิว Satin เชื่อมขัดเรียบ ไร้รอยคม แข็งแรงปลอดภัยตามมาตรฐานวิศวกรรม" },
-      
-      // หมวด 06
       s061000: { name: "06 10 00 งานไม้โครงสร้าง", desc: "ไม้เนื้อแข็งชั้น 1 ผึ่งแห้ง ความชื้น ≤ 18% ทาน้ำยากันปลวกและเชื้อรา ไสเรียบได้ฉาก" },
       s064800: { name: "06 48 00 งานวงกบไม้", desc: "ไม้สักหรือไม้เนื้อแข็งคัดเกรด ไสเรียบ เข้ามุมสนิท บังใบเป็นมุมฉากเพื่อป้องกันแสงลอด" },
-      
-      // หมวด 07
       s071400: { name: "07 14 00 งานระบบกันซึม (Waterproofing)", desc: "ระบบทาเคลือบไร้รอยต่อ โพลียูรีเทน หรืออะครีลิคกันซึมดาดฟ้าและห้องน้ำ แบรนด์: Sika, Lanko, Crocodile, TOA, Fosroc" },
       s072116: { name: "07 21 16 ฉนวนกันความร้อนหลังคา", desc: "มอก. 486-2527 ฉนวนใยแก้วหุ้มฟอยล์สะท้อนความร้อน 2 ด้าน ไม่ลามไฟ แบรนด์: SCG Stay Cool, Microfiber, Isover" },
       s072716: { name: "07 27 16 แผ่นสะท้อนความร้อน", desc: "อลูมิเนียมฟอยล์เสริมเส้นใยเหนียวพิเศษ สะท้อนความร้อน ≥ 95% ทนทานต่อแรงดึงฉีกขาด" },
@@ -399,8 +386,6 @@
       s074646: { name: "07 46 46 งานผนังไฟเบอร์ซีเมนต์", desc: "มอก. 1427-2561 ปราศจากใยหิน ทนชื้น ไม่บิดงอ แบรนด์: SCG Smartboard, Shera, Conwood" },
       s076500: { name: "07 65 00 แผ่นปิดรอยต่อ (Flexible Flashing)", desc: "ยางบิวทิลเสริมอลูมิเนียม ทน UV ยึดติดแน่น ป้องกันน้ำรั่วซึม แบรนด์: Wakaflex, SCG" },
       s079000: { name: "07 90 00 การยาแนวรอยต่อ (Joint Sealant)", desc: "ภายนอกซิลิโคน Neutral 100% ทน UV / ภายใน PU Sealant ไม่เป็นคราบน้ำมัน แบรนด์: Sika, Dow Corning, Soudal, TOA" },
-      
-      // หมวด 08
       s081100: { name: "08 11 00 ประตูและวงกบเหล็ก", desc: "เหล็ก Electro-galvanized หนา 1.6 มม. พ่นสีอบ อัดฉนวนกันไฟ ทนไฟตามข้อกำหนดโครงสร้าง" },
       s081116: { name: "08 11 16 ประตูและวงกบอลูมิเนียม", desc: "Alloy 6063-T5 หรือ 50S-T5 มอก. 284-2560 ความหนาวงกบ ≥ 1.75 มม., กรอบบานประตู ≥ 2.0 มม. สี Anodized ≥ 10-25 ไมครอน / Powder Coat ≥ 60 ไมครอน / PVDF ≥ 30 ไมครอน แบรนด์: ไทยเม็ททอล (ORM), ซิมเมอร์ (Building System), วายเคเค (Nexsta), ทอสเท็ม (P7), ฟูจิ เมททอล" },
       s085113: { name: "08 51 13 หน้าต่างอลูมิเนียม", desc: "Alloy 6063-T5 มอก. 284-2560 ความหนากรอบบาน ≥ 2.0 มม. รางล่างขาสูงกันน้ำล้น 300-500 Pa มีรูระบายน้ำ แบรนด์: ไทยเม็ททอล (ORM), ซิมเมอร์, วายเคเค, ทอสเท็ม (P7), ฟูจิ เมททอล" },
@@ -411,8 +396,6 @@
       s087500: { name: "08 75 00 อุปกรณ์หน้าต่าง (Window Hardware)", desc: "บานพับปรับมุม 4 แขน SUS304 มอก. 862 ปรับความฝืดได้, มือจับบานกระทุ้ง Handle Lock สีเดียวกับบาน" },
       s088000: { name: "08 80 00 งานกระจก (Glazing)", desc: "มอก. 880 (โฟลตใส) / มอก. 1344 (ตัดแสงเขียว ดูดความร้อน 35-50%) หนาทั่วไป ≥ 6 มม., ติดตาย 25-32 ตร.ฟุต หนา ≥ 8 มม., 32-40 ตร.ฟุต หนา ≥ 12 มม., Skylight ต้อง Laminated ≥ 8 มม. แบรนด์: การ์เดียน, บีจี โฟลต กล๊าส, ไทยอาซาฮี (AGC), ไทย-เยอรมัน, ทีวายเค" },
       s089100: { name: "08 91 00 บานเกล็ดระบายอากาศประสิทธิภาพสูง", desc: "Alloy 6063-T3 หนา ≥ 1.5-2.0 มม. ระบบใบคู่ ซ่อนโครง ทดสอบ HEVAC Class A3 กันฝน 99-100% รับประกัน 5 ปี แบรนด์: BFM LOUVERS, INNIVATE, RUSKIN, INNO LOUVER" },
-      
-      // หมวด 09
       s092400: { name: "09 24 00 งานฉาบปูนสำเร็จรูป", desc: "มอร์ตาร์ฉาบทั่วไป มอก. 1776 / ฉาบมวลเบา มอก. 2735 / สกิมโค้ท มอก. 3056 ติดตาข่ายลวด 3/4\" รอยต่อเสาคานและมุมวงกบ แบรนด์: ลูกดิ่งส้ม/แดง, ทีพีไอ, เสือ มอร์ตาร์, อินทรี มอร์ตาร์, Q-CON, จระเข้, แลงโก้" },
       s093013: { name: "09 30 13 กระเบื้องเซรามิค", desc: "เกรด A มอก. 2508-2555 ความหนาไม่น้อยกว่า 6.8 มม. ปูด้วยกาวซีเมนต์ (จระเข้, ตุ๊กแก Weber, เสือ, SikaTile) ยาแนวกันเชื้อรา ห้ามปูซาลาเปา แบรนด์: CAMPANA, COTTO, DURAGRES, RCI, VECERA, A DECOR" },
       s093014: { name: "09 30 14 กระเบื้องพอร์ซเลน", desc: "Homogeneous เผา > 1200°C ดูดซึมน้ำ < 0.5% ASTM C650 ทนกรดด่าง แบรนด์: CASA ROCCA, A DECOR, VECERA, WESTERN DECOR, KENZAI" },
@@ -424,25 +407,15 @@
       s096643: { name: "09 66 43 งานหินล้าง กรวดล้าง ทรายล้าง", desc: "เม็ดขนาด 2-4 มม. คัดกลม ผสมปูน 1:3 เคลือบน้ำยาใส 2 ครั้ง เส้นแบ่ง PVC 6 มม. ปูนขาว: ช้างเผือก/เสือเดคอร์, ปูนซีเมนต์: บัว/ทีพีไอ/อินทรี/เสือ" },
       s099000: { name: "09 90 00 งานสีและการทำผิว", desc: "สีน้ำอะครีลิค มอก. 2321 / สีน้ำมัน มอก. 2625 / สีอีพ็อกซี่ มอก. 691 รับประกันคุณภาพฟิล์มสีจากผู้ผลิต ≥ 15 ปี แบรนด์: TOA, ICI DULUX, JOTUN, BEGER, CAPTAIN, NIPPON PAINT" },
       s099643: { name: "09 96 43 งานสีป้องกันไฟ", desc: "Intumescent Fire Coatings มาตรฐานทนไฟ 1-2 ชม. ตาม BS 476 หรือ ASTM E119" },
-      
-      // หมวด 10
       s102113: { name: "10 21 13 ผนังห้องน้ำสำเร็จรูป", desc: "แผ่น Compact Laminate หนา ≥ 12 มม. กันน้ำ 100% อุปกรณ์ฟิตติ้งสเตนเลส SUS304 แบรนด์: Greenlam, Formica, Willie, ELITE" },
       s102800: { name: "10 28 00 สุขภัณฑ์และอุปกรณ์ห้องน้ำ", desc: "สุขภัณฑ์เซรามิก มอก. 792 ชนิดประหยัดน้ำ ก๊อกน้ำ มอก. 2067 สเตนเลส แบรนด์: COTTO, AMERICAN STANDARD, KOHLER, TOTO" },
       s224200: { name: "22 42 00 อุปกรณ์ประกอบงานประปา", desc: "วาล์วเปิด-ปิดน้ำทองเหลือง/สเตนเลส ทนแรงดันสูง ทนทานต่อการสึกกร่อน แบรนด์: SANWA, KITZ, KRACHER" },
       s104400: { name: "10 44 00 ระบบป้องกันไฟลาม (Firestop)", desc: "มาตรฐาน UL Listing ยาแนวป้องกันไฟลามช่องเปิดท่อ ทนไฟ 2-3 ชม. แบรนด์: 3M, Hilti, CP606" },
       s108200: { name: "10 82 00 งานระแนงและที่บังแดด", desc: "อลูมิเนียมอบสี หรือเหล็กชุบ Galvanized ยึดโครงสร้างแข็งแรง แบรนด์: Fameline, Alumax" },
-      
-      // หมวด 12
       s122113: { name: "12 21 13 มู่ลี่ปรับแสงแนวนอน", desc: "ใบมู่ลี่อลูมิเนียมเคลือบสีหนาพิเศษ ไม่เป็นสนิม อุปกรณ์รางครบชุด แบรนด์: KC, VC Fabric, Somfy, Hunter Douglas" },
       s122116: { name: "12 21 16 มู่ลี่ปรับแสงแนวตั้ง", desc: "ใบผ้าโพลีเอสเตอร์เคลือบสารสะท้อนแสง ทนทาน ป้องกันไฟลาม แบรนด์: KC, VC Fabric, Somfy" },
-      
-      // หมวด 22
       s220000: { name: "22 00 00 งานระบบสุขาภิบาล", desc: "ท่อประปา PVC มอก. 17 ชั้น 13.5 หรือ PPR ทนแรงดัน 10-20 บาร์ / ท่อน้ำทิ้ง PVC ชั้น 8.5 แบรนด์: ท่อน้ำไทย, SCG" },
-      
-      // หมวด 31
       s313116: { name: "31 31 16 การป้องกันปลวก", desc: "วางท่อ PE/PVC อัดเคมีกำจัดปลวกมี อย. ใต้คานคอดิน รับประกันผลงาน 3-5 ปี โดยสมาชิกสมาคมกำจัดแมลง" },
-      
-      // หมวด 32
       s321313: { name: "32 13 13 บล็อกปูพื้นและขอบคันหิน", desc: "คอนกรีตบล็อก มอก. 827-2531 กำลังรับแรงอัด ≥ 350-400 ksc ปูบนทรายบดอัดแน่น แบรนด์: SCG, CPS" }
     };
 
@@ -500,13 +473,13 @@
       notice.classList.remove('hidden');
 
       if (file.type === 'application/pdf') {
-        notice.textContent = "📄 กำลังแปลงไฟล์ PDF หน้าแรกเป็นรูปภาพเพื่อส่งให้ AI...";
+        notice.textContent = "📄 กำลังแปลงไฟล์ PDF หน้าแรกเป็นรูปภาพ...";
         try {
           const fileReader = new FileReader();
           fileReader.onload = async function() {
             const typedarray = new Uint8Array(this.result);
             const pdf = await pdfjsLib.getDocument(typedarray).promise;
-            const page = await pdf.getPage(1); // อ่านหน้าแรกของเอกสาร PDF
+            const page = await pdf.getPage(1); // อ่านหน้าแรก
 
             const viewport = page.getViewport({ scale: 1.5 });
             const canvas = document.createElement('canvas');
@@ -612,38 +585,57 @@ ${crit.desc}
 }
 `;
 
-      try {
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{
-              parts: [
-                { text: prompt },
-                { inline_data: { mime_type: "image/jpeg", data: base64Data } }
-              ]
-            }],
-            generationConfig: {
-              response_mime_type: "application/json",
-              temperature: 0.1
-            }
-          })
-        });
+      // รายชื่อรุ่นโมเดลที่รองรับแบบสลับอัตโนมัติ (Fallback)
+      const modelCandidates = ['gemini-2.0-flash', 'gemini-1.5-flash'];
+      let lastError = null;
+      let successData = null;
 
-        const data = await res.json();
-        if (data.error) throw new Error(data.error.message);
+      for (const modelName of modelCandidates) {
+        try {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{
+                parts: [
+                  { text: prompt },
+                  { inline_data: { mime_type: "image/jpeg", data: base64Data } }
+                ]
+              }],
+              generationConfig: {
+                response_mime_type: "application/json",
+                temperature: 0.1
+              }
+            })
+          });
 
-        const parsed = JSON.parse(data.candidates[0].content.parts[0].text);
-        currentEvaluationResult = parsed;
-        renderReport(parsed);
+          const data = await res.json();
+          if (data.error) {
+            lastError = new Error(data.error.message);
+            continue; // ลองใช้โมเดลถัดไป
+          }
 
-      } catch (err) {
-        console.error(err);
-        alert('เกิดข้อผิดพลาดในการวิเคราะห์ AI: ' + err.message);
-      } finally {
-        document.getElementById('loadingIndicator').classList.add('hidden');
-        document.getElementById('btnRun').disabled = false;
+          successData = data;
+          break;
+        } catch (err) {
+          lastError = err;
+        }
       }
+
+      if (successData && successData.candidates && successData.candidates[0]) {
+        try {
+          const parsed = JSON.parse(successData.candidates[0].content.parts[0].text);
+          currentEvaluationResult = parsed;
+          renderReport(parsed);
+        } catch (e) {
+          alert('รูปแบบผลลัพธ์จาก AI ไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง');
+        }
+      } else {
+        alert('เกิดข้อผิดพลาดในการวิเคราะห์ AI: ' + (lastError ? lastError.message : 'ไม่สามารถเชื่อมต่อได้'));
+      }
+
+      document.getElementById('loadingIndicator').classList.add('hidden');
+      document.getElementById('btnRun').disabled = false;
     }
 
     function renderReport(r) {
