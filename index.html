@@ -33,34 +33,26 @@
         </span>
         <button onclick="openModal()" class="text-xs bg-indigo-700 hover:bg-indigo-600 border border-indigo-400/40 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
-          ตั้งค่า AI & API Key
+          ตั้งค่า API Key
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Modal ตั้งค่า API Key & Model -->
+  <!-- Modal ตั้งค่า API Key -->
   <div id="keyModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-xl max-w-md w-full p-5 shadow-2xl border border-slate-200 space-y-3.5">
       <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
         <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
-        ตั้งค่า Google Gemini API
+        ตั้งค่า Google Gemini API Key
       </h3>
       <p class="text-[11px] text-slate-500 leading-relaxed">
-        API Key จะถูกบันทึกไว้ใน Browser เครื่องของคุณเท่านั้น ปลอดภัยสำหรับการใช้งานร่วมกัน
+        API Key จะถูกบันทึกไว้ใน Browser ของเครื่องคุณเท่านั้น (Local Storage) ปลอดภัยต่อการแชร์ลิงก์ให้ทีมงาน
       </p>
 
       <div>
         <label class="block text-xs font-semibold text-slate-700 mb-1">Google AI Studio API Key</label>
         <input type="password" id="keyField" placeholder="AIzaSy..." class="w-full rounded border border-slate-300 px-3 py-2 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none">
-      </div>
-
-      <div>
-        <label class="block text-xs font-semibold text-slate-700 mb-1">โมเดล AI (ค่าเริ่มต้น: gemini-2.0-flash)</label>
-        <select id="modelField" class="w-full rounded border border-slate-300 px-3 py-2 text-xs bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none">
-          <option value="gemini-2.0-flash">gemini-2.0-flash (แนะนำ รวดเร็วและแม่นยำสูง)</option>
-          <option value="gemini-2.0-flash-lite">gemini-2.0-flash-lite (ประหยัดโควต้า)</option>
-        </select>
       </div>
 
       <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
@@ -76,7 +68,7 @@
     <!-- ฝั่งซ้าย: ฟอร์มนำเข้าข้อมูล -->
     <div class="lg:col-span-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200 no-print space-y-3.5">
       
-      <!-- 1. แนบไฟล์ PDF หรือ รูปภาพ -->
+      <!-- 1. แนบรูปถ่าย หรือ ไฟล์ PDF -->
       <div>
         <h2 class="text-xs font-bold text-slate-900 pb-1.5 border-b border-slate-100 flex items-center gap-1.5">
           <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -94,7 +86,6 @@
 
         <div id="fileStatusNotice" class="text-[11px] text-emerald-700 mt-1.5 font-medium hidden flex items-center gap-1"></div>
 
-        <!-- กล่อง Preview ภาพ (แสดงเฉพาะกรณีเป็นรูปภาพ) -->
         <div id="imgPreviewCard" class="hidden rounded border p-1 bg-slate-50 mt-2">
           <img id="imgPreview" src="" class="max-h-36 rounded object-contain mx-auto">
         </div>
@@ -248,7 +239,7 @@
 
         <div id="loadingIndicator" class="hidden text-center py-2 text-xs text-indigo-700 font-medium">
           <svg class="animate-spin h-4 w-4 text-indigo-600 mx-auto mb-1" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-          AI กำลังอ่านข้อมูลในเอกสารและเทียบสเปก กฟภ. 2568...
+          AI กำลังวิเคราะห์ข้อมูลในเอกสารและเทียบสเปก กฟภ. 2568...
         </div>
       </div>
     </div>
@@ -477,7 +468,6 @@
       }
     }
 
-    // ฟังก์ชันจัดการไฟล์ ทั้ง PDF และ รูปภาพ โดยส่งตรงเข้า Gemini ไม่พึ่ง Library แปลงให้ค้าง
     function handleFileUpload(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -513,6 +503,16 @@
       reader.readAsDataURL(file);
     }
 
+    async function requestGemini(modelName, apiKey, payload) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      return await res.json();
+    }
+
     async function runAiVerification() {
       const apiKey = localStorage.getItem('gemini_api_key');
       if (!apiKey) {
@@ -527,7 +527,7 @@
 
       const catKey = document.getElementById('selCategory').value;
       const crit = PEA_MASTER_SPECS[catKey];
-      const model = localStorage.getItem('gemini_selected_model') || document.getElementById('modelField').value.trim() || 'gemini-2.0-flash';
+      const preferredModel = localStorage.getItem('gemini_selected_model') || document.getElementById('modelField').value.trim() || 'gemini-2.0-flash';
 
       document.getElementById('outPeaRegion').textContent = "กฟภ. เขต: " + (document.getElementById('fldPeaRegion').value || "-");
       document.getElementById('outPeaBranch').textContent = "การไฟฟ้าสาขา: " + (document.getElementById('fldPeaBranch').value || "-");
@@ -593,30 +593,43 @@ ${crit.desc}
         }
       };
 
-      try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
+      // ลำดับโมเดลที่จะทดลองเรียก (เริ่มจากรุ่นที่เลือก ตามด้วย Flash รุ่นเสถียร)
+      const modelsToTry = [preferredModel, 'gemini-2.0-flash', 'gemini-2.5-flash'];
+      const uniqueModels = [...new Set(modelsToTry.filter(Boolean))];
 
-        if (data && data.candidates && data.candidates[0]) {
-          const rawText = data.candidates[0].content.parts[0].text;
+      let successResponse = null;
+      let lastErrorMessage = "";
+
+      for (const m of uniqueModels) {
+        try {
+          const data = await requestGemini(m, apiKey, payload);
+          if (data && data.candidates && data.candidates[0]) {
+            successResponse = data;
+            break;
+          } else if (data && data.error) {
+            lastErrorMessage = data.error.message;
+          }
+        } catch (err) {
+          lastErrorMessage = err.message;
+        }
+      }
+
+      if (successResponse && successResponse.candidates && successResponse.candidates[0]) {
+        try {
+          const rawText = successResponse.candidates[0].content.parts[0].text;
           const cleanJson = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
           const parsed = JSON.parse(cleanJson);
           currentEvaluationResult = parsed;
           renderReport(parsed);
-        } else if (data.error) {
-          alert('เกิดข้อผิดพลาดจาก AI: ' + data.error.message);
+        } catch (e) {
+          alert('AI ตอบกลับในรูปแบบที่ไม่ถูกต้อง กรุณาลองส่งตรวจอีกครั้ง');
         }
-      } catch (err) {
-        alert('เกิดข้อผิดพลาดในการเชื่อมต่อ: ' + err.message);
-      } finally {
-        document.getElementById('loadingIndicator').classList.add('hidden');
-        document.getElementById('btnRun').disabled = false;
+      } else {
+        alert(`เกิดข้อผิดพลาดในการเชื่อมต่อ AI: ${lastErrorMessage}`);
       }
+
+      document.getElementById('loadingIndicator').classList.add('hidden');
+      document.getElementById('btnRun').disabled = false;
     }
 
     function renderReport(r) {
