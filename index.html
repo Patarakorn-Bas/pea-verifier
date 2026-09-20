@@ -43,6 +43,10 @@
         <span id="apiKeyBadge" class="text-[11px] px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-200">
           ⚠️ ยังไม่ได้ตั้งค่า API Key
         </span>
+        <button id="btnChecklist" onclick="openChecklistModal()" class="text-xs bg-indigo-700 hover:bg-indigo-600 border border-indigo-400/40 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          เช็คลิสต์ตามโครงการ
+        </button>
         <button id="btnHistory" onclick="openHistoryModal()" class="text-xs bg-indigo-700 hover:bg-indigo-600 border border-indigo-400/40 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           ประวัติการอนุมัติ
@@ -138,6 +142,60 @@
         </table>
       </div>
       <p class="text-[10px] text-slate-400 mt-2">แสดงล่าสุดไม่เกิน 100 รายการ คลิกแถวเพื่อดูรายละเอียดผลตรวจสอบทั้งหมด</p>
+    </div>
+  </div>
+
+
+  <!-- Modal เช็คลิสต์วัสดุตามโครงการ -->
+  <div id="checklistModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-white rounded-xl max-w-4xl w-full max-h-[88vh] flex flex-col p-5 shadow-2xl border border-slate-200">
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+          <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          เช็คลิสต์วัสดุตามโครงการ — ป้องกันการตกหล่น
+        </h3>
+        <button onclick="closeChecklistModal()" class="text-slate-400 hover:text-slate-700 text-lg leading-none">✕</button>
+      </div>
+      <p class="text-[11px] text-slate-500 mb-3">ไล่เทียบทุกหมวดงานในรายการประกอบแบบ กฟภ. 2568 กับประวัติที่เคยขออนุมัติของโครงการนี้ เพื่อดูว่าหมวดไหนยังไม่เคยขอ/อนุมัติเลย</p>
+
+      <div id="checklistDisabledNotice" class="hidden text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded p-3 leading-relaxed mb-2">
+        ⚠️ ฟีเจอร์นี้ใช้ได้เฉพาะเมื่อเปิดโหมด "ใช้งานร่วมกัน" ผ่าน Proxy Server ที่ผูกฐานข้อมูล D1 แล้วเท่านั้น
+      </div>
+
+      <div id="checklistSearchBox" class="flex flex-wrap gap-2 mb-3">
+        <input type="text" id="checklistProject" placeholder="พิมพ์ชื่อโครงการ (ให้ตรงกับที่กรอกตอนขออนุมัติ)..." class="flex-1 min-w-[220px] rounded border border-slate-300 px-3 py-1.5 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+        <select id="checklistStatusFilter" class="rounded border border-slate-300 px-2 py-1.5 text-xs bg-white">
+          <option value="">ทุกสถานะ</option>
+          <option value="MISSING">⚪ ยังไม่ได้ขอ</option>
+          <option value="APPROVED">✅ อนุมัติแล้ว</option>
+          <option value="REVIEW">🟡 รอเอกสารเพิ่มเติม</option>
+          <option value="REJECTED">🔴 ไม่อนุมัติ</option>
+        </select>
+        <button onclick="loadChecklist()" class="px-3.5 py-1.5 bg-indigo-700 hover:bg-indigo-800 text-white rounded text-xs font-semibold">แสดงเช็คลิสต์</button>
+      </div>
+
+      <div id="checklistSummary" class="hidden grid grid-cols-4 gap-2 text-center text-[10px] mb-3">
+        <div class="bg-slate-50 border border-slate-200 rounded p-2"><div id="sumTotal" class="text-base font-bold text-slate-800">-</div>หมวดทั้งหมด</div>
+        <div class="bg-emerald-50 border border-emerald-200 rounded p-2"><div id="sumApproved" class="text-base font-bold text-emerald-700">-</div>อนุมัติแล้ว</div>
+        <div class="bg-amber-50 border border-amber-200 rounded p-2"><div id="sumReview" class="text-base font-bold text-amber-700">-</div>รอเอกสารเพิ่ม</div>
+        <div class="bg-slate-100 border border-slate-300 rounded p-2"><div id="sumMissing" class="text-base font-bold text-slate-600">-</div>ยังไม่ได้ขอ</div>
+      </div>
+
+      <div id="checklistResultsWrap" class="overflow-y-auto flex-1 border border-slate-200 rounded">
+        <table class="w-full text-xs text-left">
+          <thead class="bg-slate-100 text-slate-700 sticky top-0">
+            <tr>
+              <th class="px-2.5 py-1.5 font-bold w-2/5">หมวดงาน (ตามเล่ม กฟภ. 2568)</th>
+              <th class="px-2.5 py-1.5 font-bold text-center">สถานะ</th>
+              <th class="px-2.5 py-1.5 font-bold">ยี่ห้อ/ผู้ผลิตที่เสนอ</th>
+              <th class="px-2.5 py-1.5 font-bold">วันที่ตรวจล่าสุด</th>
+            </tr>
+          </thead>
+          <tbody id="checklistTableBody" class="divide-y divide-slate-100">
+            <tr><td colspan="4" class="px-3 py-8 text-center text-slate-400">ใส่ชื่อโครงการแล้วกด "แสดงเช็คลิสต์"</td></tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -1264,12 +1322,145 @@ ${crit.desc}
       `).join('');
       detailTr.innerHTML = `
         <td colspan="5" class="px-4 py-3">
-          <div class="text-[10px] text-slate-500 mb-1.5"><strong>เหตุผล:</strong> ${escapeHtml(r.reason || '-')}</div>
+          <div class="flex items-start justify-between gap-2 mb-1.5">
+            <div class="text-[10px] text-slate-500"><strong>เหตุผล:</strong> ${escapeHtml(r.reason || '-')}</div>
+            <button type="button" class="flex-shrink-0 text-[10px] font-semibold text-rose-600 hover:text-rose-800 border border-rose-200 hover:bg-rose-50 rounded px-2 py-1 flex items-center gap-1">
+              🗑️ ลบรายการนี้
+            </button>
+          </div>
           <div class="text-[10px] text-slate-500 mb-2">เลขที่เอกสาร: ${escapeHtml(r.doc_no || '-')} · ผู้รับจ้าง: ${escapeHtml(r.contractor || '-')} · กฟภ. เขต: ${escapeHtml(r.pea_region || '-')} · การไฟฟ้าสาขา: ${escapeHtml(r.pea_branch || '-')}</div>
           ${checksHtml}
         </td>
       `;
+      detailTr.querySelector('button').addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        deleteHistoryRecord(r);
+      });
       tr.after(detailTr);
+    }
+
+    async function deleteHistoryRecord(r) {
+      const label = (r.brand || r.category_name || 'รายการนี้') + (r.created_at ? ' (' + new Date(r.created_at).toLocaleDateString('th-TH') + ')' : '');
+      const ok = confirm('ยืนยันการลบประวัติ: ' + label + '\n\nการลบนี้ไม่สามารถกู้คืนได้ และจะลบออกจากฐานข้อมูลกลาง (คนอื่นจะมองไม่เห็นรายการนี้อีกต่อไป)\n\nต้องการลบหรือไม่?');
+      if (!ok) return;
+      try {
+        const res = await fetch(`${PROXY_URL}/records/${r.id}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error((data.error && data.error.message) || 'ลบไม่สำเร็จ');
+        searchHistory();
+      } catch (e) {
+        alert('ลบรายการไม่สำเร็จ: ' + e.message);
+      }
+    }
+
+    // =========================================================================
+    // ----- เช็คลิสต์วัสดุตามโครงการ (ป้องกันการตกหล่น) -----
+    // ไล่เทียบทุกหมวดงานใน PEA_MASTER_SPECS กับประวัติของโครงการที่ระบุ
+    // =========================================================================
+    function openChecklistModal() {
+      document.getElementById('checklistModal').classList.remove('hidden');
+      if (!SHARED_MODE) {
+        document.getElementById('checklistDisabledNotice').classList.remove('hidden');
+        document.getElementById('checklistSearchBox').classList.add('hidden');
+        document.getElementById('checklistResultsWrap').classList.add('hidden');
+        return;
+      }
+      document.getElementById('checklistDisabledNotice').classList.add('hidden');
+      document.getElementById('checklistSearchBox').classList.remove('hidden');
+      document.getElementById('checklistResultsWrap').classList.remove('hidden');
+      const currentProject = document.getElementById('fldProject').value.trim();
+      if (currentProject && !document.getElementById('checklistProject').value) {
+        document.getElementById('checklistProject').value = currentProject;
+      }
+    }
+
+    function closeChecklistModal() {
+      document.getElementById('checklistModal').classList.add('hidden');
+    }
+
+    async function loadChecklist() {
+      if (!SHARED_MODE) return;
+      const project = document.getElementById('checklistProject').value.trim();
+      const tbody = document.getElementById('checklistTableBody');
+
+      if (!project) {
+        tbody.innerHTML = '<tr><td colspan="4" class="px-3 py-8 text-center text-slate-400">กรุณาพิมพ์ชื่อโครงการก่อน</td></tr>';
+        document.getElementById('checklistSummary').classList.add('hidden');
+        return;
+      }
+
+      tbody.innerHTML = '<tr><td colspan="4" class="px-3 py-8 text-center text-slate-400">⏳ กำลังโหลดข้อมูล...</td></tr>';
+
+      let records = [];
+      try {
+        const res = await fetch(`${PROXY_URL}/records?project=${encodeURIComponent(project)}&limit=500`);
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error((data.error && data.error.message) || 'โหลดข้อมูลไม่สำเร็จ');
+        records = data.records || [];
+      } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="4" class="px-3 py-8 text-center text-rose-500">✗ ' + escapeHtml(e.message) + '</td></tr>';
+        return;
+      }
+
+      // หา record ล่าสุดของแต่ละหมวด (records มาเรียงวันที่ล่าสุดก่อนอยู่แล้วจาก Worker)
+      const latestByCategory = {};
+      records.forEach(r => {
+        if (!latestByCategory[r.category_key]) latestByCategory[r.category_key] = r;
+      });
+
+      const statusFilter = document.getElementById('checklistStatusFilter').value;
+      let countApproved = 0, countReview = 0, countRejected = 0, countMissing = 0;
+      const rows = [];
+
+      Object.entries(PEA_MASTER_SPECS).forEach(([key, spec]) => {
+        const rec = latestByCategory[key];
+        const status = rec ? rec.verdict : 'MISSING';
+        if (status === 'APPROVED') countApproved++;
+        else if (status === 'REVIEW') countReview++;
+        else if (status === 'REJECTED') countRejected++;
+        else countMissing++;
+
+        if (statusFilter && status !== statusFilter) return;
+
+        rows.push({ key, spec, rec, status });
+      });
+
+      document.getElementById('checklistSummary').classList.remove('hidden');
+      document.getElementById('sumTotal').textContent = Object.keys(PEA_MASTER_SPECS).length;
+      document.getElementById('sumApproved').textContent = countApproved;
+      document.getElementById('sumReview').textContent = countReview;
+      document.getElementById('sumMissing').textContent = countMissing + countRejected;
+
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="px-3 py-8 text-center text-slate-400">ไม่มีหมวดที่ตรงกับตัวกรองสถานะที่เลือก</td></tr>';
+        return;
+      }
+
+      const STATUS_LABEL = {
+        APPROVED: '✅ อนุมัติแล้ว',
+        REVIEW: '🟡 รอเอกสารเพิ่ม',
+        REJECTED: '🔴 ไม่อนุมัติ',
+        MISSING: '⚪ ยังไม่ได้ขอ'
+      };
+      const STATUS_CLASS = {
+        APPROVED: 'bg-emerald-100 text-emerald-800',
+        REVIEW: 'bg-amber-100 text-amber-800',
+        REJECTED: 'bg-rose-100 text-rose-800',
+        MISSING: 'bg-slate-100 text-slate-500'
+      };
+
+      tbody.innerHTML = rows.map(({ spec, rec, status }) => {
+        const dateStr = rec && rec.created_at ? new Date(rec.created_at).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' }) : '-';
+        const rowBg = status === 'MISSING' ? 'bg-slate-50/60' : '';
+        return `
+          <tr class="${rowBg}">
+            <td class="px-2.5 py-2 text-slate-800">${escapeHtml(spec.name)}</td>
+            <td class="px-2.5 py-2 text-center"><span class="inline-flex px-2 py-0.5 rounded text-[10px] font-bold whitespace-nowrap ${STATUS_CLASS[status]}">${STATUS_LABEL[status]}</span></td>
+            <td class="px-2.5 py-2 text-slate-600">${escapeHtml(rec ? (rec.brand || '-') : '-')}</td>
+            <td class="px-2.5 py-2 text-slate-500 whitespace-nowrap">${escapeHtml(dateStr)}</td>
+          </tr>
+        `;
+      }).join('');
     }
 
     document.addEventListener('DOMContentLoaded', initKey);
