@@ -43,6 +43,10 @@
         <span id="apiKeyBadge" class="text-[11px] px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-200">
           ⚠️ ยังไม่ได้ตั้งค่า API Key
         </span>
+        <button id="btnHistory" onclick="openHistoryModal()" class="text-xs bg-indigo-700 hover:bg-indigo-600 border border-indigo-400/40 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          ประวัติการอนุมัติ
+        </button>
         <button onclick="openModal()" class="text-xs bg-indigo-700 hover:bg-indigo-600 border border-indigo-400/40 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
           ตั้งค่า Gemini API Key
@@ -91,7 +95,53 @@
     </div>
   </div>
 
-  <!-- Main Content -->
+  <!-- Modal ประวัติการอนุมัติ -->
+  <div id="historyModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-white rounded-xl max-w-3xl w-full max-h-[85vh] flex flex-col p-5 shadow-2xl border border-slate-200">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+          <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          ประวัติการตรวจสอบและอนุมัติวัสดุ
+        </h3>
+        <button onclick="closeHistoryModal()" class="text-slate-400 hover:text-slate-700 text-lg leading-none">✕</button>
+      </div>
+
+      <div id="historyDisabledNotice" class="hidden text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded p-3 leading-relaxed mb-2">
+        ⚠️ ฟีเจอร์นี้ใช้ได้เฉพาะเมื่อเปิดโหมด "ใช้งานร่วมกัน" ผ่าน Proxy Server เท่านั้น (ต้องผูกฐานข้อมูล D1 กับ Worker ก่อน ดูคำแนะนำในไฟล์ pea-verifier-proxy-worker.js)
+      </div>
+
+      <div id="historySearchBox" class="flex flex-wrap gap-2 mb-3">
+        <input type="text" id="historyQuery" placeholder="ค้นหาชื่อยี่ห้อ, โครงการ, ผู้รับจ้าง, เลขที่เอกสาร..." class="flex-1 min-w-[180px] rounded border border-slate-300 px-3 py-1.5 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+        <select id="historyVerdictFilter" class="rounded border border-slate-300 px-2 py-1.5 text-xs bg-white">
+          <option value="">ทุกสถานะ</option>
+          <option value="APPROVED">อนุมัติ</option>
+          <option value="REVIEW">ขอเอกสารเพิ่มเติม</option>
+          <option value="REJECTED">ไม่อนุมัติ</option>
+        </select>
+        <button onclick="searchHistory()" class="px-3.5 py-1.5 bg-indigo-700 hover:bg-indigo-800 text-white rounded text-xs font-semibold">ค้นหา</button>
+      </div>
+
+      <div id="historyResultsWrap" class="overflow-y-auto flex-1 border border-slate-200 rounded">
+        <table class="w-full text-xs text-left">
+          <thead class="bg-slate-100 text-slate-700 sticky top-0">
+            <tr>
+              <th class="px-2.5 py-1.5 font-bold">วันที่</th>
+              <th class="px-2.5 py-1.5 font-bold">หมวดงาน</th>
+              <th class="px-2.5 py-1.5 font-bold">ยี่ห้อ/ผู้ผลิต</th>
+              <th class="px-2.5 py-1.5 font-bold">โครงการ</th>
+              <th class="px-2.5 py-1.5 font-bold text-center">ผล</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody" class="divide-y divide-slate-100">
+            <tr><td colspan="5" class="px-3 py-8 text-center text-slate-400">ยังไม่มีข้อมูล กด "ค้นหา" เพื่อโหลดประวัติ</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-[10px] text-slate-400 mt-2">แสดงล่าสุดไม่เกิน 100 รายการ คลิกแถวเพื่อดูรายละเอียดผลตรวจสอบทั้งหมด</p>
+    </div>
+  </div>
+
+
   <main class="max-w-7xl mx-auto px-4 py-5 grid grid-cols-1 lg:grid-cols-12 gap-6">
 
     <!-- ฝั่งซ้าย: ฟอร์มนำเข้าข้อมูล -->
@@ -779,6 +829,7 @@ ${crit.desc}
           }
           currentEvaluationResult = parsed;
           renderReport(parsed);
+          saveRecordToHistory(parsed);
           if (successModel !== preferredModel) {
             console.warn(`โมเดล "${preferredModel}" เรียกไม่สำเร็จ ระบบสลับไปใช้ "${successModel}" แทน`);
           }
@@ -1083,6 +1134,142 @@ ${crit.desc}
           try { printWin.focus(); printWin.print(); } catch (e) { console.warn('เรียก print() อัตโนมัติไม่สำเร็จ ผู้ใช้สามารถกดปุ่มพิมพ์ในหน้าต่างใหม่แทนได้', e); }
         }, 350);
       });
+    }
+
+    // =========================================================================
+    // ----- ประวัติการอนุมัติ (บันทึก/ค้นหา ผ่าน Worker + D1) -----
+    // ใช้ได้เฉพาะโหมด SHARED_MODE เท่านั้น เพราะต้องมีฐานข้อมูลกลางที่ทุกคน
+    // เข้าถึงร่วมกันได้ (เก็บอยู่ที่ Cloudflare Worker ไม่ใช่ในเบราว์เซอร์)
+    // =========================================================================
+    function extractBrandFromChecks(checks) {
+      if (!Array.isArray(checks)) return '';
+      const brandCheck = checks.find(c => c.topic && c.topic.indexOf('ยี่ห้อ') !== -1);
+      return brandCheck ? (brandCheck.actual || '') : '';
+    }
+
+    async function saveRecordToHistory(result) {
+      if (!SHARED_MODE) return; // ไม่มีฐานข้อมูลกลางให้บันทึก ข้ามไปเงียบๆ
+      const catKey = document.getElementById('selCategory').value;
+      const crit = PEA_MASTER_SPECS[catKey];
+      const payload = {
+        categoryKey: catKey,
+        categoryName: crit.name,
+        verdict: result.verdict,
+        reason: result.reason,
+        brand: extractBrandFromChecks(result.checks),
+        peaRegion: document.getElementById('fldPeaRegion').value || '',
+        peaBranch: document.getElementById('fldPeaBranch').value || '',
+        project: document.getElementById('fldProject').value || '',
+        contractor: document.getElementById('fldContractor').value || '',
+        docNo: document.getElementById('fldDocNo').value || '',
+        checks: result.checks
+      };
+      try {
+        await fetch(`${PROXY_URL}/records`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      } catch (e) {
+        console.warn('บันทึกประวัติไม่สำเร็จ (ไม่กระทบการใช้งานหลัก):', e);
+      }
+    }
+
+    function openHistoryModal() {
+      document.getElementById('historyModal').classList.remove('hidden');
+      if (!SHARED_MODE) {
+        document.getElementById('historyDisabledNotice').classList.remove('hidden');
+        document.getElementById('historySearchBox').classList.add('hidden');
+        document.getElementById('historyResultsWrap').classList.add('hidden');
+        return;
+      }
+      document.getElementById('historyDisabledNotice').classList.add('hidden');
+      document.getElementById('historySearchBox').classList.remove('hidden');
+      document.getElementById('historyResultsWrap').classList.remove('hidden');
+      searchHistory();
+    }
+
+    function closeHistoryModal() {
+      document.getElementById('historyModal').classList.add('hidden');
+    }
+
+    const VERDICT_TH = { APPROVED: 'อนุมัติ', REVIEW: 'ขอเอกสารเพิ่มเติม', REJECTED: 'ไม่อนุมัติ' };
+    const VERDICT_CLASS = { APPROVED: 'bg-emerald-100 text-emerald-800', REVIEW: 'bg-amber-100 text-amber-800', REJECTED: 'bg-rose-100 text-rose-800' };
+
+    async function searchHistory() {
+      if (!SHARED_MODE) return;
+      const tbody = document.getElementById('historyTableBody');
+      tbody.innerHTML = '<tr><td colspan="5" class="px-3 py-8 text-center text-slate-400">⏳ กำลังค้นหา...</td></tr>';
+
+      const q = document.getElementById('historyQuery').value.trim();
+      const verdict = document.getElementById('historyVerdictFilter').value;
+      const params = new URLSearchParams();
+      if (q) params.set('q', q);
+      if (verdict) params.set('verdict', verdict);
+      params.set('limit', '100');
+
+      try {
+        const res = await fetch(`${PROXY_URL}/records?` + params.toString());
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error((data.error && data.error.message) || 'โหลดข้อมูลไม่สำเร็จ');
+        renderHistoryResults(data.records || []);
+      } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="5" class="px-3 py-8 text-center text-rose-500">✗ ' + escapeHtml(e.message) + '</td></tr>';
+      }
+    }
+
+    function renderHistoryResults(records) {
+      const tbody = document.getElementById('historyTableBody');
+      tbody.innerHTML = '';
+      if (!records.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="px-3 py-8 text-center text-slate-400">ไม่พบข้อมูลที่ตรงกับการค้นหา</td></tr>';
+        return;
+      }
+      records.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 cursor-pointer';
+        const dateStr = r.created_at ? new Date(r.created_at).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' }) : '-';
+        const vClass = VERDICT_CLASS[r.verdict] || 'bg-slate-100 text-slate-600';
+        const vLabel = VERDICT_TH[r.verdict] || r.verdict || '-';
+        tr.innerHTML = `
+          <td class="px-2.5 py-2 text-slate-600 whitespace-nowrap">${escapeHtml(dateStr)}</td>
+          <td class="px-2.5 py-2 text-slate-800">${escapeHtml(r.category_name || '-')}</td>
+          <td class="px-2.5 py-2 font-semibold text-slate-800">${escapeHtml(r.brand || '-')}</td>
+          <td class="px-2.5 py-2 text-slate-600">${escapeHtml(r.project || '-')}</td>
+          <td class="px-2.5 py-2 text-center"><span class="inline-flex px-2 py-0.5 rounded text-[10px] font-bold ${vClass}">${escapeHtml(vLabel)}</span></td>
+        `;
+        tr.addEventListener('click', () => toggleHistoryDetail(tr, r));
+        tbody.appendChild(tr);
+      });
+    }
+
+    function toggleHistoryDetail(tr, r) {
+      const existing = tr.nextElementSibling;
+      if (existing && existing.classList.contains('history-detail-row')) {
+        existing.remove();
+        return;
+      }
+      document.querySelectorAll('.history-detail-row').forEach(el => el.remove());
+
+      let checks = [];
+      try { checks = JSON.parse(r.checks_json || '[]'); } catch (e) { checks = []; }
+
+      const detailTr = document.createElement('tr');
+      detailTr.className = 'history-detail-row bg-slate-50';
+      const checksHtml = checks.map(c => `
+        <div class="flex items-start gap-2 py-1 border-b border-slate-100 last:border-0">
+          <span class="text-[10px] font-bold ${c.pass ? 'text-emerald-700' : 'text-rose-600'} w-4 flex-shrink-0">${c.pass ? '✓' : '✕'}</span>
+          <span class="text-[10px] text-slate-700"><strong>${escapeHtml(c.topic || '')}:</strong> ${escapeHtml(c.actual || '')}</span>
+        </div>
+      `).join('');
+      detailTr.innerHTML = `
+        <td colspan="5" class="px-4 py-3">
+          <div class="text-[10px] text-slate-500 mb-1.5"><strong>เหตุผล:</strong> ${escapeHtml(r.reason || '-')}</div>
+          <div class="text-[10px] text-slate-500 mb-2">เลขที่เอกสาร: ${escapeHtml(r.doc_no || '-')} · ผู้รับจ้าง: ${escapeHtml(r.contractor || '-')} · กฟภ. เขต: ${escapeHtml(r.pea_region || '-')} · การไฟฟ้าสาขา: ${escapeHtml(r.pea_branch || '-')}</div>
+          ${checksHtml}
+        </td>
+      `;
+      tr.after(detailTr);
     }
 
     document.addEventListener('DOMContentLoaded', initKey);
