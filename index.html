@@ -22,7 +22,7 @@
 
   <!-- Header -->
   <header class="bg-gradient-to-r from-purple-950 via-indigo-900 to-slate-900 text-white shadow no-print">
-    <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-col md:flex-row justify-between items-center gap-2">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-2">
       <div>
         <h1 class="text-base md:text-lg font-bold tracking-tight">ระบบตรวจสอบการขออนุมัติวัสดุ (PEA Material Verifier)</h1>
         <p class="text-[11px] text-purple-200">รายการประกอบแบบมาตรฐาน กองออกแบบงานโยธา การไฟฟ้าส่วนภูมิภาค ฉบับปี 2568 (ครบ 41 หมวดย่อย)</p>
@@ -47,12 +47,21 @@
         ตั้งค่า Google Gemini API Key
       </h3>
       <p class="text-[11px] text-slate-500 leading-relaxed">
-        API Key จะถูกบันทึกไว้ใน Browser ของเครื่องคุณเท่านั้น (Local Storage) ปลอดภัยต่อการแชร์ลิงก์ให้ทีมงาน
+        API Key จะถูกบันทึกไว้ใน Browser เครื่องของคุณเท่านั้น ปลอดภัยต่อการใช้งาน
       </p>
 
       <div>
         <label class="block text-xs font-semibold text-slate-700 mb-1">Google AI Studio API Key</label>
         <input type="password" id="keyField" placeholder="AIzaSy..." class="w-full rounded border border-slate-300 px-3 py-2 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">รุ่นโมเดล (Model ID)</label>
+        <select id="modelField" class="w-full rounded border border-slate-300 px-3 py-2 text-xs bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+          <option value="gemini-2.5-flash">gemini-2.5-flash (แนะนำล่าสุด)</option>
+          <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+          <option value="gemini-2.0-flash-lite">gemini-2.0-flash-lite</option>
+        </select>
       </div>
 
       <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
@@ -75,23 +84,24 @@
           1. แนบเอกสารสเปก (ไฟล์ PDF หรือ รูปภาพ)
         </h2>
 
-        <div class="mt-2 border-2 border-dashed border-slate-300 rounded-lg p-3 text-center hover:border-indigo-500 transition-colors bg-slate-50/50">
-          <input type="file" id="docFileInput" accept="application/pdf,image/*" class="hidden" onchange="handleFileUpload(event)">
-          <label for="docFileInput" class="cursor-pointer block">
-            <svg class="w-7 h-7 text-indigo-500 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-            <span class="text-xs font-semibold text-indigo-600">กดเพื่อเลือกไฟล์ PDF หรือรูปภาพ</span>
-            <span class="text-[10px] text-slate-400 block mt-0.5">รองรับไฟล์ .pdf, .jpg, .png (ตารางสเปก, ใบรับรอง มอก.)</span>
-          </label>
+        <!-- Dropzone กล่องอัปโหลด -->
+        <div id="dropZone" class="mt-2 border-2 border-dashed border-slate-300 rounded-lg p-3 text-center hover:border-indigo-500 transition-colors bg-slate-50/50 cursor-pointer">
+          <input type="file" id="docFileInput" accept="application/pdf,image/png,image/jpeg,image/webp" class="hidden">
+          <div onclick="document.getElementById('docFileInput').click()">
+            <svg class="w-7 h-7 text-indigo-500 mx-auto mb-1 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+            <span class="text-xs font-semibold text-indigo-600 pointer-events-none">คลิกเพื่อเลือกไฟล์ หรือ ลากไฟล์มาวาง</span>
+            <span class="text-[10px] text-slate-400 block mt-0.5 pointer-events-none">รองรับไฟล์ PDF, JPG, PNG (ตารางสเปก, ใบรับรอง มอก.)</span>
+          </div>
         </div>
 
-        <div id="fileStatusNotice" class="text-[11px] text-emerald-700 mt-1.5 font-medium hidden flex items-center gap-1"></div>
+        <div id="fileStatusNotice" class="text-[11px] mt-1.5 font-medium hidden"></div>
 
         <div id="imgPreviewCard" class="hidden rounded border p-1 bg-slate-50 mt-2">
           <img id="imgPreview" src="" class="max-h-36 rounded object-contain mx-auto">
         </div>
       </div>
 
-      <!-- 2. แนบโลโก้หน่วยงาน -->
+      <!-- 2. โลโก้หน่วยงาน -->
       <div>
         <h2 class="text-xs font-bold text-slate-900 pb-1.5 border-b border-slate-100 flex items-center gap-1.5">
           <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -239,7 +249,7 @@
 
         <div id="loadingIndicator" class="hidden text-center py-2 text-xs text-indigo-700 font-medium">
           <svg class="animate-spin h-4 w-4 text-indigo-600 mx-auto mb-1" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-          AI กำลังวิเคราะห์ข้อมูลในเอกสารและเทียบสเปก กฟภ. 2568...
+          AI กำลังอ่านข้อมูลและเทียบสเปก กฟภ. 2568...
         </div>
       </div>
     </div>
@@ -438,13 +448,13 @@
 
     function openModal() {
       document.getElementById('keyField').value = localStorage.getItem('gemini_api_key') || '';
-      document.getElementById('modelField').value = localStorage.getItem('gemini_selected_model') || 'gemini-2.0-flash';
+      document.getElementById('modelField').value = localStorage.getItem('gemini_selected_model') || 'gemini-2.5-flash';
       document.getElementById('keyModal').classList.remove('hidden');
     }
     function closeModal() { document.getElementById('keyModal').classList.add('hidden'); }
     function saveKey() {
       const v = document.getElementById('keyField').value.trim();
-      const m = document.getElementById('modelField').value.trim() || 'gemini-2.0-flash';
+      const m = document.getElementById('modelField').value.trim() || 'gemini-2.5-flash';
       if (v) {
         localStorage.setItem('gemini_api_key', v);
         localStorage.setItem('gemini_selected_model', m);
@@ -468,55 +478,73 @@
       }
     }
 
-    function handleFileUpload(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
+    // ระบบอ่านไฟล์ Native File API (ปลอดภัย ไม่ค้างแน่นอน)
+    function readFileDirect(file) {
       const notice = document.getElementById('fileStatusNotice');
-      notice.className = "text-[11px] text-indigo-700 mt-1.5 font-medium flex items-center gap-1";
-      notice.textContent = "⏳ กำลังโหลดเอกสาร...";
-      notice.classList.remove('hidden');
+      notice.className = "text-[11px] text-indigo-700 mt-1.5 font-medium flex items-center gap-1 block";
+      notice.textContent = "⏳ กำลังอ่านไฟล์เอกสาร...";
 
       const reader = new FileReader();
+      
       reader.onload = function(evt) {
-        const resultStr = evt.target.result;
-        base64Data = resultStr.split(',')[1];
-
-        if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
-          fileMimeType = "application/pdf";
-          document.getElementById('imgPreviewCard').classList.add('hidden');
-          document.getElementById('outPhotoBox').classList.add('hidden');
-
-          notice.className = "text-[11px] text-emerald-700 mt-1.5 font-medium flex items-center gap-1";
-          notice.innerHTML = `<span>✓ แนบไฟล์ PDF: <strong>${file.name}</strong> (${(file.size/1024).toFixed(1)} KB) พร้อมส่งตรวจ</span>`;
-        } else {
-          fileMimeType = file.type || "image/jpeg";
-          document.getElementById('imgPreview').src = resultStr;
-          document.getElementById('imgPreviewCard').classList.remove('hidden');
-          document.getElementById('outPhotoImg').src = resultStr;
-          document.getElementById('outPhotoBox').classList.remove('hidden');
-
-          notice.className = "text-[11px] text-emerald-700 mt-1.5 font-medium flex items-center gap-1";
-          notice.innerHTML = `<span>✓ แนบรูปภาพ: <strong>${file.name}</strong> พร้อมส่งตรวจ</span>`;
+        try {
+          const resultStr = evt.target.result;
+          base64Data = resultStr.split(',')[1];
+          
+          if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+            fileMimeType = "application/pdf";
+            document.getElementById('imgPreviewCard').classList.add('hidden');
+            document.getElementById('outPhotoBox').classList.add('hidden');
+            notice.className = "text-[11px] text-emerald-700 mt-1.5 font-medium block";
+            notice.innerHTML = `✓ แนบไฟล์ PDF: <strong>${file.name}</strong> (${(file.size/1024).toFixed(1)} KB) เรียบร้อย`;
+          } else {
+            fileMimeType = file.type || "image/jpeg";
+            document.getElementById('imgPreview').src = resultStr;
+            document.getElementById('imgPreviewCard').classList.remove('hidden');
+            document.getElementById('outPhotoImg').src = resultStr;
+            document.getElementById('outPhotoBox').classList.remove('hidden');
+            notice.className = "text-[11px] text-emerald-700 mt-1.5 font-medium block";
+            notice.innerHTML = `✓ แนบรูปภาพ: <strong>${file.name}</strong> เรียบร้อย`;
+          }
+        } catch (err) {
+          console.error(err);
+          notice.className = "text-[11px] text-rose-600 mt-1.5 font-medium block";
+          notice.textContent = "❌ การประมวลผลไฟล์ล้มเหลว กรุณาลองใหม่อีกครั้ง";
         }
       };
+
+      reader.onerror = function() {
+        notice.className = "text-[11px] text-rose-600 mt-1.5 font-medium block";
+        notice.textContent = "❌ ไม่สามารถอ่านไฟล์นี้ได้";
+      };
+
       reader.readAsDataURL(file);
     }
 
-    async function requestGemini(modelName, apiKey, payload) {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      return await res.json();
-    }
+    // Event Input File
+    document.getElementById('docFileInput').addEventListener('change', function(e) {
+      if (this.files && this.files[0]) {
+        readFileDirect(this.files[0]);
+      }
+      this.value = ''; // รีเซ็ตเพื่อให้อัปโหลดไฟล์เดิมซ้ำได้
+    });
+
+    // Event Drag & Drop
+    const dropZone = document.getElementById('dropZone');
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-indigo-500', 'bg-indigo-50/40'); });
+    dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('border-indigo-500', 'bg-indigo-50/40'); });
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('border-indigo-500', 'bg-indigo-50/40');
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        readFileDirect(e.dataTransfer.files[0]);
+      }
+    });
 
     async function runAiVerification() {
       const apiKey = localStorage.getItem('gemini_api_key');
       if (!apiKey) {
-        alert('กรุณาคลิก "ตั้งค่า AI & API Key" ด้านบนขวาก่อน');
+        alert('กรุณาคลิก "ตั้งค่า API Key" ด้านบนขวาก่อนใช้งาน');
         openModal();
         return;
       }
@@ -527,7 +555,7 @@
 
       const catKey = document.getElementById('selCategory').value;
       const crit = PEA_MASTER_SPECS[catKey];
-      const preferredModel = localStorage.getItem('gemini_selected_model') || document.getElementById('modelField').value.trim() || 'gemini-2.0-flash';
+      const model = localStorage.getItem('gemini_selected_model') || document.getElementById('modelField').value.trim() || 'gemini-2.5-flash';
 
       document.getElementById('outPeaRegion').textContent = "กฟภ. เขต: " + (document.getElementById('fldPeaRegion').value || "-");
       document.getElementById('outPeaBranch').textContent = "การไฟฟ้าสาขา: " + (document.getElementById('fldPeaBranch').value || "-");
@@ -593,20 +621,26 @@ ${crit.desc}
         }
       };
 
-      // ลำดับโมเดลที่จะทดลองเรียก (เริ่มจากรุ่นที่เลือก ตามด้วย Flash รุ่นเสถียร)
-      const modelsToTry = [preferredModel, 'gemini-2.0-flash', 'gemini-2.5-flash'];
-      const uniqueModels = [...new Set(modelsToTry.filter(Boolean))];
+      // ลำดับการเรียกโมเดลแบบ Auto-Fallback
+      const candidateModels = [model, 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash-lite'];
+      const uniqueModels = [...new Set(candidateModels.filter(Boolean))];
 
       let successResponse = null;
       let lastErrorMessage = "";
 
       for (const m of uniqueModels) {
         try {
-          const data = await requestGemini(m, apiKey, payload);
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${apiKey}`;
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
           if (data && data.candidates && data.candidates[0]) {
             successResponse = data;
             break;
-          } else if (data && data.error) {
+          } else if (data.error) {
             lastErrorMessage = data.error.message;
           }
         } catch (err) {
@@ -625,7 +659,7 @@ ${crit.desc}
           alert('AI ตอบกลับในรูปแบบที่ไม่ถูกต้อง กรุณาลองส่งตรวจอีกครั้ง');
         }
       } else {
-        alert(`เกิดข้อผิดพลาดในการเชื่อมต่อ AI: ${lastErrorMessage}`);
+        alert(`เกิดข้อผิดพลาดจาก AI: ${lastErrorMessage}`);
       }
 
       document.getElementById('loadingIndicator').classList.add('hidden');
