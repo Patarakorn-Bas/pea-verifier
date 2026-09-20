@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบตรวจสอบการขออนุมัติวัสดุ กฟภ. 2568 (Full Master Edition)</title>
+  <title>ระบบตรวจสอบการขออนุมัติวัสดุ กฟภ. 2568</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- SheetJS สำหรับ Export Excel (.xlsx) -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -22,10 +22,10 @@
 
   <!-- Header -->
   <header class="bg-gradient-to-r from-purple-950 via-indigo-900 to-slate-900 text-white shadow no-print">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-2">
+    <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-col md:flex-row justify-between items-center gap-2">
       <div>
         <h1 class="text-base md:text-lg font-bold tracking-tight">ระบบตรวจสอบการขออนุมัติวัสดุ (PEA Material Verifier)</h1>
-        <p class="text-[11px] text-purple-200">รายการประกอบแบบมาตรฐาน กองออกแบบงานโยธา การไฟฟ้าส่วนภูมิภาค ฉบับปี 2568 (ครบ 41 หมวดย่อย)</p>
+        <p class="text-[11px] text-purple-200">รายการประกอบแบบมาตรฐาน กองออกแบบงานโยธา การไฟฟ้าส่วนภูมิภาค ฉบับปี 2568</p>
       </div>
       <div class="flex items-center gap-2">
         <span id="apiKeyBadge" class="text-[11px] px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-200">
@@ -33,13 +33,13 @@
         </span>
         <button onclick="openModal()" class="text-xs bg-indigo-700 hover:bg-indigo-600 border border-indigo-400/40 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
-          ตั้งค่า API Key
+          ตั้งค่า AI &amp; API Key
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Modal ตั้งค่า API Key -->
+  <!-- Modal ตั้งค่า API Key และเลือกโมเดล -->
   <div id="keyModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-xl max-w-md w-full p-5 shadow-2xl border border-slate-200 space-y-3.5">
       <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
@@ -47,21 +47,23 @@
         ตั้งค่า Google Gemini API Key
       </h3>
       <p class="text-[11px] text-slate-500 leading-relaxed">
-        API Key จะถูกบันทึกไว้ใน Browser ของเครื่องคุณเท่านั้น ปลอดภัยต่อการแชร์ลิงก์
+        API Key และโมเดลที่เลือกจะถูกบันทึกไว้ใน Browser ของเครื่องคุณเท่านั้น (Local Storage) ไม่ถูกส่งไปที่ใดนอกจาก Google โดยตรง
       </p>
 
       <div>
         <label class="block text-xs font-semibold text-slate-700 mb-1">Google AI Studio API Key</label>
         <input type="password" id="keyField" placeholder="AIzaSy..." class="w-full rounded border border-slate-300 px-3 py-2 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+        <p class="text-[10px] text-slate-400 mt-1">ขอ API Key ฟรีได้ที่ <span class="font-mono">aistudio.google.com/apikey</span></p>
       </div>
 
       <div>
-        <label class="block text-xs font-semibold text-slate-700 mb-1">รุ่นโมเดล (Model ID)</label>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">เลือกโมเดล AI ที่ใช้ตรวจสอบเอกสาร</label>
         <select id="modelField" class="w-full rounded border border-slate-300 px-3 py-2 text-xs bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none">
-          <option value="gemini-2.5-flash">gemini-2.5-flash (แนะนำ แม่นยำล่าสุด)</option>
-          <option value="gemini-2.0-flash">gemini-2.0-flash</option>
-          <option value="gemini-2.0-flash-lite">gemini-2.0-flash-lite</option>
+          <option value="gemini-2.5-flash">Gemini 2.5 Flash (แนะนำ — เร็วและแม่นยำ)</option>
+          <option value="gemini-2.5-pro">Gemini 2.5 Pro (แม่นยำสูงสุด แต่ช้ากว่า)</option>
+          <option value="gemini-2.0-flash">Gemini 2.0 Flash (รุ่นสำรอง)</option>
         </select>
+        <p class="text-[10px] text-slate-400 mt-1">ถ้าโมเดลที่เลือกเรียกไม่สำเร็จ ระบบจะลองโมเดลสำรองในรายการให้อัตโนมัติ</p>
       </div>
 
       <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
@@ -73,10 +75,10 @@
 
   <!-- Main Content -->
   <main class="max-w-7xl mx-auto px-4 py-5 grid grid-cols-1 lg:grid-cols-12 gap-6">
-    
+
     <!-- ฝั่งซ้าย: ฟอร์มนำเข้าข้อมูล -->
     <div class="lg:col-span-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200 no-print space-y-3.5">
-      
+
       <!-- 1. แนบรูปถ่าย หรือ ไฟล์ PDF -->
       <div>
         <h2 class="text-xs font-bold text-slate-900 pb-1.5 border-b border-slate-100 flex items-center gap-1.5">
@@ -84,19 +86,19 @@
           1. แนบเอกสารสเปก (ไฟล์ PDF หรือ รูปภาพ)
         </h2>
 
-        <div id="dropZone" class="mt-2 border-2 border-dashed border-slate-300 rounded-lg p-3 text-center hover:border-indigo-500 transition-colors bg-slate-50/50 cursor-pointer">
-          <input type="file" id="docFileInput" accept="application/pdf,image/png,image/jpeg,image/webp" class="hidden">
-          <div onclick="document.getElementById('docFileInput').click()">
-            <svg class="w-7 h-7 text-indigo-500 mx-auto mb-1 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-            <span class="text-xs font-semibold text-indigo-600 pointer-events-none">คลิกเพื่อเลือกไฟล์ หรือ ลากไฟล์มาวาง</span>
-            <span class="text-[10px] text-slate-400 block mt-0.5 pointer-events-none">รองรับไฟล์ PDF, JPG, PNG (ตารางสเปก, ใบรับรอง มอก.)</span>
-          </div>
+        <div class="mt-2 border-2 border-dashed border-slate-300 rounded-lg p-3 text-center hover:border-indigo-500 transition-colors bg-slate-50/50">
+          <input type="file" id="docFileInput" accept="application/pdf,image/*" class="hidden" onchange="handleFileUpload(event)">
+          <label for="docFileInput" class="cursor-pointer block">
+            <svg class="w-7 h-7 text-indigo-500 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+            <span class="text-xs font-semibold text-indigo-600">กดเพื่อเลือกไฟล์ PDF หรือรูปภาพ</span>
+            <span class="text-[10px] text-slate-400 block mt-0.5">รองรับไฟล์ .pdf, .jpg, .png (ตารางสเปก, ใบรับรอง มอก.)</span>
+          </label>
         </div>
 
-        <div id="fileStatusNotice" class="text-[11px] mt-1.5 font-medium hidden"></div>
+        <div id="fileStatusNotice" class="text-[11px] text-emerald-700 mt-1.5 font-medium hidden flex items-center gap-1"></div>
 
         <div id="imgPreviewCard" class="hidden rounded border p-1 bg-slate-50 mt-2">
-          <img id="imgPreview" src="" class="max-h-36 rounded object-contain mx-auto">
+          <img id="imgPreview" src="" class="max-h-36 rounded object-contain mx-auto" alt="ตัวอย่างเอกสารที่แนบ">
         </div>
       </div>
 
@@ -118,11 +120,11 @@
         <div class="space-y-2 mt-2">
           <div class="grid grid-cols-2 gap-2">
             <div>
-              <label class="block text-[10px] font-semibold text-slate-600">กฟภ. เขต (PEA Region)</label>
+              <label class="block text-[10px] font-semibold text-slate-600">กฟภ. เขต</label>
               <input type="text" id="fldPeaRegion" placeholder="เช่น กฟก.3 (นครปฐม)" class="w-full rounded border border-slate-300 px-2 py-1 text-xs">
             </div>
             <div>
-              <label class="block text-[10px] font-semibold text-slate-600">การไฟฟ้าสาขา / สังกัด</label>
+              <label class="block text-[10px] font-semibold text-slate-600">การไฟฟ้าสาขา</label>
               <input type="text" id="fldPeaBranch" placeholder="เช่น กฟสา.สามพราน" class="w-full rounded border border-slate-300 px-2 py-1 text-xs">
             </div>
           </div>
@@ -142,7 +144,7 @@
           </div>
 
           <div>
-            <label class="block text-[10px] font-semibold text-slate-600">เลือกหมวดงานที่ขออนุมัติ (ครบ 41 หมวด)</label>
+            <label class="block text-[10px] font-semibold text-slate-600">เลือกหมวดงานที่ขออนุมัติ</label>
             <select id="selCategory" class="w-full rounded border border-slate-300 px-2 py-1.5 text-xs font-medium bg-white focus:outline-none">
               <optgroup label="หมวด 01 ข้อกำหนดทั่วไป">
                 <option value="s011100">01 11 00 ขอบเขตของงาน (Summary of Work)</option>
@@ -204,7 +206,7 @@
                 <option value="s088000">08 80 00 กระจกโฟลต / กระจกตัดแสง / กระจกนิรภัย</option>
                 <option value="s089100">08 91 00 บานเกล็ดระบายอากาศประสิทธิภาพสูง (Louvers)</option>
               </optgroup>
-              <optgroup label="หมวด 09 งานตกแต่ง" selected>
+              <optgroup label="หมวด 09 งานตกแต่ง">
                 <option value="s092400">09 24 00 งานฉาบปูนสำเร็จรูป (Plastering)</option>
                 <option value="s093013">09 30 13 งานกระเบื้องเซรามิค (Ceramic Tiling หนา ≥ 6.8 มม.)</option>
                 <option value="s093014">09 30 14 งานกระเบื้องพอร์ซเลน (Porcelain Tiling)</option>
@@ -222,7 +224,7 @@
                 <option value="s102800">10 28 00 สุขภัณฑ์และอุปกรณ์ห้องน้ำ</option>
                 <option value="s224200">22 42 00 อุปกรณ์ประกอบงานประปา (Plumbing Fixtures)</option>
                 <option value="s104400">10 44 00 ระบบป้องกันไฟลาม (Fire Protection Specialties)</option>
-                <option value="s108200">10 82 00 งานระแนงและที่บังแดด (Grilles & Screens)</option>
+                <option value="s108200">10 82 00 งานระแนงและที่บังแดด (Grilles &amp; Screens)</option>
               </optgroup>
               <optgroup label="หมวด 12 งานเฟอร์นิเจอร์">
                 <option value="s122113">12 21 13 มู่ลี่ปรับแสงแนวนอน (Horizontal Louver)</option>
@@ -241,14 +243,14 @@
           </div>
         </div>
 
-        <button type="button" id="btnRun" onclick="runAiVerification()" class="w-full mt-3 bg-indigo-700 hover:bg-indigo-800 text-white font-semibold py-2.5 rounded-lg text-xs transition-colors flex justify-center items-center gap-1.5 shadow">
+        <button type="button" id="btnRun" onclick="runAiVerification()" class="w-full mt-3 bg-indigo-700 hover:bg-indigo-800 text-white font-semibold py-2.5 rounded-lg text-xs transition-colors flex justify-center items-center gap-1.5 shadow disabled:opacity-60 disabled:cursor-not-allowed">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
           ให้ AI ตรวจสอบเทียบสเปก กฟภ. 2568
         </button>
 
         <div id="loadingIndicator" class="hidden text-center py-2 text-xs text-indigo-700 font-medium">
           <svg class="animate-spin h-4 w-4 text-indigo-600 mx-auto mb-1" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-          AI กำลังอ่านเอกสารและตรวจสอบเทียบสเปก กฟภ. 2568...
+          <span id="loadingText">AI กำลังวิเคราะห์ข้อมูลในเอกสารและเทียบสเปก กฟภ. 2568...</span>
         </div>
       </div>
     </div>
@@ -260,6 +262,7 @@
           <!-- ตราสัญลักษณ์และหัวกระดาษทางการ -->
           <div class="border-b-2 border-slate-900 pb-3 mb-3">
             <div class="flex items-center gap-3">
+              <!-- กล่องแสดงโลโก้หน่วยงาน -->
               <div id="logoDisplayContainer" class="hidden flex-shrink-0">
                 <img id="agencyLogoImg" src="" alt="Agency Logo" class="h-14 w-auto max-w-[120px] object-contain">
               </div>
@@ -274,12 +277,12 @@
                 <span id="badgeVerdict" class="text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-600">รอผลการตรวจสอบ</span>
               </div>
             </div>
-            
+
             <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px] text-slate-600 mt-3 bg-slate-50 p-2 rounded border border-slate-200">
               <div><strong>โครงการ:</strong> <span id="outProject">-</span></div>
               <div><strong>ผู้รับจ้าง:</strong> <span id="outContractor">-</span></div>
               <div><strong>เลขที่เอกสาร:</strong> <span id="outDocNo">-</span></div>
-              <div><strong>วันที่ตรวจสอบ:</strong> <span id="outDate">20 ก.ย. 2569</span></div>
+              <div><strong>วันที่ตรวจสอบ:</strong> <span id="outDate">-</span></div>
             </div>
           </div>
 
@@ -312,7 +315,7 @@
           <!-- รูปถ่ายเอกสารแนบในรายงาน -->
           <div id="outPhotoBox" class="hidden mb-3">
             <span class="text-[10px] font-bold text-slate-600 block mb-1">ภาพเอกสาร/แค็ตตาล็อกที่นำมาเปรียบเทียบสเปก:</span>
-            <img id="outPhotoImg" src="" class="max-h-32 border rounded p-1 object-contain">
+            <img id="outPhotoImg" src="" class="max-h-32 border rounded p-1 object-contain" alt="เอกสารที่ใช้ตรวจสอบ">
           </div>
         </div>
 
@@ -338,7 +341,7 @@
               <p class="text-slate-400 text-[9px]">ตำแหน่ง: ประธานกรรมการตรวจรับพัสดุ</p>
             </div>
           </div>
-          
+
           <!-- ปุ่มพิมพ์ PDF และ ปุ่ม Export Excel -->
           <div class="flex justify-end gap-2 mt-4 no-print">
             <button onclick="exportToExcel()" class="px-3.5 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded text-xs font-semibold flex items-center gap-1.5 shadow">
@@ -357,66 +360,71 @@
   </main>
 
   <script>
-    // ฐานข้อมูลเกณฑ์ข้อกำหนดมาตรฐาน กฟภ. ฉบับปี 2568 ครบทั้ง 41 หมวดย่อย
+    // =========================================================================
+    // ฐานข้อมูลเกณฑ์ข้อกำหนดมาตรฐาน กฟภ. ฉบับปี 2568
+    // หมายเหตุ: ข้อความในนี้เป็นการสรุปย่อจากรายการประกอบแบบเพื่อใช้เป็น prompt
+    // อ้างอิงให้ AI เท่านั้น ไม่ใช่สำเนาทางการ ก่อนใช้ตัดสินใจอนุมัติจริงต้อง
+    // ตรวจทานกับเอกสารต้นฉบับเสมอ
+    // =========================================================================
     const PEA_MASTER_SPECS = {
-      s011100: { name: "01 11 00 ขอบเขตงาน", desc: "ก่อสร้างถูกต้องตามแบบและรายการประกอบแบบ มีความมั่นคงถาวร ประณีตตามหลักวิชาช่างที่ดี"[cite: 2] },
-      s013000: { name: "01 30 00 การดำเนินงานและส่งตัวอย่าง", desc: "ส่งตัวอย่าง 3 ชุด และ Shop Drawing ล่วงหน้า 15-30 วัน มีสถาปนิกและวิศวกรประจำไซต์งาน"[cite: 2] },
-      s014000: { name: "01 40 00 คุณภาพและสถาบันทดสอบ", desc: "สถาบันทดสอบที่รับรอง: มอก., วสท., จุฬาฯ, มก., AIT, มจธ., สจล., กรมวิทยาศาสตร์บริการ"[cite: 2] },
-      s015000: { name: "01 50 00 สิ่งอำนวยความสะดวกชั่วคราว", desc: "รั้วสังกะสีเขียวสูง ≥ 2.40 ม., ถังดับเพลิงประจำทุกชั้น, สำนักงานสนามและห้องประชุม 4x6 ม."[cite: 2] },
-      s016000: { name: "01 60 00 วัสดุและการขอเทียบเท่า", desc: "ต้องเลิกผลิตหรือขาดตลาดจริง พร้อมมีเอกสารและผลทดสอบยืนยันเทียบเท่า อนุมัติโดยผู้ออกแบบ"[cite: 2] },
-      s017000: { name: "01 70 00 การส่งมอบงานและ As-Built", desc: "แบบจริงพิมพ์เขียวไข 1 ชุด สำเนา 2 ชุด CD CAD .dwg 1 ชุด กุญแจ Master Key ส่งมอบครบ"[cite: 2] },
-      s020000: { name: "02 00 00 สภาพพื้นที่เดิมและการรื้อถอน", desc: "สำรวจรังวัดระดับ ถ่ายรูปอาคารข้างเคียง ป้องกันความเสียหายต่อทรัพย์สินข้างเคียงและสาธารณูปโภค"[cite: 2] },
-      s023000: { name: "02 30 00 งานดิน (Earthwork)", desc: "ขุดดินตามพิกัด รองทรายหนา 25 ซม. ใต้โครงสร้างสัมผัสดิน ถมดินเป็นชั้นๆ หนาไม่เกิน 30 ซม. บดอัดแน่น"[cite: 2] },
-      s024501: { name: "02 45 00 เสาเข็มตอก คอนกรีตอัดแรง", desc: "มอก. 396-2549 / ลูกตุ้มตอก ≥ 70% น้ำหนักเข็ม / นับ Blow Count 10 ฟุตสุดท้าย / ทำ Dynamic Load Test ≥ 2 ต้น"[cite: 2] },
-      s024502: { name: "02 45 00 เสาเข็มเจาะ", desc: "คอนกรีต fc' 28 วัน ≥ 280 ksc (Cube) หรือ 240 ksc (Cylinder) / Static Test 2 ต้น (มยผ.1251) + Seismic Test ทุกต้น 100% (มยผ.1551)"[cite: 2] },
-      s031100: { name: "03 11 00 แบบหล่อและการถอดแบบ", desc: "อายุคอนกรีตขั้นต่ำก่อนถอดแบบ: ข้างเสา/คาน 2 วัน, ท้องพื้น/คาน 14 วัน, ท้องคานยาวเกิน 6 ม. 21 วัน และบ่มน้ำต่ออย่างน้อย 7 วัน"[cite: 2] },
-      s032101: { name: "03 21 00 เหล็กเส้นกลม (RB) ≤ 9 มม.", desc: "มอก. 20-2559 ชั้นคุณภาพ SR24 กำลังคราก ≥ 2,400 ksc ห้ามนำเหล็กรีดซ้ำ (SRR) มาใช้เด็ดขาด"[cite: 2] },
-      s032102: { name: "03 21 00 เหล็กข้ออ้อย (DB) 10-25 มม.", desc: "มอก. 24-2559 ชั้นคุณภาพ SD40 กำลังคราก ≥ 4,000 ksc ห้ามนำเหล็กรีดซ้ำ (SRR) มาใช้เด็ดขาด"[cite: 2] },
-      s032103: { name: "03 21 00 เหล็กข้ออ้อย (DB) 28-32 มม.", desc: "มอก. 24-2559 ชั้นคุณภาพ SD50 กำลังคราก ≥ 5,000 ksc ห้ามนำเหล็กรีดซ้ำ (SRR) มาใช้เด็ดขาด"[cite: 2] },
-      s033100: { name: "03 31 00 งานคอนกรีตโครงสร้าง", desc: "คอนกรีตผสมเสร็จ มอก. 213-2552 ค่า Slump ฐานราก 4-7.5 ซม. เสา/คาน/พื้น 5-10 ซม. คอนกรีตสัมผัสดินและหลังคาต้องผสมน้ำยากันซึม"[cite: 2] },
-      s033513: { name: "03 35 13 ผงขัดผิวแกร่ง (Floor Hardener)", desc: "มอก. 2704-2559 ชนิดไม่ผสมโลหะ (Non-Metallic) ความแข็ง Mohs Scale ≥ 7 อัตราโปรย ≥ 5.0 กก./ตร.ม. แบรนด์: C-TOP (ดูรากรีต), Crocodile, Lanko 243, TPI M99, Nito Flor Hardtop"[cite: 2] },
-      s033900: { name: "03 39 00 การเทและการบ่มคอนกรีต", desc: "ห้ามทิ้งเกิน 30 นาที เทชั้นละไม่เกิน 45 ซม. สั่นเขย่า 5-15 วินาที/จุด บ่มชื้นต่อเนื่องไม่น้อยกว่า 7-28 วัน"[cite: 2] },
-      s034100: { name: "03 41 00 แผ่นพื้นสำเร็จรูป (Precast Slab)", desc: "มอก. 828-2546 หรือ มอก. 576-2546 คอนกรีตทับหน้า Topping หนา 5 ซม. พร้อมตะแกรงเหล็ก มอก. 737 บ่มน้ำอย่างน้อย 3 วัน"[cite: 2] },
-      s042113: { name: "04 21 13 ผนังก่ออิฐมอญ", desc: "อิฐมอญ มอก. 77-2545 ชั้นคุณภาพ ก สุกแกร่ง มีเสาเอ็น-ทับหลังทุกความยาว 2.00 ม. และความสูงไม่เกิน 2.00 ม. เสียบเหล็ก 6 มม. ยึดเสาทุก 30 ซม."[cite: 2] },
-      s042219: { name: "04 22 19 คอนกรีตมวลเบาอบไอน้ำ", desc: "มอก. 1505-2541 ชั้นคุณภาพ 4 (G4) ปูนก่อบาง มอก. 2706 ยึดเสาด้วย Metal Strap ทุก 2 ชั้น แบรนด์: INSEE SUPERBLOCK, Q-CON, SMART BLOCK, THAICON"[cite: 2] },
-      s051200: { name: "05 12 00 เหล็กโครงสร้าง (Structural Steel)", desc: "มอก. 1227-2558 หรือ JIS G3101 SS400 ไร้สนิม ทาสีรองพื้นกันสนิม Zinc Chromate / Red Lead 2 ชั้น แบรนด์: SYS, สยามยามาโตะ, ทาทา" },
+      s011100: { name: "01 11 00 ขอบเขตงาน", desc: "ก่อสร้างถูกต้องตามแบบและรายการประกอบแบบ มีความมั่นคงถาวร ประณีตตามหลักวิชาช่างที่ดี" },
+      s013000: { name: "01 30 00 การดำเนินงานและส่งตัวอย่าง", desc: "ส่งตัวอย่าง 3 ชุด และ Shop Drawing ล่วงหน้า 15-30 วัน มีสถาปนิกและวิศวกรประจำไซต์งาน" },
+      s014000: { name: "01 40 00 คุณภาพและสถาบันทดสอบ", desc: "สถาบันทดสอบที่รับรอง: มอก., วสท., จุฬาฯ, มก., AIT, มจธ., สจล., กรมวิทยาศาสตร์บริการ" },
+      s015000: { name: "01 50 00 สิ่งอำนวยความสะดวกชั่วคราว", desc: "รั้วสังกะสีเขียวสูง ≥ 2.40 ม., ถังดับเพลิงประจำทุกชั้น, สำนักงานสนามและห้องประชุม 4x6 ม." },
+      s016000: { name: "01 60 00 วัสดุและการขอเทียบเท่า", desc: "ต้องเลิกผลิตหรือขาดตลาดจริง พร้อมมีเอกสารและผลทดสอบยืนยันเทียบเท่า อนุมัติโดยผู้ออกแบบ" },
+      s017000: { name: "01 70 00 การส่งมอบงานและ As-Built", desc: "แบบจริงพิมพ์เขียวไข 1 ชุด สำเนา 2 ชุด CD CAD .dwg 1 ชุด กุญแจ Master Key ส่งมอบครบ" },
+      s020000: { name: "02 00 00 สภาพพื้นที่เดิมและการรื้อถอน", desc: "สำรวจรังวัดระดับ ถ่ายรูปอาคารข้างเคียง ป้องกันความเสียหายต่อทรัพย์สินข้างเคียงและสาธารณูปโภค" },
+      s023000: { name: "02 30 00 งานดิน (Earthwork)", desc: "ขุดดินตามพิกัด รองทรายหนา 25 ซม. ใต้โครงสร้างสัมผัสดิน ถมดินเป็นชั้นๆ หนาไม่เกิน 30 ซม. บดอัดแน่น" },
+      s024501: { name: "02 45 00 เสาเข็มตอก คอนกรีตอัดแรง", desc: "มอก. 396-2549 / ลูกตุ้มตอก ≥ 70% น้ำหนักเข็ม / นับ Blow Count 10 ฟุตสุดท้าย / ทำ Dynamic Load Test ≥ 2 ต้น" },
+      s024502: { name: "02 45 00 เสาเข็มเจาะ", desc: "คอนกรีต fc' 28 วัน ≥ 280 ksc (Cube) หรือ 240 ksc (Cylinder) / Static Test 2 ต้น (มยผ.1251) + Seismic Test ทุกต้น 100% (มยผ.1551)" },
+      s031100: { name: "03 11 00 แบบหล่อและการถอดแบบ", desc: "อายุคอนกรีตขั้นต่ำก่อนถอดแบบ: ข้างเสา/คาน 2 วัน, ท้องพื้น/คาน 14 วัน, ท้องคานยาวเกิน 6 ม. 21 วัน และบ่มน้ำต่ออย่างน้อย 7 วัน" },
+      s032101: { name: "03 21 00 เหล็กเส้นกลม (RB) ≤ 9 มม.", desc: "มอก. 20-2559 ชั้นคุณภาพ SR24 กำลังคราก ≥ 2,400 ksc ห้ามนำเหล็กรีดซ้ำ (SRR) มาใช้เด็ดขาด" },
+      s032102: { name: "03 21 00 เหล็กข้ออ้อย (DB) 10-25 มม.", desc: "มอก. 24-2559 ชั้นคุณภาพ SD40 กำลังคราก ≥ 4,000 ksc ห้ามนำเหล็กรีดซ้ำ (SRR) มาใช้เด็ดขาด" },
+      s032103: { name: "03 21 00 เหล็กข้ออ้อย (DB) 28-32 มม.", desc: "มอก. 24-2559 ชั้นคุณภาพ SD50 กำลังคราก ≥ 5,000 ksc ห้ามนำเหล็กรีดซ้ำ (SRR) มาใช้เด็ดขาด" },
+      s033100: { name: "03 31 00 งานคอนกรีตโครงสร้าง", desc: "คอนกรีตผสมเสร็จ มอก. 213-2552 ค่า Slump ฐานราก 4-7.5 ซม. เสา/คาน/พื้น 5-10 ซม. คอนกรีตสัมผัสดินและหลังคาต้องผสมน้ำยากันซึม" },
+      s033513: { name: "03 35 13 ผงขัดผิวแกร่ง (Floor Hardener)", desc: "มอก. 2704-2559 ชนิดไม่ผสมโลหะ (Non-Metallic) ความแข็ง Mohs Scale ≥ 7 อัตราโปรย ≥ 5.0 กก./ตร.ม. แบรนด์: C-TOP (ดูรากรีต), Crocodile, Lanko 243, TPI M99, Nito Flor Hardtop" },
+      s033900: { name: "03 39 00 การเทและการบ่มคอนกรีต", desc: "ห้ามทิ้งเกิน 30 นาที เทชั้นละไม่เกิน 45 ซม. สั่นเขย่า 5-15 วินาที/จุด บ่มชื้นต่อเนื่องไม่น้อยกว่า 7-28 วัน" },
+      s034100: { name: "03 41 00 แผ่นพื้นสำเร็จรูป (Precast Slab)", desc: "มอก. 828-2546 หรือ มอก. 576-2546 คอนกรีตทับหน้า Topping หนา 5 ซม. พร้อมตะแกรงเหล็ก มอก. 737 บ่มน้ำอย่างน้อย 3 วัน" },
+      s042113: { name: "04 21 13 ผนังก่ออิฐมอญ", desc: "อิฐมอญ มอก. 77-2545 ชั้นคุณภาพ ก สุกแกร่ง มีเสาเอ็น-ทับหลังทุกความยาว 2.00 ม. และความสูงไม่เกิน 2.00 ม. เสียบเหล็ก 6 มม. ยึดเสาทุก 30 ซม." },
+      s042219: { name: "04 22 19 คอนกรีตมวลเบาอบไอน้ำ", desc: "มอก. 1505-2541 ชั้นคุณภาพ 4 (G4) ปูนก่อบาง มอก. 2706 ยึดเสาด้วย Metal Strap ทุก 2 ชั้น แบรนด์: INSEE SUPERBLOCK, Q-CON, SMART BLOCK, THAICON" },
+      s051200: { name: "05 12 00 เหล็กโครงสร้าง (Structural Steel)", desc: "มอก. 1227-2558 หรือ JIS G3101 SS400 ไร้สนิม ทาสีรองพื้นกันสนิม Zinc Chromate / Red Lead 2 ชั้น สลักเกลียวตาม ASTM A325/A490" },
       s055000: { name: "05 50 00 โลหะตกแต่ง สเตนเลส SUS304", desc: "สเตนเลสเกรด SUS304 ผิว Satin เชื่อมขัดเรียบ ไร้รอยคม แข็งแรงปลอดภัยตามมาตรฐานวิศวกรรม" },
-      s061000: { name: "06 10 00 งานไม้โครงสร้าง", desc: "ไม้เนื้อแข็งชั้น 1 ผึ่งแห้ง ความชื้น ≤ 18% ทาน้ำยากันปลวกและเชื้อรา ไสเรียบได้ฉาก" },
-      s064800: { name: "06 48 00 งานวงกบไม้", desc: "ไม้สักหรือไม้เนื้อแข็งคัดเกรด ไสเรียบ เข้ามุมสนิท บังใบเป็นมุมฉากเพื่อป้องกันแสงลอด"[cite: 1] },
-      s071400: { name: "07 14 00 งานระบบกันซึม (Waterproofing)", desc: "ระบบทาเคลือบไร้รอยต่อ โพลียูรีเทน หรืออะครีลิคกันซึมดาดฟ้าและห้องน้ำ แบรนด์: Sika, Lanko, Crocodile, TOA, Fosroc" },
-      s072116: { name: "07 21 16 ฉนวนกันความร้อนหลังคา", desc: "มอก. 486-2527 ฉนวนใยแก้วหุ้มฟอยล์สะท้อนความร้อน 2 ด้าน ไม่ลามไฟ แบรนด์: SCG Stay Cool, Microfiber, Isover" },
-      s072716: { name: "07 27 16 แผ่นสะท้อนความร้อน", desc: "อลูมิเนียมฟอยล์เสริมเส้นใยเหนียวพิเศษ สะท้อนความร้อน ≥ 95% ทนทานต่อแรงดึงฉีกขาด" },
-      s074013: { name: "07 40 13 หลังคาและผนังเมทัลชีท", desc: "มอก. 1128 เคลือบอลูซิงค์ AZ150 ความหนารวม BMT ≥ 0.48 มม. รับประกันคุณภาพ 10 ปี แบรนด์: BlueScope Lysaght, Ampelite" },
-      s074033: { name: "07 40 33 แผ่นหลังคาโปร่งแสง (FRP)", desc: "มอก. 612-2548 ทนรังสี UV แสงส่องผ่านตามแบบ แบรนด์: Ampelite, SCG" },
-      s074133: { name: "07 41 33 แผ่นหลังคาโพลี่คาร์บอเนต", desc: "ชนิดกลวง/ตัน เกรด A เคลือบสารป้องกันรังสี UV ไม่กรอบแตกหักง่าย" },
-      s074243: { name: "07 42 43 แผ่นอลูมิเนียมคอมโพสิต (ACP)", desc: "หนารวม 4 มม. (ผิวอลูมิเนียม 0.50 มม.) ไส้กลางทนไฟ FR เคลือบสี PVDF มาตรฐาน AAMA 2605 แบรนด์: Alpolic, Alucobond, Fameline, Sky High" },
-      s074646: { name: "07 46 46 งานผนังไฟเบอร์ซีเมนต์", desc: "มอก. 1427-2561 ปราศจากใยหิน ทนชื้น ไม่บิดงอ แบรนด์: SCG Smartboard, Shera, Conwood" },
-      s076500: { name: "07 65 00 แผ่นปิดรอยต่อ (Flexible Flashing)", desc: "ยางบิวทิลเสริมอลูมิเนียม ทน UV ยึดติดแน่น ป้องกันน้ำรั่วซึม แบรนด์: Wakaflex, SCG" },
-      s079000: { name: "07 90 00 การยาแนวรอยต่อ (Joint Sealant)", desc: "ภายนอกซิลิโคน Neutral 100% ทน UV / ภายใน PU Sealant ไม่เป็นคราบน้ำมัน แบรนด์: Sika, Dow Corning, Soudal, TOA" },
-      s081100: { name: "08 11 00 ประตูและวงกบเหล็ก", desc: "เหล็ก Electro-galvanized หนา 1.6 มม. พ่นสีอบ อัดฉนวนกันไฟ ทนไฟตามข้อกำหนดโครงสร้าง" },
-      s081116: { name: "08 11 16 ประตูและวงกบอลูมิเนียม", desc: "Alloy 6063-T5 หรือ 50S-T5 มอก. 284-2560 ความหนาวงกบ ≥ 1.75 มม., กรอบบานประตู ≥ 2.0 มม. สี Anodized ≥ 10-25 ไมครอน / Powder Coat ≥ 60 ไมครอน / PVDF ≥ 30 ไมครอน แบรนด์: ไทยเม็ททอล (ORM), ซิมเมอร์ (Building System), วายเคเค (Nexsta), ทอสเท็ม (P7), ฟูจิ เมททอล"[cite: 1] },
-      s085113: { name: "08 51 13 หน้าต่างอลูมิเนียม", desc: "Alloy 6063-T5 มอก. 284-2560 ความหนากรอบบาน ≥ 2.0 มม. รางล่างขาสูงกันน้ำล้น 300-500 Pa มีรูระบายน้ำ แบรนด์: ไทยเม็ททอล (ORM), ซิมเมอร์, วายเคเค, ทอสเท็ม (P7), ฟูจิ เมททอล"[cite: 1] },
-      s081400: { name: "08 14 00 ประตูไม้อัดสำเร็จรูปทนน้ำ", desc: "มอก. 192-2549 โครงไม้เนื้อแข็ง ชนิดภายนอก (ทนน้ำ) ทั้งหมด หนา 35 มม. แบรนด์: ไม้อัดไทย, สามชัยพนา, บำรุงไทยเคหะภัณฑ์, ไพร์ซ ออฟ วู้ด"[cite: 1] },
-      s085200: { name: "08 52 00 งานหน้าต่างไม้", desc: "ไม้สักหรือไม้เนื้อแข็งคัดเกรด บังใบมุมฉากป้องกันแสงลอด ไสเรียบได้ฉาก"[cite: 1] },
-      s084229: { name: "08 42 29 ประตูบานเลื่อนอัตโนมัติ", desc: "มอเตอร์ DC Belt ควบคุมด้วยไมโครโปรเซสเซอร์ บานเดี่ยว ≥ 90 กก. บานคู่ ≥ 80 กก. มี Safety Beam รับประกันอุปกรณ์ 2 ปี แบรนด์: DORMA, KARTA, NABCO"[cite: 1] },
-      s087100: { name: "08 71 00 อุปกรณ์ประตู (Door Hardware)", desc: "บานพับ SUS304 หนา 2.5-4 มม., กุญแจ Master Key 6 พิน, โช้คอัพ Heavy Duty 2 จังหวะ เปิดค้าง 90°, บาร์ผลักหนีไฟ ANSI Gr.1 ทนไฟ 3 ชม. แบรนด์: ASSA ABLOY, CENZA, COLT, DORMA, JARTON, PENTACO, SKULTHAI, VVP"[cite: 1] },
-      s087500: { name: "08 75 00 อุปกรณ์หน้าต่าง (Window Hardware)", desc: "บานพับปรับมุม 4 แขน SUS304 มอก. 862 ปรับความฝืดได้, มือจับบานกระทุ้ง Handle Lock สีเดียวกับบาน"[cite: 1] },
-      s088000: { name: "08 80 00 งานกระจก (Glazing)", desc: "มอก. 880 (โฟลตใส) / มอก. 1344 (ตัดแสงเขียว ดูดความร้อน 35-50%) หนาทั่วไป ≥ 6 มม., ติดตาย 25-32 ตร.ฟุต หนา ≥ 8 มม., 32-40 ตร.ฟุต หนา ≥ 12 มม., Skylight ต้อง Laminated ≥ 8 มม. แบรนด์: การ์เดียน, บีจี โฟลต กล๊าส, ไทยอาซาฮี (AGC), ไทย-เยอรมัน, ทีวายเค"[cite: 1] },
-      s089100: { name: "08 91 00 บานเกล็ดระบายอากาศประสิทธิภาพสูง", desc: "Alloy 6063-T3 หนา ≥ 1.5-2.0 มม. ระบบใบคู่ ซ่อนโครง ทดสอบ HEVAC Class A3 กันฝน 99-100% รับประกัน 5 ปี แบรนด์: BFM LOUVERS, INNIVATE, RUSKIN, INNO LOUVER"[cite: 1] },
-      s092400: { name: "09 24 00 งานฉาบปูนสำเร็จรูป", desc: "มอร์ตาร์ฉาบทั่วไป มอก. 1776 / ฉาบมวลเบา มอก. 2735 / สกิมโค้ท มอก. 3056 ติดตาข่ายลวด 3/4\" รอยต่อเสาคานและมุมวงกบ แบรนด์: ลูกดิ่งส้ม/แดง, ทีพีไอ, เสือ มอร์ตาร์, อินทรี มอร์ตาร์, Q-CON, จระเข้, แลงโก้"[cite: 1] },
-      s093013: { name: "09 30 13 กระเบื้องเซรามิค", desc: "เกรด A มอก. 2508-2555 ความหนาไม่น้อยกว่า 6.8 มม. ปูด้วยกาวซีเมนต์ (จระเข้, ตุ๊กแก Weber, เสือ, SikaTile) ยาแนวกันเชื้อรา ห้ามปูซาลาเปา แบรนด์: CAMPANA, COTTO, DURAGRES, RCI, VECERA, A DECOR"[cite: 1] },
-      s093014: { name: "09 30 14 กระเบื้องพอร์ซเลน", desc: "Homogeneous เผา > 1200°C ดูดซึมน้ำ < 0.5% ASTM C650 ทนกรดด่าง แบรนด์: CASA ROCCA, A DECOR, VECERA, WESTERN DECOR, KENZAI"[cite: 1] },
-      s095000: { name: "09 50 00 ฝ้าเพดานยิปซัม", desc: "แผ่นยิปซัมหนา ≥ 9 มม. มอก. 219 (ห้องน้ำใช้ชนิดทนชื้น) / โครงคร่าวสังกะสี Hot-Dip ชุบ ≥ 220 ก./ตร.ม. แบรนด์: GYPROC, KNAUF, SCG, TOA GYPSUM"[cite: 1] },
-      s095100: { name: "09 51 00 ฝ้าเพดานกันเสียง (Acoustic)", desc: "แผ่นใยแร่ Mineral Fiber หนา ≥ 15 มม. บังใบ NRC ≥ 0.50, CAC ≥ 34 dB รับประกันไม่แอ่นตัว 10 ปี แบรนด์: AMF (Knauf), ARMSTRONG, CELOTEX, DAIKEN, OWA, TRANDAR, USG"[cite: 1] },
-      s095809: { name: "09 58 09 ฝ้าระแนงอลูมิเนียมตัว C", desc: "Alloy ≥ 3105 H16 อบสี Stove Enamel หนา ≥ 0.60 มม. ขาแขวน Carrier หนา ≥ 0.90 มม. รับประกันวัสดุ 10 ปี แบรนด์: ARMSTRONG, FAMELINE, LUXALON, MN Metal Supply, BITEC"[cite: 1] },
-      s096340: { name: "09 63 40 งานพื้นปูหินธรรมชาติ", desc: "หินแกรนิต/หินอ่อน หนา ≥ 20 มม. (ผนังสูง > 5 ม. หนา ≥ 30 มม.) ทาน้ำยาเคลือบ Penetration Sealer 5-6 ด้านก่อนติดตั้ง แบรนด์กาว: จระเข้, เวเบอร์, เสือ, ซิก้า, อินทรี"[cite: 1] },
-      s096518: { name: "09 65 18 กระเบื้องยางชนิดม้วน (Vinyl)", desc: "Homogeneous หนา ≥ 2.0 มม. กว้าง ≥ 2 ม. เชื่อมรอยต่อร้อน Welding Rod ไม่ลามไฟ EN 13501-1 รับประกันวัสดุ 10 ปี แบรนด์: ARMSTRONG, TARKETT, GERFLOR, FORBO"[cite: 1] },
-      s096643: { name: "09 66 43 งานหินล้าง กรวดล้าง ทรายล้าง", desc: "เม็ดขนาด 2-4 มม. คัดกลม ผสมปูน 1:3 เคลือบน้ำยาใส 2 ครั้ง เส้นแบ่ง PVC 6 มม. ปูนขาว: ช้างเผือก/เสือเดคอร์, ปูนซีเมนต์: บัว/ทีพีไอ/อินทรี/เสือ"[cite: 1] },
-      s099000: { name: "09 90 00 งานสีและการทำผิว", desc: "สีน้ำอะครีลิค มอก. 2321 / สีน้ำมัน มอก. 2625 / สีอีพ็อกซี่ มอก. 691 รับประกันคุณภาพฟิล์มสีจากผู้ผลิต ≥ 15 ปี แบรนด์: TOA, ICI DULUX, JOTUN, BEGER, CAPTAIN, NIPPON PAINT"[cite: 1] },
-      s099643: { name: "09 96 43 งานสีป้องกันไฟ", desc: "Intumescent Fire Coatings มาตรฐานทนไฟ 1-2 ชม. ตาม BS 476 หรือ ASTM E119" },
-      s102113: { name: "10 21 13 ผนังห้องน้ำสำเร็จรูป", desc: "แผ่น Compact Laminate หนา ≥ 12 มม. กันน้ำ 100% อุปกรณ์ฟิตติ้งสเตนเลส SUS304 แบรนด์: Greenlam, Formica, Willie, ELITE" },
-      s102800: { name: "10 28 00 สุขภัณฑ์และอุปกรณ์ห้องน้ำ", desc: "สุขภัณฑ์เซรามิก มอก. 792 ชนิดประหยัดน้ำ ก๊อกน้ำ มอก. 2067 สเตนเลส แบรนด์: COTTO, AMERICAN STANDARD, KOHLER, TOTO" },
-      s224200: { name: "22 42 00 อุปกรณ์ประกอบงานประปา", desc: "วาล์วเปิด-ปิดน้ำทองเหลือง/สเตนเลส ทนแรงดันสูง ทนทานต่อการสึกกร่อน แบรนด์: SANWA, KITZ, KRACHER" },
+      s061000: { name: "06 10 00 งานไม้โครงสร้าง", desc: "ไม้เนื้อแข็งชั้น 1 ผึ่งแห้ง ความชื้น ≤ 16-18% ทาน้ำยากันปลวกและเชื้อรา ไสเรียบได้ฉาก" },
+      s064800: { name: "06 48 00 งานวงกบไม้", desc: "ไม้แดงหรือไม้มะค่าโมง คัดเกรด ไสเรียบ เข้ามุมสนิท บังใบเป็นมุมฉากเพื่อป้องกันแสงลอด ขนาดตั้งแต่ 2x4 นิ้ว ขึ้นไปตามตำแหน่งใช้งาน" },
+      s071400: { name: "07 14 00 งานระบบกันซึม (Waterproofing)", desc: "ระบบทาเคลือบไร้รอยต่อ โพลียูรีเทน (ASTM D412 ยืดหยุ่น ≥ 600%) หรืออะคริลิคกันซึมดาดฟ้าและห้องน้ำ รับประกันไม่น้อยกว่า 10 ปี แบรนด์: Sika, Lanko, Crocodile, TOA, Fosroc, Tremco, Bitec" },
+      s072116: { name: "07 21 16 ฉนวนกันความร้อนหลังคา", desc: "มอก. 487-2526 ฉนวนใยแก้วหุ้มฟอยล์สะท้อนความร้อน 2 ด้าน K-Value ≤ 0.035 ไม่ลามไฟ แบรนด์: SPG, 3D, SCG, Microfiber" },
+      s072716: { name: "07 27 16 แผ่นสะท้อนความร้อน", desc: "อลูมิเนียมฟอยล์เสริมเส้นใยเหนียวพิเศษ สะท้อนความร้อน ≥ 95% ทนทานต่อแรงดึงฉีกขาด ≥ 11 กิโลนิวตัน/เมตร" },
+      s074013: { name: "07 40 13 หลังคาและผนังเมทัลชีท", desc: "มอก. 1128-2562 เคลือบอลูซิงค์ AZ150 ความหนา BMT ≥ 0.42 มม. รับประกันคุณภาพ 10 ปี แบรนด์: SUNTECH, LYSAGHT, TSS METAL SHEET, WMI, SPRIT, NASPA" },
+      s074033: { name: "07 40 33 แผ่นหลังคาโปร่งแสง (FRP)", desc: "มอก. 612-2549 ทนรังสี UV แสงส่องผ่านตามแบบ รับประกัน 15 ปี แบรนด์: AMPELITE, SCG, TOPGLASS, SP SKYLIGHT" },
+      s074133: { name: "07 41 33 แผ่นหลังคาโพลี่คาร์บอเนต", desc: "ชนิดกลวง/ตัน เกรด A เคลือบสารป้องกันรังสี UV ไม่กรอบแตกหักง่าย รับประกัน 10 ปี แบรนด์: LEXAN, TWINLITE, MARKLON, DANPALON" },
+      s074243: { name: "07 42 43 แผ่นอลูมิเนียมคอมโพสิต (ACP)", desc: "มอก. 2314-2549 หนารวม 4 มม. (ผิวอลูมิเนียม ≥ 0.5 มม.) ไส้กลางทนไฟ FR เคลือบสี PVDF ≥ 25 ไมครอน รับประกัน 10 ปี แบรนด์: ALUCOBOND, ALPOLIC, RAYNOBOND, ALCOBOND" },
+      s074646: { name: "07 46 46 งานผนังไฟเบอร์ซีเมนต์", desc: "มอก. 1427-2540 ปราศจากใยหิน ทนชื้น ไม่บิดงอ แบรนด์: สมาร์ทบอร์ด SCG, ทีพีไอบอร์ด, เฌอร่าบอร์ด" },
+      s076500: { name: "07 65 00 แผ่นปิดรอยต่อ (Flexible Flashing)", desc: "เนื้อยางบิทูเมน ทน UV ทนความร้อน ≥ 80°C ยึดติดแน่น ป้องกันน้ำรั่วซึม แบรนด์: Sika Multiseal AP, SCG, ซีเท็กซ์" },
+      s079000: { name: "07 90 00 การยาแนวรอยต่อ (Joint Sealant)", desc: "ภายนอกซิลิโคน Neutral 100% (ASTM C920) ทน UV / ภายใน PU Sealant ไม่เป็นคราบน้ำมัน แบรนด์: Sika, Dow Corning, GE, Tremco" },
+      s081100: { name: "08 11 00 ประตูและวงกบเหล็ก", desc: "เหล็กชุบสังกะสี (Galvanized) หนา ≥ 1.6 มม. พ่นสีอบ Powder Coated รุ่นทนไฟตาม มอก. 1220-2541" },
+      s081116: { name: "08 11 16 ประตูและวงกบอลูมิเนียม", desc: "Alloy 6063-T5 หรือ 50S-T5 มอก. 284-2560 ความหนาวงกบ ≥ 1.75 มม., กรอบบานประตู ≥ 2.0 มม. สี Anodized ≥ 10-25 ไมครอน / Powder Coat ≥ 60 ไมครอน / PVDF ≥ 30 ไมครอน แบรนด์: ไทยเม็ททอล (ORM), ซิมเมอร์ (Building System), วายเคเค (Nexsta), ทอสเท็ม (P7), ฟูจิ เมททอล" },
+      s085113: { name: "08 51 13 หน้าต่างอลูมิเนียม", desc: "Alloy 6063-T5 มอก. 284-2560 ความหนากรอบบาน ≥ 2.0 มม. รางล่างกันน้ำล้น 300-500 Pa มีรูระบายน้ำ แบรนด์: ไทยเม็ททอล (ORM), ซิมเมอร์, วายเคเค, ทอสเท็ม (P7), ฟูจิ เมททอล" },
+      s081400: { name: "08 14 00 ประตูไม้อัดสำเร็จรูปทนน้ำ", desc: "มอก. 192-2549 โครงไม้เนื้อแข็ง ผิวชั้นภายนอกทนน้ำ หนา 35 มม. แบรนด์: ไม้อัดไทย, สามชัยพนา, บำรุงไทยเคหะภัณฑ์, ไพร์ซ ออฟ วู้ด" },
+      s085200: { name: "08 52 00 งานหน้าต่างไม้", desc: "ไม้เนื้อแข็งคัดเกรดตาม มอก. 424-2530 บังใบมุมฉากป้องกันแสงลอด ไสเรียบได้ฉาก" },
+      s084229: { name: "08 42 29 ประตูบานเลื่อนอัตโนมัติ", desc: "มอเตอร์ DC Belt ควบคุมด้วยไมโครโปรเซสเซอร์ บานเดี่ยว ≥ 90 กก. บานคู่ ≥ 80 กก. มี Safety Beam รับประกันอุปกรณ์ 2 ปี แบรนด์: DORMA, KARTA, NABCO" },
+      s087100: { name: "08 71 00 อุปกรณ์ประตู (Door Hardware)", desc: "บานพับ SUS304 หนา 2.5-4 มม. (มอก.759-2531), กุญแจ Master Key ≥ 6 พิน (มอก.756-2533), โช้คอัพ Heavy Duty 2 จังหวะ เปิดค้าง 90°, บาร์ผลักหนีไฟ ANSI Gr.1 ทนไฟ ≥ 3 ชม. แบรนด์: ASSA ABLOY, CENZA, COLT, DORMA, JARTON, PENTACO, SKULTHAI, VVP" },
+      s087500: { name: "08 75 00 อุปกรณ์หน้าต่าง (Window Hardware)", desc: "บานพับปรับมุม 4 แขน SUS304 มอก. 862-2532 ปรับความฝืดได้, มือจับบานกระทุ้ง Handle Lock สีเดียวกับบาน" },
+      s088000: { name: "08 80 00 งานกระจก (Glazing)", desc: "มอก. 880-2560 (โฟลตใส) / มอก. 1344-2560 (ตัดแสง) หนาทั่วไป ≥ 6 มม., ติดตาย 25-32 ตร.ฟุต หนา ≥ 8 มม., 32-40 ตร.ฟุต หนา ≥ 12 มม., Skylight ต้อง Laminated (มอก.1222) ≥ 8 มม. แบรนด์: การ์เดียน, บีจี โฟลต กล๊าส, ไทยอาซาฮี, ไทย-เยอรมัน, ทีวายเค" },
+      s089100: { name: "08 91 00 บานเกล็ดระบายอากาศประสิทธิภาพสูง", desc: "Alloy 6063-T3 หนา ≥ 1.5-2.0 มม. ระบบใบคู่ ซ่อนโครง ทดสอบ HEVAC Class A3 กันฝน 99-100% รับประกัน 5 ปี แบรนด์: BFM LOUVERS, INNIVATE, RUSKIN, INNO LOUVER" },
+      s092400: { name: "09 24 00 งานฉาบปูนสำเร็จรูป", desc: "มอร์ตาร์ฉาบทั่วไป มอก. 1776-2560 / ฉาบมวลเบา มอก. 2735-2559 / สกิมโค้ท มอก. 3056-2563 ติดตาข่ายลวด 3/4 นิ้วบริเวณรอยต่อเสาคานและมุมวงกบ แบรนด์: ลูกดิ่งส้ม/แดง/เขียว, ทีพีไอ, เสือ มอร์ตาร์, อินทรี มอร์ตาร์, Q-CON, จระเข้, แลงโก้" },
+      s093013: { name: "09 30 13 กระเบื้องเซรามิค", desc: "เกรด A มอก. 2508-2555 ความหนาไม่น้อยกว่า 6.8 มม. ปูด้วยกาวซีเมนต์ (จระเข้, ตุ๊กแก Weber, เสือ, SikaTile) ยาแนวกันเชื้อรา ห้ามปูซาลาเปา แบรนด์: CAMPANA, COTTO, DURAGRES, RCI, VECERA, A DECOR" },
+      s093014: { name: "09 30 14 กระเบื้องพอร์ซเลน", desc: "Homogeneous เผา > 1200°C ดูดซึมน้ำ < 0.5% ASTM C650 ทนกรดด่าง แบรนด์: CASA ROCA, A DECOR, VECERA, WESTERN DECOR, ARTIFACT DESIGN" },
+      s095000: { name: "09 50 00 ฝ้าเพดานยิปซัม", desc: "แผ่นยิปซัมหนา ≥ 9 มม. มอก. 219-2552 (ห้องน้ำใช้ชนิดทนชื้น) / โครงคร่าวสังกะสี Hot-Dip ชุบ ≥ 220 ก./ตร.ม. (มอก.863-2532) แบรนด์: GYPROC, KNAUF, SCG, TOA GYPSUM" },
+      s095100: { name: "09 51 00 ฝ้าเพดานกันเสียง (Acoustic)", desc: "แผ่นใยแร่ Mineral Fiber หนา ≥ 15 มม. ขอบบังใบ NRC ≥ 0.50, CAC ≥ 34 dB รับประกันไม่แอ่นตัว 10 ปี แบรนด์: AMF, ARMSTRONG, CELOTEX, DAIKEN, OWA, TRANDAR, USG" },
+      s095809: { name: "09 58 09 ฝ้าระแนงอลูมิเนียมตัว C", desc: "Alloy ≥ 3105 H16 อบสี Stove Enamel หนา ≥ 0.60 มม. ขาแขวน Carrier หนา ≥ 0.90 มม. รับประกันวัสดุ 10 ปี แบรนด์: ARMSTRONG, FAMELINE, LUXALON, MN Metal Supply, BITEC" },
+      s096340: { name: "09 63 40 งานพื้นปูหินธรรมชาติ", desc: "หินแกรนิต/หินอ่อน หนา ≥ 20 มม. (ผนังสูง > 5 ม. หนา ≥ 30 มม.) ทาน้ำยาเคลือบ Penetration Sealer ก่อนติดตั้ง แบรนด์กาว: จระเข้, เวเบอร์, เสือ, ซิก้า, อินทรี" },
+      s096518: { name: "09 65 18 กระเบื้องยางชนิดม้วน (Vinyl)", desc: "Homogeneous หนา ≥ 2.0 มม. กว้าง ≥ 2 ม. เชื่อมรอยต่อร้อน Welding Rod ไม่ลามไฟ EN 13501-1/ASTM E648 รับประกันวัสดุ 10 ปี แบรนด์: ARMSTRONG, TARKETT, GERFLOR, FORBO" },
+      s096643: { name: "09 66 43 งานหินล้าง กรวดล้าง ทรายล้าง", desc: "หินล้างขนาด 3-4 มม. กรวดล้าง 2-3 มม. ทรายล้างขนาด ≈ 3 มม. เม็ดกลม คัดพิเศษ ล้างจนสะอาด เคลือบผิวด้วย Penetration Sealer อย่างน้อย 2 ครั้ง" },
+      s099000: { name: "09 90 00 งานสีและการทำผิว", desc: "สีน้ำอะคริลิก 100% มอก. 2321-2564 / สีเคลือบเงา มอก. 2625-2557 / สีอีพ็อกซี่ มอก. 691-2547 สั่งซื้อตรงจากผู้ผลิต รับประกันคุณภาพฟิล์มสีจากผู้ผลิต ≥ 15 ปี VOC ต้องผ่านเกณฑ์ TREES-NC" },
+      s099643: { name: "09 96 43 งานสีป้องกันไฟ", desc: "Intumescent Coating หนา ≥ 1,000 ไมครอน หรือตามการคำนวณ HP/A มาตรฐานทดสอบ ASTM E119 หรือ ISO834 รับประกัน 10 ปี แบรนด์: FIRE SHIELD, NULLIFIRE, FIRE KOTE, DUFIRE SHIELD" },
+      s102113: { name: "10 21 13 ผนังห้องน้ำสำเร็จรูป", desc: "แผ่น HPL/MFF หนารวม 25 มม. ขอบปิดทับ PVC เกรด A หนา 2 มม. ไม่บวมน้ำ ไม่ลามไฟ อุปกรณ์ฟิตติ้งสเตนเลส SUS304 รับประกัน 2 ปี แบรนด์: WILLY, PANEL, KOREX, DOLPHIN, ELITE" },
+      s102800: { name: "10 28 00 สุขภัณฑ์และอุปกรณ์ห้องน้ำ", desc: "สุขภัณฑ์และก๊อกน้ำรุ่นประหยัดน้ำตามเกณฑ์ TREES-NC แบรนด์: COTTO, AMERICAN STANDARD, KOHLER, KARAT, VRH, GROHE, SANA, MOGEN, NAHM" },
+      s224200: { name: "22 42 00 อุปกรณ์ประกอบงานประปา", desc: "ก๊อกน้ำและอุปกรณ์ประกอบยี่ห้อเดียวกับสุขภัณฑ์ แบรนด์: COTTO, AMERICAN STANDARD, KOHLER, ENGLEFIELD, VRH, GROHE, SANA, KARAT FAUCET, MOGEN, NAHM" },
       s104400: { name: "10 44 00 ระบบป้องกันไฟลาม (Firestop)", desc: "มาตรฐาน UL Listing ยาแนวป้องกันไฟลามช่องเปิดท่อ ทนไฟ 2-3 ชม. แบรนด์: 3M, Hilti, CP606" },
       s108200: { name: "10 82 00 งานระแนงและที่บังแดด", desc: "อลูมิเนียมอบสี หรือเหล็กชุบ Galvanized ยึดโครงสร้างแข็งแรง แบรนด์: Fameline, Alumax" },
       s122113: { name: "12 21 13 มู่ลี่ปรับแสงแนวนอน", desc: "ใบมู่ลี่อลูมิเนียมเคลือบสีหนาพิเศษ ไม่เป็นสนิม อุปกรณ์รางครบชุด แบรนด์: KC, VC Fabric, Somfy, Hunter Douglas" },
@@ -426,22 +434,22 @@
       s321313: { name: "32 13 13 บล็อกปูพื้นและขอบคันหิน", desc: "คอนกรีตบล็อก มอก. 827-2531 กำลังรับแรงอัด ≥ 350-400 ksc ปูบนทรายบดอัดแน่น แบรนด์: SCG, CPS" }
     };
 
+    // ----- ตัวแปรสถานะหลัก -----
     let base64Data = null;
     let fileMimeType = "image/jpeg";
     let currentEvaluationResult = null;
 
+    // ----- จัดการ API Key / โมเดล -----
     function initKey() {
       const k = localStorage.getItem('gemini_api_key');
       const b = document.getElementById('apiKeyBadge');
       if (k && k.length > 10) {
         b.className = 'text-[11px] px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-200';
-        b.textContent = '✓ พร้อมใช้งาน (API Key บันทึกแล้ว)';
+        b.textContent = '✓ พร้อมใช้งาน (' + (localStorage.getItem('gemini_selected_model') || 'gemini-2.5-flash') + ')';
       } else {
         b.className = 'text-[11px] px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-200';
         b.textContent = '⚠️ ยังไม่ได้ตั้งค่า API Key';
       }
-      const m = localStorage.getItem('gemini_selected_model');
-      if (m) document.getElementById('modelField').value = m;
     }
 
     function openModal() {
@@ -449,26 +457,32 @@
       document.getElementById('modelField').value = localStorage.getItem('gemini_selected_model') || 'gemini-2.5-flash';
       document.getElementById('keyModal').classList.remove('hidden');
     }
-    function closeModal() { document.getElementById('keyModal').classList.add('hidden'); }
+
+    function closeModal() {
+      document.getElementById('keyModal').classList.add('hidden');
+    }
+
     function saveKey() {
       const v = document.getElementById('keyField').value.trim();
-      const m = document.getElementById('modelField').value.trim() || 'gemini-2.5-flash';
+      const m = document.getElementById('modelField').value || 'gemini-2.5-flash';
       if (v) {
         localStorage.setItem('gemini_api_key', v);
         localStorage.setItem('gemini_selected_model', m);
-        alert('บันทึก API Key เรียบร้อย');
+        alert('บันทึกการตั้งค่าเรียบร้อย (โมเดล: ' + m + ')');
       } else {
         localStorage.removeItem('gemini_api_key');
+        localStorage.removeItem('gemini_selected_model');
       }
       closeModal();
       initKey();
     }
 
+    // ----- อัปโหลดโลโก้ -----
     function handleLogoUpload(e) {
       const file = e.target.files[0];
       if (file && file.type.startsWith('image/')) {
         const reader = new FileReader();
-        reader.onload = function(evt) {
+        reader.onload = function (evt) {
           document.getElementById('agencyLogoImg').src = evt.target.result;
           document.getElementById('logoDisplayContainer').classList.remove('hidden');
         };
@@ -476,70 +490,79 @@
       }
     }
 
-    // ฟังก์ชันอ่านไฟล์ Direct ปลอดภัย ไม่ค้าง
-    function readFileSafe(file) {
+    // ----- อัปโหลดเอกสารสเปก (PDF/รูปภาพ) -----
+    function handleFileUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
       const notice = document.getElementById('fileStatusNotice');
-      notice.className = "text-[11px] text-indigo-700 mt-1.5 font-medium block";
-      notice.textContent = "⏳ กำลังโหลดไฟล์เอกสาร...";
+      notice.className = "text-[11px] text-indigo-700 mt-1.5 font-medium flex items-center gap-1";
+      notice.textContent = "⏳ กำลังโหลดเอกสาร...";
       notice.classList.remove('hidden');
 
       const reader = new FileReader();
-      reader.onload = function(evt) {
-        try {
-          const res = evt.target.result;
-          base64Data = res.split(',')[1];
+      reader.onload = function (evt) {
+        const resultStr = evt.target.result;
+        base64Data = resultStr.split(',')[1];
 
-          if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
-            fileMimeType = "application/pdf";
-            document.getElementById('imgPreviewCard').classList.add('hidden');
-            document.getElementById('outPhotoBox').classList.add('hidden');
-            notice.className = "text-[11px] text-emerald-700 mt-1.5 font-medium block";
-            notice.innerHTML = `✓ แนบไฟล์ PDF: <strong>${file.name}</strong> (${(file.size/1024).toFixed(1)} KB) เรียบร้อย`;
-          } else {
-            fileMimeType = file.type || "image/jpeg";
-            document.getElementById('imgPreview').src = res;
-            document.getElementById('imgPreviewCard').classList.remove('hidden');
-            document.getElementById('outPhotoImg').src = res;
-            document.getElementById('outPhotoBox').classList.remove('hidden');
-            notice.className = "text-[11px] text-emerald-700 mt-1.5 font-medium block";
-            notice.innerHTML = `✓ แนบรูปภาพ: <strong>${file.name}</strong> เรียบร้อย`;
-          }
-        } catch (err) {
-          notice.className = "text-[11px] text-rose-600 mt-1.5 font-medium block";
-          notice.textContent = "❌ ไม่สามารถประมวลผลไฟล์ได้";
+        if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+          fileMimeType = "application/pdf";
+          document.getElementById('imgPreviewCard').classList.add('hidden');
+          document.getElementById('outPhotoBox').classList.add('hidden');
+
+          notice.className = "text-[11px] text-emerald-700 mt-1.5 font-medium flex items-center gap-1";
+          notice.innerHTML = `<span>✓ แนบไฟล์ PDF: <strong>${escapeHtml(file.name)}</strong> (${(file.size / 1024).toFixed(1)} KB) พร้อมส่งตรวจ</span>`;
+        } else {
+          fileMimeType = file.type || "image/jpeg";
+          document.getElementById('imgPreview').src = resultStr;
+          document.getElementById('imgPreviewCard').classList.remove('hidden');
+          document.getElementById('outPhotoImg').src = resultStr;
+          document.getElementById('outPhotoBox').classList.remove('hidden');
+
+          notice.className = "text-[11px] text-emerald-700 mt-1.5 font-medium flex items-center gap-1";
+          notice.innerHTML = `<span>✓ แนบรูปภาพ: <strong>${escapeHtml(file.name)}</strong> พร้อมส่งตรวจ</span>`;
         }
       };
-      reader.onerror = function() {
-        notice.className = "text-[11px] text-rose-600 mt-1.5 font-medium block";
-        notice.textContent = "❌ เกิดข้อผิดพลาดในการเปิดไฟล์";
+      reader.onerror = function () {
+        notice.className = "text-[11px] text-rose-700 mt-1.5 font-medium flex items-center gap-1";
+        notice.textContent = "✗ อ่านไฟล์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง";
+        base64Data = null;
       };
       reader.readAsDataURL(file);
     }
 
-    // Input File Event
-    document.getElementById('docFileInput').addEventListener('change', function(e) {
-      if (this.files && this.files[0]) {
-        readFileSafe(this.files[0]);
-      }
-      this.value = '';
-    });
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
 
-    // Drag and Drop Event
-    const dropZone = document.getElementById('dropZone');
-    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('border-indigo-500', 'bg-indigo-50/40'); });
-    dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('border-indigo-500', 'bg-indigo-50/40'); });
-    dropZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropZone.classList.remove('border-indigo-500', 'bg-indigo-50/40');
-      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-        readFileSafe(e.dataTransfer.files[0]);
+    // ----- เรียก Gemini API (ส่ง key ผ่าน header แทน query string เพื่อความปลอดภัย) -----
+    async function requestGemini(modelName, apiKey, payload) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': apiKey
+        },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        const msg = (data && data.error && data.error.message) ? data.error.message : `HTTP ${res.status}`;
+        const err = new Error(msg);
+        err.status = res.status;
+        throw err;
       }
-    });
+      return data;
+    }
 
+    // ----- ตรวจสอบหลัก -----
     async function runAiVerification() {
       const apiKey = localStorage.getItem('gemini_api_key');
       if (!apiKey) {
-        alert('กรุณาคลิก "ตั้งค่า API Key" ด้านบนขวาก่อน');
+        alert('กรุณาคลิก "ตั้งค่า AI & API Key" ด้านบนขวาก่อน');
         openModal();
         return;
       }
@@ -550,17 +573,23 @@
 
       const catKey = document.getElementById('selCategory').value;
       const crit = PEA_MASTER_SPECS[catKey];
-      const model = localStorage.getItem('gemini_selected_model') || document.getElementById('modelField').value.trim() || 'gemini-2.5-flash';
+      const preferredModel = localStorage.getItem('gemini_selected_model') || 'gemini-2.5-flash';
+
+      const today = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
 
       document.getElementById('outPeaRegion').textContent = "กฟภ. เขต: " + (document.getElementById('fldPeaRegion').value || "-");
       document.getElementById('outPeaBranch').textContent = "การไฟฟ้าสาขา: " + (document.getElementById('fldPeaBranch').value || "-");
       document.getElementById('outProject').textContent = document.getElementById('fldProject').value || 'อาคารสำนักงาน กฟภ.';
       document.getElementById('outContractor').textContent = document.getElementById('fldContractor').value || '-';
       document.getElementById('outDocNo').textContent = document.getElementById('fldDocNo').value || '-';
+      document.getElementById('outDate').textContent = today;
       document.getElementById('outStandardCriteria').textContent = crit.desc;
 
-      document.getElementById('loadingIndicator').classList.remove('hidden');
-      document.getElementById('btnRun').disabled = true;
+      const loadingBox = document.getElementById('loadingIndicator');
+      const loadingText = document.getElementById('loadingText');
+      const runBtn = document.getElementById('btnRun');
+      loadingBox.classList.remove('hidden');
+      runBtn.disabled = true;
 
       const prompt = `
 คุณเป็นวิศวกรและสถาปนิกผู้เชี่ยวชาญการตรวจรับรองวัสดุของการไฟฟ้าส่วนภูมิภาค (กฟภ.)
@@ -601,65 +630,78 @@ ${crit.desc}
     }
   ]
 }
+
+หากเอกสารที่แนบมาไม่มีข้อมูลเพียงพอสำหรับหัวข้อใด ให้ใส่ "actual": "ไม่พบข้อมูลในเอกสารที่แนบ" และ "pass": false สำหรับหัวข้อนั้น แทนการเดาข้อมูล
 `;
 
       const payload = {
         contents: [{
           parts: [
             { text: prompt },
-            { inline_data: { mime_type: fileMimeType, data: base64Data } }
+            { inlineData: { mimeType: fileMimeType, data: base64Data } }
           ]
         }],
         generationConfig: {
-          response_mime_type: "application/json",
+          responseMimeType: "application/json",
           temperature: 0.1
         }
       };
 
-      const candidateModels = [model, 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash-lite'];
-      const uniqueModels = [...new Set(candidateModels.filter(Boolean))];
+      // ลำดับโมเดลที่จะทดลองเรียก (เริ่มจากรุ่นที่เลือกไว้ ตามด้วยรุ่นสำรอง)
+      const fallbackModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-pro'];
+      const modelsToTry = [preferredModel, ...fallbackModels].filter((v, i, arr) => v && arr.indexOf(v) === i);
 
       let successResponse = null;
-      let lastErrorMessage = "";
+      let successModel = null;
+      const errorsByModel = [];
 
-      for (const m of uniqueModels) {
+      for (const m of modelsToTry) {
+        loadingText.textContent = `AI (${m}) กำลังวิเคราะห์เอกสารและเทียบสเปก กฟภ. 2568...`;
         try {
-          const url = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${apiKey}`;
-          const res = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-          const data = await res.json();
-          if (data && data.candidates && data.candidates[0]) {
+          const data = await requestGemini(m, apiKey, payload);
+          if (data && data.candidates && data.candidates.length > 0 && data.candidates[0].content) {
             successResponse = data;
+            successModel = m;
             break;
-          } else if (data.error) {
-            lastErrorMessage = data.error.message;
+          } else {
+            errorsByModel.push(`${m}: ไม่มีผลลัพธ์จาก AI (อาจถูกบล็อกด้วยตัวกรองความปลอดภัย)`);
           }
         } catch (err) {
-          lastErrorMessage = err.message;
+          errorsByModel.push(`${m}: ${err.message}`);
+          // ถ้า key ผิดหรือไม่มีสิทธิ์ใช้งาน (401/403) ไม่มีประโยชน์ที่จะลองโมเดลอื่นต่อ
+          if (err.status === 400 && /API key/i.test(err.message)) break;
+          if (err.status === 401 || err.status === 403) break;
         }
       }
 
-      if (successResponse && successResponse.candidates && successResponse.candidates[0]) {
+      if (successResponse) {
         try {
           const rawText = successResponse.candidates[0].content.parts[0].text;
           const cleanJson = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
           const parsed = JSON.parse(cleanJson);
+          if (!parsed.checks || !Array.isArray(parsed.checks)) {
+            throw new Error('รูปแบบผลลัพธ์ไม่มี "checks" เป็น array');
+          }
           currentEvaluationResult = parsed;
           renderReport(parsed);
+          if (successModel !== preferredModel) {
+            console.warn(`โมเดล "${preferredModel}" เรียกไม่สำเร็จ ระบบสลับไปใช้ "${successModel}" แทน`);
+          }
         } catch (e) {
-          alert('AI ตอบกลับในรูปแบบที่ไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง');
+          console.error('JSON parse error:', e);
+          alert('AI ตอบกลับในรูปแบบที่ไม่ถูกต้อง (' + e.message + ') กรุณาลองส่งตรวจอีกครั้ง');
         }
       } else {
-        alert(`เกิดข้อผิดพลาดจาก AI: ${lastErrorMessage}`);
+        console.error('เรียก AI ไม่สำเร็จทุกโมเดล:', errorsByModel);
+        alert('เกิดข้อผิดพลาดในการเชื่อมต่อ AI กับทุกโมเดลที่ลอง:\n\n' + errorsByModel.join('\n') + '\n\nตรวจสอบ API Key และการเชื่อมต่ออินเทอร์เน็ต แล้วลองใหม่อีกครั้ง');
       }
 
-      document.getElementById('loadingIndicator').classList.add('hidden');
-      document.getElementById('btnRun').disabled = false;
+      loadingBox.classList.add('hidden');
+      loadingText.textContent = 'AI กำลังวิเคราะห์ข้อมูลในเอกสารและเทียบสเปก กฟภ. 2568...';
+      runBtn.disabled = false;
     }
 
+    // ----- แสดงผลรายงาน -----
     function renderReport(r) {
       const tbody = document.getElementById('outTableBody');
       const badge = document.getElementById('badgeVerdict');
@@ -669,9 +711,9 @@ ${crit.desc}
       r.checks.forEach(c => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td class="px-2.5 py-2 font-semibold text-slate-800">${c.topic}</td>
-          <td class="px-2.5 py-2 text-slate-600">${c.standard}</td>
-          <td class="px-2.5 py-2 font-semibold ${c.pass ? 'text-slate-800' : 'text-rose-600'}">${c.actual}</td>
+          <td class="px-2.5 py-2 font-semibold text-slate-800">${escapeHtml(c.topic || '-')}</td>
+          <td class="px-2.5 py-2 text-slate-600">${escapeHtml(c.standard || '-')}</td>
+          <td class="px-2.5 py-2 font-semibold ${c.pass ? 'text-slate-800' : 'text-rose-600'}">${escapeHtml(c.actual || '-')}</td>
           <td class="px-2.5 py-2 text-center">
             <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${c.pass ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
               ${c.pass ? 'ผ่านเกณฑ์' : 'ไม่ผ่านเกณฑ์'}
@@ -682,24 +724,27 @@ ${crit.desc}
       });
 
       box.classList.remove('hidden');
+      const reasonText = escapeHtml(r.reason || '-');
+
       if (r.verdict === 'APPROVED') {
         badge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800';
         badge.textContent = 'ผลการตรวจ: อนุมัติ (Approved)';
         box.className = 'p-2.5 rounded border border-emerald-200 bg-emerald-50 text-emerald-950 text-xs leading-relaxed';
-        box.innerHTML = `<strong>สรุปผลการพิจารณา: สอดคล้องตามรายการประกอบแบบ กฟภ. ฉบับปี 2568</strong><br>${r.reason}<br><span class="text-[10px] text-emerald-800 mt-1 block">ความเห็นผู้ควบคุมงาน: คุณสมบัติครบถ้วนตามข้อกำหนด อนุมัติให้จัดหาและใช้งานได้</span>`;
+        box.innerHTML = `<strong>สรุปผลการพิจารณา: สอดคล้องตามรายการประกอบแบบ กฟภ. ฉบับปี 2568</strong><br>${reasonText}<br><span class="text-[10px] text-emerald-800 mt-1 block">ความเห็นผู้ควบคุมงาน: คุณสมบัติครบถ้วนตามข้อกำหนด อนุมัติให้จัดหาและใช้งานได้ (ควรตรวจทานกับเอกสารต้นฉบับก่อนลงนามจริง)</span>`;
       } else if (r.verdict === 'REVIEW') {
         badge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-amber-100 text-amber-800';
         badge.textContent = 'ผลการตรวจ: ขอเอกสารเทียบเท่า (Review Required)';
         box.className = 'p-2.5 rounded border border-amber-200 bg-amber-50 text-amber-950 text-xs leading-relaxed';
-        box.innerHTML = `<strong>สรุปผลการพิจารณา: ต้องเสนอเอกสารรับรองคุณสมบัติเทียบเท่าเพิ่มเติม</strong><br>${r.reason}<br><span class="text-[10px] text-amber-800 mt-1 block">ความเห็นผู้ควบคุมงาน: ให้ผู้รับจ้างแนบผลทดสอบจากสถาบันที่ กฟภ. รับรองตามหมวด 01 60 00 เพื่อเสนอผู้ออกแบบพิจารณา</span>`;
+        box.innerHTML = `<strong>สรุปผลการพิจารณา: ต้องเสนอเอกสารรับรองคุณสมบัติเทียบเท่าเพิ่มเติม</strong><br>${reasonText}<br><span class="text-[10px] text-amber-800 mt-1 block">ความเห็นผู้ควบคุมงาน: ให้ผู้รับจ้างแนบผลทดสอบจากสถาบันที่ กฟภ. รับรองตามหมวด 01 60 00 เพื่อเสนอผู้ออกแบบพิจารณา</span>`;
       } else {
         badge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-rose-100 text-rose-800';
         badge.textContent = 'ผลการตรวจ: ไม่อนุมัติ (Rejected)';
         box.className = 'p-2.5 rounded border border-rose-200 bg-rose-50 text-rose-950 text-xs leading-relaxed';
-        box.innerHTML = `<strong>สรุปผลการพิจารณา: ไม่อนุญาตให้นำมาใช้ในงานก่อสร้าง</strong><br>${r.reason}<br><span class="text-[10px] text-rose-800 mt-1 block">ความเห็นผู้ควบคุมงาน: คุณสมบัติต่ำกว่าเกณฑ์ขั้นต่ำตามสเปก ปฏิเสธการขออนุมัติและให้ผู้รับจ้างเสนอผลิตภัณฑ์ใหม่</span>`;
+        box.innerHTML = `<strong>สรุปผลการพิจารณา: ไม่อนุญาตให้นำมาใช้ในงานก่อสร้าง</strong><br>${reasonText}<br><span class="text-[10px] text-rose-800 mt-1 block">ความเห็นผู้ควบคุมงาน: คุณสมบัติต่ำกว่าเกณฑ์ขั้นต่ำตามสเปก ปฏิเสธการขออนุมัติและให้ผู้รับจ้างเสนอผลิตภัณฑ์ใหม่</span>`;
       }
     }
 
+    // ----- ส่งออก Excel -----
     function exportToExcel() {
       if (!currentEvaluationResult) {
         alert('กรุณาทำการตรวจสอบสเปกก่อนส่งออกเป็น Excel');
@@ -711,6 +756,7 @@ ${crit.desc}
       const pName = document.getElementById('fldProject').value || 'อาคารสำนักงาน กฟภ.';
       const pContractor = document.getElementById('fldContractor').value || '-';
       const pDoc = document.getElementById('fldDocNo').value || '-';
+      const pDate = document.getElementById('outDate').textContent || '-';
       const catKey = document.getElementById('selCategory').value;
       const catName = PEA_MASTER_SPECS[catKey].name;
 
@@ -718,7 +764,7 @@ ${crit.desc}
         ["รายงานผลการตรวจสอบและทดสอบสเปกวัสดุ (กฟภ. ฉบับปี 2568)"],
         ["กฟภ. เขต:", pRegion, "การไฟฟ้าสาขา:", pBranch],
         ["โครงการ:", pName, "ผู้รับจ้าง:", pContractor],
-        ["เลขที่เอกสาร:", pDoc, "วันที่ตรวจ:", "20 ก.ย. 2569"],
+        ["เลขที่เอกสาร:", pDoc, "วันที่ตรวจ:", pDate],
         ["หมวดงาน:", catName],
         [""],
         ["รายการตรวจสอบ", "เกณฑ์สเปกตามเล่ม กฟภ. 2568", "ค่าที่ตรวจสอบได้จากเอกสาร/ภาพ", "ผลการประเมิน"]
@@ -733,10 +779,12 @@ ${crit.desc}
       excelRows.push(["เหตุผลสรุป:", currentEvaluationResult.reason]);
 
       const ws = XLSX.utils.aoa_to_sheet(excelRows);
+      ws['!cols'] = [{ wch: 28 }, { wch: 45 }, { wch: 35 }, { wch: 16 }];
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "PEA_Material_Report");
-      
-      const fileName = `PEA_Material_Check_${pDoc.replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`;
+
+      const safeDocName = pDoc.replace(/[^a-zA-Z0-9ก-๙_-]/g, '_') || 'report';
+      const fileName = `PEA_Material_Check_${safeDocName}.xlsx`;
       XLSX.writeFile(wb, fileName);
     }
 
