@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบตรวจสอบการขออนุมัติวัสดุ กฟภ. 2568 (ครบทุกหมวดหมู่)</title>
+  <title>ระบบตรวจสอบการขออนุมัติวัสดุ กฟภ. 2568 (Full Edition)</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- SheetJS สำหรับ Export Excel (.xlsx) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Sarabun', sans-serif; }
@@ -23,7 +25,7 @@
     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-2">
       <div>
         <h1 class="text-base md:text-lg font-bold tracking-tight">ระบบตรวจสอบการขออนุมัติวัสดุ (PEA Material Verifier)</h1>
-        <p class="text-[11px] text-purple-200">รายการประกอบแบบมาตรฐาน กองออกแบบงานโยธา การไฟฟ้าส่วนภูมิภาค ฉบับปี 2568 (ครบ 41 หมวดย่อยตามสารบัญ)</p>
+        <p class="text-[11px] text-purple-200">รายการประกอบแบบมาตรฐาน กองออกแบบงานโยธา การไฟฟ้าส่วนภูมิภาค ฉบับปี 2568 (ครบ 41 หมวดย่อย)</p>
       </div>
       <div class="flex items-center gap-2">
         <span id="apiKeyBadge" class="text-[11px] px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-200">
@@ -37,15 +39,15 @@
     </div>
   </header>
 
-  <!-- หน้าต่าง Modal สำหรับตั้งค่า API Key -->
+  <!-- Modal ตั้งค่า API Key -->
   <div id="keyModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-xl max-w-md w-full p-5 shadow-2xl border border-slate-200">
       <h3 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
         <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
-        บันทึก Gemini API Key สำหรับเครื่องของคุณ
+        บันทึก Gemini API Key สำหรับเครื่องนี้
       </h3>
       <p class="text-[11px] text-slate-500 mb-3 leading-relaxed">
-        Key จะถูกบันทึกไว้ในเบราว์เซอร์ของเครื่องคุณเท่านั้น ปลอดภัยต่อการแชร์ลิงก์ให้ทีมงานเปิดใช้งาน
+        Key จะถูกบันทึกไว้ในเบราว์เซอร์ของเครื่องคุณเท่านั้น (Local Storage) ปลอดภัยต่อการแชร์ลิงก์ให้ทีมงานเปิดใช้งาน
       </p>
       <input type="password" id="keyField" placeholder="AIzaSy..." class="w-full rounded border border-slate-300 px-3 py-2 text-xs mb-3 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
       <div class="flex justify-end gap-2">
@@ -78,12 +80,22 @@
         <img id="imgPreview" src="" class="max-h-36 rounded object-contain mx-auto">
       </div>
 
-      <h2 class="text-xs font-bold text-slate-900 pt-1 pb-1 border-b border-slate-100">2. ข้อมูลโครงการและเลือกหมวดงาน กฟภ. 2568</h2>
+      <h2 class="text-xs font-bold text-slate-900 pt-1 pb-1 border-b border-slate-100">2. ข้อมูลโครงการและสังกัด กฟภ.</h2>
 
       <div class="space-y-2">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[10px] font-semibold text-slate-600">กฟภ. เขต (PEA Region)</label>
+            <input type="text" id="fldPeaRegion" placeholder="เช่น กฟก.3 (นครปฐม)" class="w-full rounded border border-slate-300 px-2 py-1 text-xs">
+          </div>
+          <div>
+            <label class="block text-[10px] font-semibold text-slate-600">การไฟฟ้าสาขา / สังกัด</label>
+            <input type="text" id="fldPeaBranch" placeholder="เช่น กฟสา.สามพราน" class="w-full rounded border border-slate-300 px-2 py-1 text-xs">
+          </div>
+        </div>
         <div>
           <label class="block text-[10px] font-semibold text-slate-600">ชื่อโครงการ</label>
-          <input type="text" id="fldProject" placeholder="เช่น ก่อสร้างอาคารสำนักงาน กฟภ." class="w-full rounded border border-slate-300 px-2 py-1 text-xs">
+          <input type="text" id="fldProject" placeholder="เช่น งานก่อสร้างอาคารสำนักงาน กฟภ." class="w-full rounded border border-slate-300 px-2 py-1 text-xs">
         </div>
         <div class="grid grid-cols-2 gap-2">
           <div>
@@ -96,9 +108,9 @@
           </div>
         </div>
 
-        <!-- รายการหมวดหมู่ทั้งหมด 41 หมวดตรงตามสารบัญ กฟภ. 2568 -->
+        <!-- รายการหมวดหมู่ทั้งหมด 41 หมวด -->
         <div>
-          <label class="block text-[10px] font-semibold text-slate-600">เลือกหมวดงานที่ขออนุมัติ (ครบทุกหมวดตามเล่ม)</label>
+          <label class="block text-[10px] font-semibold text-slate-600">เลือกหมวดงานที่ขออนุมัติ (กฟภ. 2568)</label>
           <select id="selCategory" class="w-full rounded border border-slate-300 px-2 py-1.5 text-xs font-medium bg-white focus:outline-none">
             <optgroup label="หมวด 01 ข้อกำหนดทั่วไป">
               <option value="s011100">01 11 00 ขอบเขตของงาน (Summary of Work)</option>
@@ -218,6 +230,9 @@
               <div>
                 <h2 class="text-base font-bold text-slate-900 tracking-tight">รายงานผลการตรวจสอบและทดสอบสเปกวัสดุ</h2>
                 <h3 class="text-xs font-semibold text-slate-700">กองออกแบบงานโยธา การไฟฟ้าส่วนภูมิภาค (PEA Standards Specification 2568)</h3>
+                <div class="text-[11px] text-indigo-900 mt-1 font-semibold">
+                  <span id="outPeaRegion">กฟภ. เขต: -</span> | <span id="outPeaBranch">การไฟฟ้าสาขา: -</span>
+                </div>
               </div>
               <div class="text-right">
                 <span id="badgeVerdict" class="text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-600">รอผลการตรวจสอบ</span>
@@ -288,10 +303,15 @@
             </div>
           </div>
           
-          <div class="flex justify-end mt-4 no-print">
+          <!-- ปุ่มพิมพ์ PDF และ ปุ่ม Export Excel -->
+          <div class="flex justify-end gap-2 mt-4 no-print">
+            <button onclick="exportToExcel()" class="px-3.5 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded text-xs font-semibold flex items-center gap-1.5 shadow">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              ส่งออกไฟล์ Excel (.xlsx)
+            </button>
             <button onclick="window.print()" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-xs font-semibold flex items-center gap-1.5 shadow">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-              พิมพ์รายงานมาตรฐาน / บันทึก PDF (Print Report)
+              พิมพ์รายงานมาตรฐาน / บันทึก PDF
             </button>
           </div>
         </div>
@@ -301,7 +321,7 @@
   </main>
 
   <script>
-    // ฐานข้อมูลเกณฑ์ข้อกำหนดมาตรฐาน กฟภ. ฉบับปี 2568 ครบถ้วนทั้ง 41 หมวดย่อย
+    // ฐานข้อมูลเกณฑ์ข้อกำหนดมาตรฐาน กฟภ. ฉบับปี 2568 ครบทั้ง 41 หมวดย่อย
     const PEA_MASTER_SPECS = {
       // หมวด 01
       s011100: { name: "01 11 00 ขอบเขตงาน", desc: "ก่อสร้างถูกต้องตามแบบและรายการประกอบแบบ มีความมั่นคงถาวร ประณีตตามหลักวิชาช่างที่ดี" },
@@ -398,6 +418,7 @@
     };
 
     let base64Data = null;
+    let currentEvaluationResult = null; // เก็บผลการตรวจสำหรับ Export Excel
 
     function initKey() {
       const k = localStorage.getItem('gemini_api_key');
@@ -459,6 +480,8 @@
       const crit = PEA_MASTER_SPECS[catKey];
 
       // อัปเดตข้อมูลหัวกระดาษรายงาน
+      document.getElementById('outPeaRegion').textContent = "กฟภ. เขต: " + (document.getElementById('fldPeaRegion').value || "-");
+      document.getElementById('outPeaBranch').textContent = "การไฟฟ้าสาขา: " + (document.getElementById('fldPeaBranch').value || "-");
       document.getElementById('outProject').textContent = document.getElementById('fldProject').value || 'อาคารสำนักงาน กฟภ.';
       document.getElementById('outContractor').textContent = document.getElementById('fldContractor').value || '-';
       document.getElementById('outDocNo').textContent = document.getElementById('fldDocNo').value || '-';
@@ -530,6 +553,7 @@ ${crit.desc}
         if (data.error) throw new Error(data.error.message);
 
         const parsed = JSON.parse(data.candidates[0].content.parts[0].text);
+        currentEvaluationResult = parsed; // บันทึกไว้สำหรับ Export Excel
         renderReport(parsed);
 
       } catch (err) {
@@ -579,6 +603,47 @@ ${crit.desc}
         box.className = 'p-2.5 rounded border border-rose-200 bg-rose-50 text-rose-950 text-xs leading-relaxed';
         box.innerHTML = `<strong>สรุปผลการพิจารณา: ไม่อนุญาตให้นำมาใช้ในงานก่อสร้าง</strong><br>${r.reason}<br><span class="text-[10px] text-rose-800 mt-1 block">ความเห็นผู้ควบคุมงาน: คุณสมบัติต่ำกว่าเกณฑ์ขั้นต่ำตามสเปก ปฏิเสธการขออนุมัติและให้ผู้รับจ้างเสนอผลิตภัณฑ์ใหม่</span>`;
       }
+    }
+
+    // ฟังก์ชันส่งออกเป็น Excel (.xlsx)
+    function exportToExcel() {
+      if (!currentEvaluationResult) {
+        alert('กรุณาทำการตรวจสอบสเปกก่อนส่งออกเป็น Excel');
+        return;
+      }
+
+      const pRegion = document.getElementById('fldPeaRegion').value || '-';
+      const pBranch = document.getElementById('fldPeaBranch').value || '-';
+      const pName = document.getElementById('fldProject').value || 'อาคารสำนักงาน กฟภ.';
+      const pContractor = document.getElementById('fldContractor').value || '-';
+      const pDoc = document.getElementById('fldDocNo').value || '-';
+      const catKey = document.getElementById('selCategory').value;
+      const catName = PEA_MASTER_SPECS[catKey].name;
+
+      const excelRows = [
+        ["รายงานผลการตรวจสอบและทดสอบสเปกวัสดุ (กฟภ. ฉบับปี 2568)"],
+        ["กฟภ. เขต:", pRegion, "การไฟฟ้าสาขา:", pBranch],
+        ["โครงการ:", pName, "ผู้รับจ้าง:", pContractor],
+        ["เลขที่เอกสาร:", pDoc, "วันที่ตรวจ:", "20 ก.ย. 2569"],
+        ["หมวดงาน:", catName],
+        [""],
+        ["รายการตรวจสอบ", "เกณฑ์สเปกตามเล่ม กฟภ. 2568", "ค่าที่ตรวจสอบได้จากเอกสาร/ภาพ", "ผลการประเมิน"]
+      ];
+
+      currentEvaluationResult.checks.forEach(c => {
+        excelRows.push([c.topic, c.standard, c.actual, c.pass ? "ผ่านเกณฑ์" : "ไม่ผ่านเกณฑ์"]);
+      });
+
+      excelRows.push([""]);
+      excelRows.push(["ผลการตัดสินโดยรวม:", currentEvaluationResult.verdict]);
+      excelRows.push(["เหตุผลสรุป:", currentEvaluationResult.reason]);
+
+      const ws = XLSX.utils.aoa_to_sheet(excelRows);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "PEA_Material_Report");
+      
+      const fileName = `PEA_Material_Check_${pDoc.replace(/[^a-zA-Z0-9]/g, '_')}.xlsx`;
+      XLSX.writeFile(wb, fileName);
     }
 
     document.addEventListener('DOMContentLoaded', initKey);
