@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบตรวจสอบการขออนุมัติวัสดุ กฟภ. 2568 (Universal AI Edition)</title>
+  <title>ระบบตรวจสอบการขออนุมัติวัสดุ กฟภ. 2568 (Fixed Upload Edition)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- SheetJS สำหรับ Export Excel (.xlsx) -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <!-- PDF.js สำหรับอ่านและแปลงไฟล์ PDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Sarabun', sans-serif; }
@@ -93,7 +93,7 @@
         </h2>
 
         <div class="mt-2 border-2 border-dashed border-slate-300 rounded-lg p-3 text-center hover:border-indigo-500 transition-colors bg-slate-50/50">
-          <input type="file" id="docFileInput" accept="image/*,application/pdf" class="hidden" onchange="handleDocumentUpload(event)">
+          <input type="file" id="docFileInput" accept="image/*,.pdf,application/pdf" class="hidden" onchange="handleDocumentUpload(event)">
           <label for="docFileInput" class="cursor-pointer block">
             <svg class="w-6 h-6 text-indigo-500 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
             <span class="text-xs font-semibold text-indigo-600">กดเพื่อแนบไฟล์ PDF หรือ รูปถ่าย</span>
@@ -367,8 +367,10 @@
   </main>
 
   <script>
-    // ตั้งค่า PDF.js Worker
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    // ตั้งค่า PDF.js Worker จาก CDN ที่เสถียร
+    if (typeof pdfjsLib !== 'undefined') {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+    }
 
     // ฐานข้อมูลเกณฑ์ข้อกำหนดมาตรฐาน กฟภ. ฉบับปี 2568 ครบทั้ง 41 หมวดย่อย
     const PEA_MASTER_SPECS = {
@@ -476,7 +478,6 @@
       initKey();
     }
 
-    // ฟังก์ชันดึงรายชื่อโมเดลทั้งหมดที่บัญชีนี้ใช้งานได้
     async function fetchAvailableModels() {
       const apiKey = document.getElementById('keyField').value.trim() || localStorage.getItem('gemini_api_key');
       if (!apiKey) {
@@ -525,67 +526,94 @@
       }
     }
 
+    // ฟังก์ชันย่อขนาดภาพเพื่อไม่ให้เบราว์เซอร์ล้น
+    function resizeAndCompressImage(imgElement, maxWidth = 1200) {
+      const canvas = document.createElement('canvas');
+      let width = imgElement.width;
+      let height = imgElement.height;
+
+      if (width > maxWidth) {
+        height = Math.round((height * maxWidth) / width);
+        width = maxWidth;
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(imgElement, 0, 0, width, height);
+      return canvas.toDataURL('image/jpeg', 0.85);
+    }
+
     async function handleDocumentUpload(e) {
       const file = e.target.files[0];
       if (!file) return;
 
       const notice = document.getElementById('fileStatusNotice');
-      notice.classList.remove('hidden');
+      notice.className = "text-[11px] text-indigo-700 mt-1 font-medium block";
+      notice.textContent = "⏳ กำลังโหลดไฟล์...";
 
-      if (file.type === 'application/pdf') {
+      const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+
+      if (isPdf) {
         notice.textContent = "📄 กำลังแปลงหน้าแรกของ PDF เป็นภาพ...";
         try {
           const fileReader = new FileReader();
           fileReader.onload = async function() {
-            const typedarray = new Uint8Array(this.result);
-            const pdf = await pdfjsLib.getDocument(typedarray).promise;
-            const page = await pdf.getPage(1);
+            try {
+              const typedarray = new Uint8Array(this.result);
+              const pdf = await pdfjsLib.getDocument(typedarray).promise;
+              const page = await pdf.getPage(1);
 
-            const viewport = page.getViewport({ scale: 1.5 });
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            canvas.height = viewport.height;
-            canvas.width = viewport.width;
+              const viewport = page.getViewport({ scale: 1.5 });
+              const canvas = document.createElement('canvas');
+              const context = canvas.getContext('2d');
+              canvas.height = viewport.height;
+              canvas.width = viewport.width;
 
-            await page.render({ canvasContext: context, viewport: viewport }).promise;
+              await page.render({ canvasContext: context, viewport: viewport }).promise;
 
-            const imgUrl = canvas.toDataURL('image/jpeg');
-            base64Data = imgUrl.split(',')[1];
+              const imgUrl = canvas.toDataURL('image/jpeg', 0.85);
+              base64Data = imgUrl.split(',')[1];
 
-            document.getElementById('imgPreview').src = imgUrl;
-            document.getElementById('imgPreviewCard').classList.remove('hidden');
-            document.getElementById('outPhotoImg').src = imgUrl;
-            document.getElementById('outPhotoBox').classList.remove('hidden');
+              document.getElementById('imgPreview').src = imgUrl;
+              document.getElementById('imgPreviewCard').classList.remove('hidden');
+              document.getElementById('outPhotoImg').src = imgUrl;
+              document.getElementById('outPhotoBox').classList.remove('hidden');
 
-            notice.textContent = "✓ แปลง PDF หน้าแรกเรียบร้อย พร้อมตรวจ";
+              notice.className = "text-[11px] text-emerald-700 mt-1 font-medium block";
+              notice.textContent = "✓ แปลง PDF หน้าแรกเรียบร้อย พร้อมตรวจ";
+            } catch (pdfErr) {
+              console.error(pdfErr);
+              notice.className = "text-[11px] text-rose-600 mt-1 font-medium block";
+              notice.textContent = "❌ ไม่สามารถอ่าน PDF ได้ กรุณาลองแนบเป็นไฟล์ภาพ JPG/PNG";
+            }
           };
           fileReader.readAsArrayBuffer(file);
         } catch (err) {
-          notice.textContent = "❌ ไม่สามารถอ่าน PDF ได้ กรุณาแนบเป็นรูปภาพ";
+          notice.className = "text-[11px] text-rose-600 mt-1 font-medium block";
+          notice.textContent = "❌ เกิดข้อผิดพลาดในการเปิดไฟล์";
         }
-      } else if (file.type.startsWith('image/')) {
-        notice.textContent = "🖼️ แนบไฟล์รูปภาพเรียบร้อย";
+      } else {
+        notice.textContent = "🖼️ กำลังประมวลผลรูปภาพ...";
         const reader = new FileReader();
         reader.onload = function(evt) {
-          base64Data = evt.target.result.split(',')[1];
-          document.getElementById('imgPreview').src = evt.target.result;
-          document.getElementById('imgPreviewCard').classList.remove('hidden');
-          document.getElementById('outPhotoImg').src = evt.target.result;
-          document.getElementById('outPhotoBox').classList.remove('hidden');
+          const tempImg = new Image();
+          tempImg.onload = function() {
+            const compressedUrl = resizeAndCompressImage(tempImg, 1200);
+            base64Data = compressedUrl.split(',')[1];
+
+            document.getElementById('imgPreview').src = compressedUrl;
+            document.getElementById('imgPreviewCard').classList.remove('hidden');
+            document.getElementById('outPhotoImg').src = compressedUrl;
+            document.getElementById('outPhotoBox').classList.remove('hidden');
+
+            notice.className = "text-[11px] text-emerald-700 mt-1 font-medium block";
+            notice.textContent = "✓ แนบไฟล์รูปภาพเรียบร้อย";
+          };
+          tempImg.src = evt.target.result;
         };
         reader.readAsDataURL(file);
       }
-    }
-
-    // ฟังก์ชันส่งคำขอไปประมวลผล (รองรับทั้ง v1 และ v1beta)
-    async function requestGeminiAI(endpointVersion, modelName, apiKey, payload) {
-      const url = `https://generativelanguage.googleapis.com/${endpointVersion}/models/${modelName}:generateContent?key=${apiKey}`;
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      return await res.json();
     }
 
     async function runAiVerification() {
@@ -602,7 +630,7 @@
 
       const catKey = document.getElementById('selCategory').value;
       const crit = PEA_MASTER_SPECS[catKey];
-      const preferredModel = localStorage.getItem('gemini_selected_model') || document.getElementById('modelField').value.trim() || 'gemini-2.5-flash';
+      const selectedModel = localStorage.getItem('gemini_selected_model') || document.getElementById('modelField').value.trim() || 'gemini-2.5-flash';
 
       document.getElementById('outPeaRegion').textContent = "กฟภ. เขต: " + (document.getElementById('fldPeaRegion').value || "-");
       document.getElementById('outPeaBranch').textContent = "การไฟฟ้าสาขา: " + (document.getElementById('fldPeaBranch').value || "-");
@@ -668,36 +696,39 @@ ${crit.desc}
         }
       };
 
-      // รายชื่อลำดับโมเดลที่จะลองเรียกใช้งาน
-      const candidateModels = [
-        preferredModel,
-        'gemini-2.5-flash',
-        'gemini-2.0-flash',
-        'gemini-2.0-flash-exp'
+      // รายการ Endpoint และโมเดลที่จะลองเชื่อมต่อแบบอัตโนมัติ
+      const trialConfigs = [
+        { ep: 'v1beta', m: selectedModel },
+        { ep: 'v1',     m: selectedModel },
+        { ep: 'v1beta', m: 'gemini-2.5-flash' },
+        { ep: 'v1',     m: 'gemini-2.5-flash' },
+        { ep: 'v1beta', m: 'gemini-2.0-flash' },
+        { ep: 'v1',     m: 'gemini-2.0-flash' }
       ];
-      // ตัดชื่อที่ซ้ำออก
-      const uniqueModels = [...new Set(candidateModels.filter(Boolean))];
 
       let successResponse = null;
       let lastErrorMessage = "";
 
-      for (const model of uniqueModels) {
-        // ลอง Endpoint v1beta ก่อน
-        let data = await requestGeminiAI('v1beta', model, apiKey, payload);
-        if (data && data.candidates && data.candidates[0]) {
-          successResponse = data;
-          break;
-        }
-
-        // หากไม่สำเร็จ ให้ลอง Endpoint v1
-        data = await requestGeminiAI('v1', model, apiKey, payload);
-        if (data && data.candidates && data.candidates[0]) {
-          successResponse = data;
-          break;
-        }
-
-        if (data && data.error) {
-          lastErrorMessage = data.error.message;
+      for (const cfg of trialConfigs) {
+        try {
+          const url = `https://generativelanguage.googleapis.com/${cfg.ep}/models/${cfg.m}:generateContent?key=${apiKey}`;
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (data && data.candidates && data.candidates[0]) {
+            successResponse = data;
+            // บันทึกโมเดลที่ทำงานผ่านไว้ใช้งานครั้งถัดไป
+            localStorage.setItem('gemini_selected_model', cfg.m);
+            document.getElementById('modelField').value = cfg.m;
+            break;
+          } else if (data.error) {
+            lastErrorMessage = data.error.message;
+          }
+        } catch (err) {
+          lastErrorMessage = err.message;
         }
       }
 
@@ -712,7 +743,7 @@ ${crit.desc}
           alert('AI ตอบกลับในรูปแบบที่ไม่ถูกต้อง กรุณาลองส่งตรวจอีกครั้ง');
         }
       } else {
-        alert(`เกิดข้อผิดพลาดในการเชื่อมต่อ AI: ${lastErrorMessage}\n\nคำแนะนำ: ให้กดปุ่ม "ตั้งค่า AI & API Key" ด้านบนขวา แล้วกด "🔄 สแกนโมเดลที่มีในบัญชี" เพื่อเลือกโมเดลที่บัญชีของคุณเปิดใช้งานได้`);
+        alert(`เกิดข้อผิดพลาดในการเชื่อมต่อ AI: ${lastErrorMessage}\n\nคำแนะนำ: กดปุ่ม "ตั้งค่า AI & API Key" แล้วกด "🔄 สแกนโมเดลที่มีในบัญชี" เพื่อเลือกรุ่นที่เปิดใช้งานได้จริงในบัญชีของคุณ`);
       }
 
       document.getElementById('loadingIndicator').classList.add('hidden');
