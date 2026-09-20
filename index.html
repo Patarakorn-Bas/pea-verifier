@@ -3,10 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบตรวจสอบการขออนุมัติวัสดุ กฟภ. 2568 (Full Edition)</title>
+  <title>ระบบตรวจสอบการขออนุมัติวัสดุ กฟภ. 2568 (Full PDF & Logo Edition)</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- SheetJS สำหรับ Export Excel (.xlsx) -->
+  <!-- SheetJS สำหรับ Export Excel -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- PDF.js สำหรับแปลงไฟล์ PDF ให้ AI อ่าน -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Sarabun', sans-serif; }
@@ -44,7 +46,7 @@
     <div class="bg-white rounded-xl max-w-md w-full p-5 shadow-2xl border border-slate-200">
       <h3 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
         <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
-        บันทึก Gemini API Key สำหรับเครื่องนี้
+        บันทึก Gemini API Key สำหรับเครื่องของคุณ
       </h3>
       <p class="text-[11px] text-slate-500 mb-3 leading-relaxed">
         Key จะถูกบันทึกไว้ในเบราว์เซอร์ของเครื่องคุณเท่านั้น (Local Storage) ปลอดภัยต่อการแชร์ลิงก์ให้ทีมงานเปิดใช้งาน
@@ -62,161 +64,181 @@
     
     <!-- ฝั่งซ้าย: ฟอร์มนำเข้าข้อมูล -->
     <div class="lg:col-span-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200 no-print space-y-3.5">
-      <h2 class="text-xs font-bold text-slate-900 pb-2 border-b border-slate-100 flex items-center gap-1.5">
-        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-        1. แนบรูปถ่ายแค็ตตาล็อก / ตารางสเปก / เอกสาร TDS
-      </h2>
+      
+      <!-- 1. แนบรูปถ่าย หรือ ไฟล์ PDF -->
+      <div>
+        <h2 class="text-xs font-bold text-slate-900 pb-1.5 border-b border-slate-100 flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          1. แนบเอกสารสเปก (รูปภาพ หรือ ไฟล์ PDF)
+        </h2>
 
-      <div class="border-2 border-dashed border-slate-300 rounded-lg p-3 text-center hover:border-indigo-500 transition-colors bg-slate-50/50">
-        <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="processImage(event)">
-        <label for="imageInput" class="cursor-pointer block">
-          <svg class="w-6 h-6 text-indigo-500 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-          <span class="text-xs font-semibold text-indigo-600">กดเพื่อถ่ายรูป หรืออัปโหลดภาพ</span>
-          <span class="text-[10px] text-slate-400 block">รองรับรูปถ่ายแค็ตตาล็อก ตารางสเปก ผลทดสอบ ฉลาก มอก.</span>
-        </label>
-      </div>
-
-      <div id="imgPreviewCard" class="hidden rounded border p-1.5 bg-slate-50">
-        <img id="imgPreview" src="" class="max-h-36 rounded object-contain mx-auto">
-      </div>
-
-      <h2 class="text-xs font-bold text-slate-900 pt-1 pb-1 border-b border-slate-100">2. ข้อมูลโครงการและสังกัด กฟภ.</h2>
-
-      <div class="space-y-2">
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block text-[10px] font-semibold text-slate-600">กฟภ. เขต (PEA Region)</label>
-            <input type="text" id="fldPeaRegion" placeholder="เช่น กฟก.3 (นครปฐม)" class="w-full rounded border border-slate-300 px-2 py-1 text-xs">
-          </div>
-          <div>
-            <label class="block text-[10px] font-semibold text-slate-600">การไฟฟ้าสาขา / สังกัด</label>
-            <input type="text" id="fldPeaBranch" placeholder="เช่น กฟสา.สามพราน" class="w-full rounded border border-slate-300 px-2 py-1 text-xs">
-          </div>
-        </div>
-        <div>
-          <label class="block text-[10px] font-semibold text-slate-600">ชื่อโครงการ</label>
-          <input type="text" id="fldProject" placeholder="เช่น งานก่อสร้างอาคารสำนักงาน กฟภ." class="w-full rounded border border-slate-300 px-2 py-1 text-xs">
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block text-[10px] font-semibold text-slate-600">ผู้รับจ้าง</label>
-            <input type="text" id="fldContractor" placeholder="บริษัทคู่สัญญา" class="w-full rounded border border-slate-300 px-2 py-1 text-xs">
-          </div>
-          <div>
-            <label class="block text-[10px] font-semibold text-slate-600">เลขที่เอกสารขออนุมัติ</label>
-            <input type="text" id="fldDocNo" placeholder="เช่น MAT-001/2569" class="w-full rounded border border-slate-300 px-2 py-1 text-xs">
-          </div>
+        <div class="mt-2 border-2 border-dashed border-slate-300 rounded-lg p-3 text-center hover:border-indigo-500 transition-colors bg-slate-50/50">
+          <input type="file" id="docFileInput" accept="image/*,application/pdf" class="hidden" onchange="handleDocumentUpload(event)">
+          <label for="docFileInput" class="cursor-pointer block">
+            <svg class="w-6 h-6 text-indigo-500 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+            <span class="text-xs font-semibold text-indigo-600">กดเพื่อแนบไฟล์ PDF หรือ รูปถ่าย</span>
+            <span class="text-[10px] text-slate-400 block">รองรับไฟล์ PDF, JPG, PNG (ตารางสเปก, ใบรับรอง มอก.)</span>
+          </label>
         </div>
 
-        <!-- รายการหมวดหมู่ทั้งหมด 41 หมวด -->
-        <div>
-          <label class="block text-[10px] font-semibold text-slate-600">เลือกหมวดงานที่ขออนุมัติ (กฟภ. 2568)</label>
-          <select id="selCategory" class="w-full rounded border border-slate-300 px-2 py-1.5 text-xs font-medium bg-white focus:outline-none">
-            <optgroup label="หมวด 01 ข้อกำหนดทั่วไป">
-              <option value="s011100">01 11 00 ขอบเขตของงาน (Summary of Work)</option>
-              <option value="s013000">01 30 00 การดำเนินงานและส่งตัวอย่าง (Administrative)</option>
-              <option value="s014000">01 40 00 คุณภาพและสถาบันทดสอบ (Quality)</option>
-              <option value="s015000">01 50 00 สิ่งอำนวยความสะดวกชั่วคราวและการป้องกัน</option>
-              <option value="s016000">01 60 00 วัสดุและการขอเทียบเท่า (Product Requirements)</option>
-              <option value="s017000">01 70 00 การส่งมอบงานและ As-Built Drawing</option>
-            </optgroup>
-            <optgroup label="หมวด 02 เงื่อนไขสภาพพื้นที่เดิมและงานดิน">
-              <option value="s020000">02 00 00 เงื่อนไขสภาพพื้นที่เดิมและการรื้อถอน</option>
-              <option value="s023000">02 30 00 งานดิน (Earthwork Method)</option>
-              <option value="s024501">02 45 00 งานฐานราก - เสาเข็มตอก คอนกรีตอัดแรง</option>
-              <option value="s024502">02 45 00 งานฐานราก - เสาเข็มเจาะ (กำลังอัด 280 ksc)</option>
-            </optgroup>
-            <optgroup label="หมวด 03 งานคอนกรีต">
-              <option value="s031100">03 11 00 งานแบบหล่อคอนกรีตและการถอดแบบ</option>
-              <option value="s032101">03 21 00 เหล็กเส้นกลม (RB) ชั้นคุณภาพ SR24</option>
-              <option value="s032102">03 21 00 เหล็กข้ออ้อย (DB) ชั้นคุณภาพ SD40</option>
-              <option value="s032103">03 21 00 เหล็กข้ออ้อย (DB) ชั้นคุณภาพ SD50</option>
-              <option value="s033100">03 31 00 งานคอนกรีตโครงสร้าง (Structural Concrete)</option>
-              <option value="s033513">03 35 13 งานพื้นผิวแกร่ง (Floor Hardener Non-Metallic)</option>
-              <option value="s033900">03 39 00 การเทและการบ่มคอนกรีต (Concrete Curing)</option>
-              <option value="s034100">03 41 00 งานพื้นสำเร็จรูป (Precast Concrete Slab)</option>
-            </optgroup>
-            <optgroup label="หมวด 04 งานก่อและวัสดุก่อ">
-              <option value="s042113">04 21 13 งานผนังก่ออิฐมอญ</option>
-              <option value="s042219">04 22 19 งานคอนกรีตมวลเบาและปูนก่อบาง</option>
-            </optgroup>
-            <optgroup label="หมวด 05 งานโลหะ">
-              <option value="s051200">05 12 00 งานเหล็กโครงสร้าง (Structural Steel)</option>
-              <option value="s055000">05 50 00 งานโลหะตกแต่ง (สเตนเลส SUS304 ราวบันได)</option>
-            </optgroup>
-            <optgroup label="หมวด 06 งานไม้และพลาสติก">
-              <option value="s061000">06 10 00 งานไม้โครงสร้าง (Rough Carpentry)</option>
-              <option value="s064800">06 48 00 งานวงกบไม้ (Wood Frames)</option>
-            </optgroup>
-            <optgroup label="หมวด 07 งานป้องกันความร้อนและความชื้น">
-              <option value="s071400">07 14 00 งานระบบกันซึม (Waterproofing)</option>
-              <option value="s072116">07 21 16 งานฉนวนกันความร้อน (Blanket Insulation)</option>
-              <option value="s072716">07 27 16 แผ่นสะท้อนความร้อนใต้หลังคา</option>
-              <option value="s074013">07 40 13 แผ่นหลังคา ผนัง และเกล็ดระบายอากาศโลหะ (Metal Sheet)</option>
-              <option value="s074033">07 40 33 แผ่นหลังคาและผนังโปร่งแสง (FRP Panels)</option>
-              <option value="s074133">07 41 33 แผ่นหลังคาโพลี่คาร์บอเนต</option>
-              <option value="s074243">07 42 43 อลูมิเนียมคอมโพสิต (ACP) ผิว PVDF ไส้ FR</option>
-              <option value="s074646">07 46 46 งานผนังไฟเบอร์ซีเมนต์ (Fiber Cement Siding)</option>
-              <option value="s076500">07 65 00 แผ่นปิดรอยต่อ (Flexible Flashing)</option>
-              <option value="s079000">07 90 00 การยาแนวรอยต่อ (Joint Sealant)</option>
-            </optgroup>
-            <optgroup label="หมวด 08 งานประตู-หน้าต่างและกระจก" selected>
-              <option value="s081100">08 11 00 งานประตูและวงกบเหล็ก (Metal Doors)</option>
-              <option value="s081116" selected>08 11 16 ประตูและวงกบอลูมิเนียม (วงกบ ≥ 1.75 มม.)</option>
-              <option value="s085113">08 51 13 หน้าต่างอลูมิเนียม (กรอบบาน ≥ 2.0 มม.)</option>
-              <option value="s081400">08 14 00 ประตูไม้อัดสำเร็จรูปทนน้ำ หนา 35 มม.</option>
-              <option value="s085200">08 52 00 งานหน้าต่างไม้ (Wood Windows)</option>
-              <option value="s084229">08 42 29 ประตูบานเลื่อนอัตโนมัติ (Sliding Auto Doors)</option>
-              <option value="s087100">08 71 00 อุปกรณ์ประตู / Hardware / โช้คอัพ</option>
-              <option value="s087500">08 75 00 อุปกรณ์หน้าต่าง (Window Hardware)</option>
-              <option value="s088000">08 80 00 กระจกโฟลต / กระจกตัดแสง / กระจกนิรภัย</option>
-              <option value="s089100">08 91 00 บานเกล็ดระบายอากาศประสิทธิภาพสูง (Louvers)</option>
-            </optgroup>
-            <optgroup label="หมวด 09 งานตกแต่ง">
-              <option value="s092400">09 24 00 งานฉาบปูนสำเร็จรูป (Plastering)</option>
-              <option value="s093013">09 30 13 งานกระเบื้องเซรามิค (Ceramic Tiling หนา ≥ 6.8 มม.)</option>
-              <option value="s093014">09 30 14 งานกระเบื้องพอร์ซเลน (Porcelain Tiling)</option>
-              <option value="s095000">09 50 00 งานฝ้าเพดานยิปซัมฉาบเรียบและทีบาร์</option>
-              <option value="s095100">09 51 00 ฝ้าเพดานกันเสียง (Acoustical Ceilings ใยแร่ ≥ 15 มม.)</option>
-              <option value="s095809">09 58 09 งานฝ้าระแนงอลูมิเนียม (Linear Grille หนา ≥ 0.60 มม.)</option>
-              <option value="s096340">09 63 40 งานพื้นปูหินธรรมชาติ (แกรนิต หนา ≥ 20 มม.)</option>
-              <option value="s096518">09 65 18 กระเบื้องยางชนิดม้วน (Vinyl Flooring หนา ≥ 2.0 มม.)</option>
-              <option value="s096643">09 66 43 งานหินล้าง กรวดล้าง ทรายล้าง</option>
-              <option value="s099000">09 90 00 งานสีและการทำผิว (รับประกันฟิล์มสี ≥ 15 ปี)</option>
-              <option value="s099643">09 96 43 งานสีป้องกันไฟ (Intumescent Fire Coatings)</option>
-            </optgroup>
-            <optgroup label="หมวด 10 งานก่อสร้างพิเศษ">
-              <option value="s102113">10 21 13 ผนังห้องน้ำสำเร็จรูป (Compact Laminate ≥ 12 มม.)</option>
-              <option value="s102800">10 28 00 สุขภัณฑ์และอุปกรณ์ห้องน้ำ</option>
-              <option value="s224200">22 42 00 อุปกรณ์ประกอบงานประปา (Plumbing Fixtures)</option>
-              <option value="s104400">10 44 00 ระบบป้องกันไฟลาม (Fire Protection Specialties)</option>
-              <option value="s108200">10 82 00 งานระแนงและที่บังแดด (Grilles & Screens)</option>
-            </optgroup>
-            <optgroup label="หมวด 12 งานเฟอร์นิเจอร์">
-              <option value="s122113">12 21 13 มู่ลี่ปรับแสงแนวนอน (Horizontal Louver)</option>
-              <option value="s122116">12 21 16 มู่ลี่ปรับแสงแนวตั้ง (Vertical Louver)</option>
-            </optgroup>
-            <optgroup label="หมวด 22 งานระบบสุขาภิบาล">
-              <option value="s220000">22 00 00 งานระบบท่อสุขาภิบาลและระบายน้ำ (PVC 13.5 / PPR)</option>
-            </optgroup>
-            <optgroup label="หมวด 31 งานดินและการกำจัดปลวก">
-              <option value="s313116">31 31 16 การป้องกันปลวก (Termite Control รับประกัน 3-5 ปี)</option>
-            </optgroup>
-            <optgroup label="หมวด 32 งานภายนอกอาคาร">
-              <option value="s321313">32 13 13 บล็อกปูพื้น บล็อกสนามหญ้า และขอบคันหิน (มอก. 827)</option>
-            </optgroup>
-          </select>
+        <div id="fileStatusNotice" class="text-[11px] text-indigo-700 mt-1 font-medium hidden"></div>
+
+        <div id="imgPreviewCard" class="hidden rounded border p-1.5 bg-slate-50 mt-2">
+          <img id="imgPreview" src="" class="max-h-36 rounded object-contain mx-auto">
         </div>
       </div>
 
-      <button type="button" id="btnRun" onclick="runAiVerification()" class="w-full bg-indigo-700 hover:bg-indigo-800 text-white font-semibold py-2 rounded-lg text-xs transition-colors flex justify-center items-center gap-1.5 shadow">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-        ให้ AI ตรวจสอบเทียบสเปก กฟภ. 2568
-      </button>
+      <!-- 2. โลโก้หน่วยงาน -->
+      <div>
+        <h2 class="text-xs font-bold text-slate-900 pb-1.5 border-b border-slate-100 flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          2. ใส่โลโก้หน่วยงาน / ตราโครงการ (สำหรับหัวรายงาน)
+        </h2>
+        <div class="mt-2 flex items-center gap-2">
+          <input type="file" id="logoFileInput" accept="image/*" class="text-[11px] text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" onchange="handleLogoUpload(event)">
+        </div>
+      </div>
 
-      <div id="loadingIndicator" class="hidden text-center py-2 text-xs text-indigo-700 font-medium">
-        <svg class="animate-spin h-4 w-4 text-indigo-600 mx-auto mb-1" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-        AI กำลังอ่านข้อความในรูปและเทียบสเปก กฟภ. 2568...
+      <!-- 3. ข้อมูลโครงการและหมวดงาน -->
+      <div>
+        <h2 class="text-xs font-bold text-slate-900 pb-1.5 border-b border-slate-100">3. ข้อมูลโครงการและหมวดงาน กฟภ. 2568</h2>
+
+        <div class="space-y-2 mt-2">
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[10px] font-semibold text-slate-600">กฟภ. เขต (PEA Region)</label>
+              <input type="text" id="fldPeaRegion" placeholder="เช่น กฟก.3 (นครปฐม)" class="w-full rounded border border-slate-300 px-2 py-1 text-xs">
+            </div>
+            <div>
+              <label class="block text-[10px] font-semibold text-slate-600">การไฟฟ้าสาขา / สังกัด</label>
+              <input type="text" id="fldPeaBranch" placeholder="เช่น กฟสา.สามพราน" class="w-full rounded border border-slate-300 px-2 py-1 text-xs">
+            </div>
+          </div>
+          <div>
+            <label class="block text-[10px] font-semibold text-slate-600">ชื่อโครงการ</label>
+            <input type="text" id="fldProject" placeholder="เช่น งานก่อสร้างอาคารสำนักงาน กฟภ." class="w-full rounded border border-slate-300 px-2 py-1 text-xs">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[10px] font-semibold text-slate-600">ผู้รับจ้าง</label>
+              <input type="text" id="fldContractor" placeholder="บริษัทคู่สัญญา" class="w-full rounded border border-slate-300 px-2 py-1 text-xs">
+            </div>
+            <div>
+              <label class="block text-[10px] font-semibold text-slate-600">เลขที่เอกสารขออนุมัติ</label>
+              <input type="text" id="fldDocNo" placeholder="เช่น MAT-001/2569" class="w-full rounded border border-slate-300 px-2 py-1 text-xs">
+            </div>
+          </div>
+
+          <!-- รายการหมวดหมู่ทั้งหมด 41 หมวด -->
+          <div>
+            <label class="block text-[10px] font-semibold text-slate-600">เลือกหมวดงานที่ขออนุมัติ (กฟภ. 2568)</label>
+            <select id="selCategory" class="w-full rounded border border-slate-300 px-2 py-1.5 text-xs font-medium bg-white focus:outline-none">
+              <optgroup label="หมวด 01 ข้อกำหนดทั่วไป">
+                <option value="s011100">01 11 00 ขอบเขตของงาน (Summary of Work)</option>
+                <option value="s013000">01 30 00 การดำเนินงานและส่งตัวอย่าง (Administrative)</option>
+                <option value="s014000">01 40 00 คุณภาพและสถาบันทดสอบ (Quality)</option>
+                <option value="s015000">01 50 00 สิ่งอำนวยความสะดวกชั่วคราวและการป้องกัน</option>
+                <option value="s016000">01 60 00 วัสดุและการขอเทียบเท่า (Product Requirements)</option>
+                <option value="s017000">01 70 00 การส่งมอบงานและ As-Built Drawing</option>
+              </optgroup>
+              <optgroup label="หมวด 02 เงื่อนไขสภาพพื้นที่เดิมและงานดิน">
+                <option value="s020000">02 00 00 เงื่อนไขสภาพพื้นที่เดิมและการรื้อถอน</option>
+                <option value="s023000">02 30 00 งานดิน (Earthwork Method)</option>
+                <option value="s024501">02 45 00 งานฐานราก - เสาเข็มตอก คอนกรีตอัดแรง</option>
+                <option value="s024502">02 45 00 งานฐานราก - เสาเข็มเจาะ (กำลังอัด 280 ksc)</option>
+              </optgroup>
+              <optgroup label="หมวด 03 งานคอนกรีต">
+                <option value="s031100">03 11 00 งานแบบหล่อคอนกรีตและการถอดแบบ</option>
+                <option value="s032101">03 21 00 เหล็กเส้นกลม (RB) ชั้นคุณภาพ SR24</option>
+                <option value="s032102">03 21 00 เหล็กข้ออ้อย (DB) ชั้นคุณภาพ SD40</option>
+                <option value="s032103">03 21 00 เหล็กข้ออ้อย (DB) ชั้นคุณภาพ SD50</option>
+                <option value="s033100">03 31 00 งานคอนกรีตโครงสร้าง (Structural Concrete)</option>
+                <option value="s033513">03 35 13 งานพื้นผิวแกร่ง (Floor Hardener Non-Metallic)</option>
+                <option value="s033900">03 39 00 การเทและการบ่มคอนกรีต (Concrete Curing)</option>
+                <option value="s034100">03 41 00 งานพื้นสำเร็จรูป (Precast Concrete Slab)</option>
+              </optgroup>
+              <optgroup label="หมวด 04 งานก่อและวัสดุก่อ">
+                <option value="s042113">04 21 13 งานผนังก่ออิฐมอญ</option>
+                <option value="s042219">04 22 19 งานคอนกรีตมวลเบาและปูนก่อบาง</option>
+              </optgroup>
+              <optgroup label="หมวด 05 งานโลหะ">
+                <option value="s051200">05 12 00 งานเหล็กโครงสร้าง (Structural Steel)</option>
+                <option value="s055000">05 50 00 งานโลหะตกแต่ง (สเตนเลส SUS304 ราวบันได)</option>
+              </optgroup>
+              <optgroup label="หมวด 06 งานไม้และพลาสติก">
+                <option value="s061000">06 10 00 งานไม้โครงสร้าง (Rough Carpentry)</option>
+                <option value="s064800">06 48 00 งานวงกบไม้ (Wood Frames)</option>
+              </optgroup>
+              <optgroup label="หมวด 07 งานป้องกันความร้อนและความชื้น">
+                <option value="s071400">07 14 00 งานระบบกันซึม (Waterproofing)</option>
+                <option value="s072116">07 21 16 งานฉนวนกันความร้อน (Blanket Insulation)</option>
+                <option value="s072716">07 27 16 แผ่นสะท้อนความร้อนใต้หลังคา</option>
+                <option value="s074013">07 40 13 แผ่นหลังคา ผนัง และเกล็ดระบายอากาศโลหะ (Metal Sheet)</option>
+                <option value="s074033">07 40 33 แผ่นหลังคาและผนังโปร่งแสง (FRP Panels)</option>
+                <option value="s074133">07 41 33 แผ่นหลังคาโพลี่คาร์บอเนต</option>
+                <option value="s074243">07 42 43 อลูมิเนียมคอมโพสิต (ACP) ผิว PVDF ไส้ FR</option>
+                <option value="s074646">07 46 46 งานผนังไฟเบอร์ซีเมนต์ (Fiber Cement Siding)</option>
+                <option value="s076500">07 65 00 แผ่นปิดรอยต่อ (Flexible Flashing)</option>
+                <option value="s079000">07 90 00 การยาแนวรอยต่อ (Joint Sealant)</option>
+              </optgroup>
+              <optgroup label="หมวด 08 งานประตู-หน้าต่างและกระจก" selected>
+                <option value="s081100">08 11 00 งานประตูและวงกบเหล็ก (Metal Doors)</option>
+                <option value="s081116" selected>08 11 16 ประตูและวงกบอลูมิเนียม (วงกบ ≥ 1.75 มม.)</option>
+                <option value="s085113">08 51 13 หน้าต่างอลูมิเนียม (กรอบบาน ≥ 2.0 มม.)</option>
+                <option value="s081400">08 14 00 ประตูไม้อัดสำเร็จรูปทนน้ำ หนา 35 มม.</option>
+                <option value="s085200">08 52 00 งานหน้าต่างไม้ (Wood Windows)</option>
+                <option value="s084229">08 42 29 ประตูบานเลื่อนอัตโนมัติ (Sliding Auto Doors)</option>
+                <option value="s087100">08 71 00 อุปกรณ์ประตู / Hardware / โช้คอัพ</option>
+                <option value="s087500">08 75 00 อุปกรณ์หน้าต่าง (Window Hardware)</option>
+                <option value="s088000">08 80 00 กระจกโฟลต / กระจกตัดแสง / กระจกนิรภัย</option>
+                <option value="s089100">08 91 00 บานเกล็ดระบายอากาศประสิทธิภาพสูง (Louvers)</option>
+              </optgroup>
+              <optgroup label="หมวด 09 งานตกแต่ง">
+                <option value="s092400">09 24 00 งานฉาบปูนสำเร็จรูป (Plastering)</option>
+                <option value="s093013">09 30 13 งานกระเบื้องเซรามิค (Ceramic Tiling หนา ≥ 6.8 มม.)</option>
+                <option value="s093014">09 30 14 งานกระเบื้องพอร์ซเลน (Porcelain Tiling)</option>
+                <option value="s095000">09 50 00 งานฝ้าเพดานยิปซัมฉาบเรียบและทีบาร์</option>
+                <option value="s095100">09 51 00 ฝ้าเพดานกันเสียง (Acoustical Ceilings ใยแร่ ≥ 15 มม.)</option>
+                <option value="s095809">09 58 09 งานฝ้าระแนงอลูมิเนียม (Linear Grille หนา ≥ 0.60 มม.)</option>
+                <option value="s096340">09 63 40 งานพื้นปูหินธรรมชาติ (แกรนิต หนา ≥ 20 มม.)</option>
+                <option value="s096518">09 65 18 กระเบื้องยางชนิดม้วน (Vinyl Flooring หนา ≥ 2.0 มม.)</option>
+                <option value="s096643">09 66 43 งานหินล้าง กรวดล้าง ทรายล้าง</option>
+                <option value="s099000">09 90 00 งานสีและการทำผิว (รับประกันฟิล์มสี ≥ 15 ปี)</option>
+                <option value="s099643">09 96 43 งานสีป้องกันไฟ (Intumescent Fire Coatings)</option>
+              </optgroup>
+              <optgroup label="หมวด 10 งานก่อสร้างพิเศษ">
+                <option value="s102113">10 21 13 ผนังห้องน้ำสำเร็จรูป (Compact Laminate ≥ 12 มม.)</option>
+                <option value="s102800">10 28 00 สุขภัณฑ์และอุปกรณ์ห้องน้ำ</option>
+                <option value="s224200">22 42 00 อุปกรณ์ประกอบงานประปา (Plumbing Fixtures)</option>
+                <option value="s104400">10 44 00 ระบบป้องกันไฟลาม (Fire Protection Specialties)</option>
+                <option value="s108200">10 82 00 งานระแนงและที่บังแดด (Grilles & Screens)</option>
+              </optgroup>
+              <optgroup label="หมวด 12 งานเฟอร์นิเจอร์">
+                <option value="s122113">12 21 13 มู่ลี่ปรับแสงแนวนอน (Horizontal Louver)</option>
+                <option value="s122116">12 21 16 มู่ลี่ปรับแสงแนวตั้ง (Vertical Louver)</option>
+              </optgroup>
+              <optgroup label="หมวด 22 งานระบบสุขาภิบาล">
+                <option value="s220000">22 00 00 งานระบบท่อสุขาภิบาลและระบายน้ำ (PVC 13.5 / PPR)</option>
+              </optgroup>
+              <optgroup label="หมวด 31 งานดินและการกำจัดปลวก">
+                <option value="s313116">31 31 16 การป้องกันปลวก (Termite Control รับประกัน 3-5 ปี)</option>
+              </optgroup>
+              <optgroup label="หมวด 32 งานภายนอกอาคาร">
+                <option value="s321313">32 13 13 บล็อกปูพื้น บล็อกสนามหญ้า และขอบคันหิน (มอก. 827)</option>
+              </optgroup>
+            </select>
+          </div>
+        </div>
+
+        <button type="button" id="btnRun" onclick="runAiVerification()" class="w-full mt-3 bg-indigo-700 hover:bg-indigo-800 text-white font-semibold py-2 rounded-lg text-xs transition-colors flex justify-center items-center gap-1.5 shadow">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          ให้ AI ตรวจสอบเทียบสเปก กฟภ. 2568
+        </button>
+
+        <div id="loadingIndicator" class="hidden text-center py-2 text-xs text-indigo-700 font-medium">
+          <svg class="animate-spin h-4 w-4 text-indigo-600 mx-auto mb-1" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+          AI กำลังอ่านข้อมูลในเอกสารและเทียบสเปก กฟภ. 2568...
+        </div>
       </div>
     </div>
 
@@ -226,20 +248,24 @@
         <div>
           <!-- ตราสัญลักษณ์และหัวกระดาษทางการ -->
           <div class="border-b-2 border-slate-900 pb-3 mb-3">
-            <div class="flex justify-between items-start">
-              <div>
+            <div class="flex items-center gap-3">
+              <!-- กล่องแสดงโลโก้หน่วยงาน -->
+              <div id="logoDisplayContainer" class="hidden flex-shrink-0">
+                <img id="agencyLogoImg" src="" alt="Agency Logo" class="h-14 w-auto max-w-[120px] object-contain">
+              </div>
+              <div class="flex-grow">
                 <h2 class="text-base font-bold text-slate-900 tracking-tight">รายงานผลการตรวจสอบและทดสอบสเปกวัสดุ</h2>
                 <h3 class="text-xs font-semibold text-slate-700">กองออกแบบงานโยธา การไฟฟ้าส่วนภูมิภาค (PEA Standards Specification 2568)</h3>
                 <div class="text-[11px] text-indigo-900 mt-1 font-semibold">
                   <span id="outPeaRegion">กฟภ. เขต: -</span> | <span id="outPeaBranch">การไฟฟ้าสาขา: -</span>
                 </div>
               </div>
-              <div class="text-right">
+              <div class="text-right flex-shrink-0">
                 <span id="badgeVerdict" class="text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-600">รอผลการตรวจสอบ</span>
               </div>
             </div>
             
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px] text-slate-600 mt-2 bg-slate-50 p-2 rounded border border-slate-200">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px] text-slate-600 mt-3 bg-slate-50 p-2 rounded border border-slate-200">
               <div><strong>โครงการ:</strong> <span id="outProject">-</span></div>
               <div><strong>ผู้รับจ้าง:</strong> <span id="outContractor">-</span></div>
               <div><strong>เลขที่เอกสาร:</strong> <span id="outDocNo">-</span></div>
@@ -250,7 +276,7 @@
           <!-- เกณฑ์ข้อกำหนดตามเล่ม กฟภ. 2568 -->
           <div class="mb-3 text-xs bg-indigo-50/60 border border-indigo-100 p-2 rounded">
             <span class="font-bold text-indigo-950">ข้อกำหนดอ้างอิงตามรายการประกอบแบบ กฟภ. ฉบับปี 2568:</span>
-            <p id="outStandardCriteria" class="text-indigo-900 mt-0.5 text-[11px] leading-relaxed">กรุณาแนบรูปถ่ายและกดเริ่มการตรวจสอบ</p>
+            <p id="outStandardCriteria" class="text-indigo-900 mt-0.5 text-[11px] leading-relaxed">กรุณาแนบไฟล์สเปกและกดเริ่มการตรวจสอบ</p>
           </div>
 
           <!-- ตารางเปรียบเทียบผลการตรวจสอบ -->
@@ -321,6 +347,9 @@
   </main>
 
   <script>
+    // ตั้งค่า PDF.js Worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
     // ฐานข้อมูลเกณฑ์ข้อกำหนดมาตรฐาน กฟภ. ฉบับปี 2568 ครบทั้ง 41 หมวดย่อย
     const PEA_MASTER_SPECS = {
       // หมวด 01
@@ -418,7 +447,7 @@
     };
 
     let base64Data = null;
-    let currentEvaluationResult = null; // เก็บผลการตรวจสำหรับ Export Excel
+    let currentEvaluationResult = null;
 
     function initKey() {
       const k = localStorage.getItem('gemini_api_key');
@@ -449,18 +478,70 @@
       initKey();
     }
 
-    function processImage(e) {
-      const f = e.target.files[0];
-      if (f && f.type.startsWith('image/')) {
-        const r = new FileReader();
-        r.onload = function(evt) {
+    // ฟังก์ชันจัดการโลโก้หน่วยงาน
+    function handleLogoUpload(e) {
+      const file = e.target.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          document.getElementById('agencyLogoImg').src = evt.target.result;
+          document.getElementById('logoDisplayContainer').classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    // ฟังก์ชันจัดการไฟล์เอกสาร (รองรับทั้ง Image และ PDF)
+    async function handleDocumentUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const notice = document.getElementById('fileStatusNotice');
+      notice.classList.remove('hidden');
+
+      if (file.type === 'application/pdf') {
+        notice.textContent = "📄 กำลังแปลงไฟล์ PDF หน้าแรกเป็นรูปภาพเพื่อส่งให้ AI...";
+        try {
+          const fileReader = new FileReader();
+          fileReader.onload = async function() {
+            const typedarray = new Uint8Array(this.result);
+            const pdf = await pdfjsLib.getDocument(typedarray).promise;
+            const page = await pdf.getPage(1); // อ่านหน้าแรกของเอกสาร PDF
+
+            const viewport = page.getViewport({ scale: 1.5 });
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            await page.render({ canvasContext: context, viewport: viewport }).promise;
+
+            const imgUrl = canvas.toDataURL('image/jpeg');
+            base64Data = imgUrl.split(',')[1];
+
+            document.getElementById('imgPreview').src = imgUrl;
+            document.getElementById('imgPreviewCard').classList.remove('hidden');
+            document.getElementById('outPhotoImg').src = imgUrl;
+            document.getElementById('outPhotoBox').classList.remove('hidden');
+
+            notice.textContent = "✓ แปลงหน้าแรกของ PDF เรียบร้อย พร้อมตรวจสอบ";
+          };
+          fileReader.readAsArrayBuffer(file);
+        } catch (err) {
+          console.error(err);
+          notice.textContent = "❌ ไม่สามารถอ่านไฟล์ PDF ได้ กรุณาลองแนบเป็นรูปภาพ";
+        }
+      } else if (file.type.startsWith('image/')) {
+        notice.textContent = "🖼️ แนบไฟล์รูปภาพเรียบร้อย";
+        const reader = new FileReader();
+        reader.onload = function(evt) {
           base64Data = evt.target.result.split(',')[1];
           document.getElementById('imgPreview').src = evt.target.result;
           document.getElementById('imgPreviewCard').classList.remove('hidden');
           document.getElementById('outPhotoImg').src = evt.target.result;
           document.getElementById('outPhotoBox').classList.remove('hidden');
         };
-        r.readAsDataURL(f);
+        reader.readAsDataURL(file);
       }
     }
 
@@ -472,7 +553,7 @@
         return;
       }
       if (!base64Data) {
-        alert('กรุณาอัปโหลดรูปถ่ายสเปก หรือเอกสารแค็ตตาล็อกก่อน');
+        alert('กรุณาแนบรูปภาพหรือไฟล์ PDF ของสเปกสินค้าก่อน');
         return;
       }
 
@@ -492,7 +573,7 @@
 
       const prompt = `
 คุณเป็นวิศวกรและสถาปนิกผู้เชี่ยวชาญการตรวจรับรองวัสดุของการไฟฟ้าส่วนภูมิภาค (กฟภ.)
-หน้าที่ของคุณคือ อ่านข้อมูลทางวิศวกรรมจากรูปภาพที่แนบมา (เช่น ตารางสเปก, สติกเกอร์ มอก., ตารางแค็ตตาล็อก หรือ Data Sheet) แล้วนำมาตรวจสอบเปรียบเทียบกับข้อกำหนดมาตรฐาน กฟภ. ฉบับปี 2568 ดังนี้:
+หน้าที่ของคุณคือ อ่านข้อมูลทางวิศวกรรมจากรูปภาพ/เอกสาร PDF ที่แนบมา (เช่น ตารางสเปก, สติกเกอร์ มอก., ตารางแค็ตตาล็อก หรือ Data Sheet) แล้วนำมาตรวจสอบเปรียบเทียบกับข้อกำหนดมาตรฐาน กฟภ. ฉบับปี 2568 ดังนี้:
 
 [หมวดงานที่ตรวจสอบ: ${crit.name}]
 [เกณฑ์มาตรฐาน กฟภ. 2568 ที่ต้องยึดถือ]:
@@ -506,25 +587,25 @@ ${crit.desc}
     {
       "topic": "ยี่ห้อ / โรงงานผู้ผลิต",
       "standard": "เกณฑ์ กฟภ. 2568",
-      "actual": "ค่าที่อ่านได้จากรูป",
+      "actual": "ค่าที่อ่านได้จากรูป/เอกสาร",
       "pass": true | false
     },
     {
       "topic": "ความหนา / ขนาด / กำลังรับแรง / คุณสมบัติทางกล",
       "standard": "เกณฑ์ กฟภ. 2568",
-      "actual": "ค่าที่อ่านได้จากรูป",
+      "actual": "ค่าที่อ่านได้จากรูป/เอกสาร",
       "pass": true | false
     },
     {
       "topic": "มาตรฐาน มอก. / มาตรฐานรับรองสากล",
       "standard": "เกณฑ์ กฟภ. 2568",
-      "actual": "ค่าที่อ่านได้จากรูป",
+      "actual": "ค่าที่อ่านได้จากรูป/เอกสาร",
       "pass": true | false
     },
     {
       "topic": "ระยะเวลารับประกัน / ข้อกำหนดทางเทคนิคพิเศษ",
       "standard": "เกณฑ์ กฟภ. 2568",
-      "actual": "ค่าที่อ่านได้จากรูป",
+      "actual": "ค่าที่อ่านได้จากรูป/เอกสาร",
       "pass": true | false
     }
   ]
@@ -553,7 +634,7 @@ ${crit.desc}
         if (data.error) throw new Error(data.error.message);
 
         const parsed = JSON.parse(data.candidates[0].content.parts[0].text);
-        currentEvaluationResult = parsed; // บันทึกไว้สำหรับ Export Excel
+        currentEvaluationResult = parsed;
         renderReport(parsed);
 
       } catch (err) {
