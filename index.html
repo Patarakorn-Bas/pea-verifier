@@ -59,9 +59,10 @@
       <div>
         <label class="block text-xs font-semibold text-slate-700 mb-1">เลือกโมเดล AI ที่ใช้ตรวจสอบเอกสาร</label>
         <select id="modelField" class="w-full rounded border border-slate-300 px-3 py-2 text-xs bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none">
-          <option value="gemini-2.5-flash">Gemini 2.5 Flash (แนะนำ — เร็วและแม่นยำ)</option>
-          <option value="gemini-2.5-pro">Gemini 2.5 Pro (แม่นยำสูงสุด แต่ช้ากว่า)</option>
-          <option value="gemini-2.0-flash">Gemini 2.0 Flash (รุ่นสำรอง)</option>
+          <option value="gemini-3.6-flash">Gemini 3.6 Flash (แนะนำ — เสถียร เร็ว คุ้มราคา)</option>
+          <option value="gemini-3.8-flash">Gemini 3.8 Flash (รุ่นล่าสุด ฉลาดที่สุด แต่ราคาสูงกว่า)</option>
+          <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro Preview (แม่นยำสูงสุด ช้ากว่า)</option>
+          <option value="gemini-2.5-flash">Gemini 2.5 Flash (รุ่นเก่า สำรอง)</option>
         </select>
         <p class="text-[10px] text-slate-400 mt-1">ถ้าโมเดลที่เลือกเรียกไม่สำเร็จ ระบบจะลองโมเดลสำรองในรายการให้อัตโนมัติ</p>
       </div>
@@ -99,6 +100,11 @@
 
         <div id="imgPreviewCard" class="hidden rounded border p-1 bg-slate-50 mt-2">
           <img id="imgPreview" src="" class="max-h-36 rounded object-contain mx-auto" alt="ตัวอย่างเอกสารที่แนบ">
+        </div>
+
+        <div id="pdfPreviewCard" class="hidden rounded border p-1 bg-slate-50 mt-2">
+          <embed id="pdfPreviewEmbed" src="" type="application/pdf" class="w-full h-48 rounded bg-white">
+          <a id="pdfOpenNewTab" href="#" target="_blank" rel="noopener" class="text-[10px] text-indigo-600 hover:underline block text-center mt-1">เปิดไฟล์ PDF เต็มจอในแท็บใหม่ ↗</a>
         </div>
       </div>
 
@@ -315,7 +321,11 @@
           <!-- รูปถ่ายเอกสารแนบในรายงาน -->
           <div id="outPhotoBox" class="hidden mb-3">
             <span class="text-[10px] font-bold text-slate-600 block mb-1">ภาพเอกสาร/แค็ตตาล็อกที่นำมาเปรียบเทียบสเปก:</span>
-            <img id="outPhotoImg" src="" class="max-h-32 border rounded p-1 object-contain" alt="เอกสารที่ใช้ตรวจสอบ">
+            <img id="outPhotoImg" src="" class="max-h-32 border rounded p-1 object-contain hidden" alt="เอกสารที่ใช้ตรวจสอบ">
+            <div id="outPhotoPdfChip" class="hidden inline-flex items-center gap-1.5 border rounded px-2.5 py-1.5 bg-slate-50 text-[11px] text-slate-700">
+              <svg class="w-4 h-4 text-rose-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+              <span id="outPhotoPdfName">-</span>
+            </div>
           </div>
         </div>
 
@@ -438,6 +448,7 @@
     let base64Data = null;
     let fileMimeType = "image/jpeg";
     let currentEvaluationResult = null;
+    let currentPdfObjectUrl = null; // ใช้แสดงตัวอย่าง PDF เท่านั้น (แยกจาก base64Data ที่ส่งให้ AI)
 
     // ----- จัดการ API Key / โมเดล -----
     function initKey() {
@@ -445,7 +456,7 @@
       const b = document.getElementById('apiKeyBadge');
       if (k && k.length > 10) {
         b.className = 'text-[11px] px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-200';
-        b.textContent = '✓ พร้อมใช้งาน (' + (localStorage.getItem('gemini_selected_model') || 'gemini-2.5-flash') + ')';
+        b.textContent = '✓ พร้อมใช้งาน (' + (localStorage.getItem('gemini_selected_model') || 'gemini-3.6-flash') + ')';
       } else {
         b.className = 'text-[11px] px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-200';
         b.textContent = '⚠️ ยังไม่ได้ตั้งค่า API Key';
@@ -454,7 +465,7 @@
 
     function openModal() {
       document.getElementById('keyField').value = localStorage.getItem('gemini_api_key') || '';
-      document.getElementById('modelField').value = localStorage.getItem('gemini_selected_model') || 'gemini-2.5-flash';
+      document.getElementById('modelField').value = localStorage.getItem('gemini_selected_model') || 'gemini-3.6-flash';
       document.getElementById('keyModal').classList.remove('hidden');
     }
 
@@ -464,7 +475,7 @@
 
     function saveKey() {
       const v = document.getElementById('keyField').value.trim();
-      const m = document.getElementById('modelField').value || 'gemini-2.5-flash';
+      const m = document.getElementById('modelField').value || 'gemini-3.6-flash';
       if (v) {
         localStorage.setItem('gemini_api_key', v);
         localStorage.setItem('gemini_selected_model', m);
@@ -495,20 +506,42 @@
       const file = e.target.files[0];
       if (!file) return;
 
+      // ล้างตัวอย่าง PDF เก่า (ถ้ามี) ก่อนโหลดไฟล์ใหม่ ป้องกันหน่วยความจำรั่ว
+      if (currentPdfObjectUrl) {
+        URL.revokeObjectURL(currentPdfObjectUrl);
+        currentPdfObjectUrl = null;
+      }
+      document.getElementById('imgPreviewCard').classList.add('hidden');
+      document.getElementById('pdfPreviewCard').classList.add('hidden');
+      document.getElementById('outPhotoBox').classList.add('hidden');
+      document.getElementById('outPhotoImg').classList.add('hidden');
+      document.getElementById('outPhotoPdfChip').classList.add('hidden');
+
       const notice = document.getElementById('fileStatusNotice');
       notice.className = "text-[11px] text-indigo-700 mt-1.5 font-medium flex items-center gap-1";
       notice.textContent = "⏳ กำลังโหลดเอกสาร...";
       notice.classList.remove('hidden');
+
+      const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
 
       const reader = new FileReader();
       reader.onload = function (evt) {
         const resultStr = evt.target.result;
         base64Data = resultStr.split(',')[1];
 
-        if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+        if (isPdf) {
           fileMimeType = "application/pdf";
-          document.getElementById('imgPreviewCard').classList.add('hidden');
-          document.getElementById('outPhotoBox').classList.add('hidden');
+
+          // แสดงตัวอย่าง PDF ด้วย Blob URL (เบากว่าและแสดงผลได้เสถียรกว่า data URI ขนาดใหญ่)
+          currentPdfObjectUrl = URL.createObjectURL(file);
+          document.getElementById('pdfPreviewEmbed').src = currentPdfObjectUrl;
+          document.getElementById('pdfOpenNewTab').href = currentPdfObjectUrl;
+          document.getElementById('pdfPreviewCard').classList.remove('hidden');
+
+          // ในรายงาน ให้แสดงเป็นชิปชื่อไฟล์แทน (เสถียรกว่าเวลาสั่งพิมพ์ PDF)
+          document.getElementById('outPhotoPdfName').textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+          document.getElementById('outPhotoPdfChip').classList.remove('hidden');
+          document.getElementById('outPhotoBox').classList.remove('hidden');
 
           notice.className = "text-[11px] text-emerald-700 mt-1.5 font-medium flex items-center gap-1";
           notice.innerHTML = `<span>✓ แนบไฟล์ PDF: <strong>${escapeHtml(file.name)}</strong> (${(file.size / 1024).toFixed(1)} KB) พร้อมส่งตรวจ</span>`;
@@ -516,7 +549,9 @@
           fileMimeType = file.type || "image/jpeg";
           document.getElementById('imgPreview').src = resultStr;
           document.getElementById('imgPreviewCard').classList.remove('hidden');
+
           document.getElementById('outPhotoImg').src = resultStr;
+          document.getElementById('outPhotoImg').classList.remove('hidden');
           document.getElementById('outPhotoBox').classList.remove('hidden');
 
           notice.className = "text-[11px] text-emerald-700 mt-1.5 font-medium flex items-center gap-1";
@@ -525,7 +560,7 @@
       };
       reader.onerror = function () {
         notice.className = "text-[11px] text-rose-700 mt-1.5 font-medium flex items-center gap-1";
-        notice.textContent = "✗ อ่านไฟล์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง";
+        notice.textContent = "✗ อ่านไฟล์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง (ไฟล์อาจใหญ่เกินไปหรือเสียหาย)";
         base64Data = null;
       };
       reader.readAsDataURL(file);
@@ -573,7 +608,7 @@
 
       const catKey = document.getElementById('selCategory').value;
       const crit = PEA_MASTER_SPECS[catKey];
-      const preferredModel = localStorage.getItem('gemini_selected_model') || 'gemini-2.5-flash';
+      const preferredModel = localStorage.getItem('gemini_selected_model') || 'gemini-3.6-flash';
 
       const today = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -648,7 +683,9 @@ ${crit.desc}
       };
 
       // ลำดับโมเดลที่จะทดลองเรียก (เริ่มจากรุ่นที่เลือกไว้ ตามด้วยรุ่นสำรอง)
-      const fallbackModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-pro'];
+      // หมายเหตุ: Google ปลดระวางรุ่นโมเดลเป็นระยะ หากพบว่ารุ่นในลิสต์นี้ใช้ไม่ได้แล้ว
+      // ให้ตรวจสอบรายชื่อรุ่นล่าสุดที่ https://ai.google.dev/gemini-api/docs/models แล้วแก้ไขค่าด้านล่างนี้
+      const fallbackModels = ['gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-3.1-pro-preview', 'gemini-2.5-flash'];
       const modelsToTry = [preferredModel, ...fallbackModels].filter((v, i, arr) => v && arr.indexOf(v) === i);
 
       let successResponse = null;
