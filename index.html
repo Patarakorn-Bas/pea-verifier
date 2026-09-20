@@ -10,7 +10,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Sarabun', sans-serif; }
-    /* สำรองไว้เผื่อผู้ใช้กด Ctrl+P ตรงๆ บนหน้าเว็บหลัก (ปกติปุ่มพิมพ์จะเปิดหน้าต่างรายงานแยกต่างหากซึ่งเสถียรกว่า) */
     @media print {
       body { background: white !important; font-size: 11px; margin: 0; padding: 0; }
       .no-print { display: none !important; }
@@ -19,6 +18,19 @@
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen">
+
+  <!-- =========================================================================
+       ตั้งค่าโหมด "ใช้งานร่วมกัน" (Shared Proxy Mode) - ไม่บังคับ
+       ถ้าคุณ deploy Cloudflare Worker ตามไฟล์ pea-verifier-proxy-worker.js แล้ว
+       ให้นำ URL ของ Worker มาใส่ที่ตัวแปรนี้ (เช่น
+       "https://pea-verifier-proxy.yourname.workers.dev")
+       เมื่อใส่แล้ว "ทุกคน" ที่เปิดเว็บนี้จะใช้งานได้ทันทีโดยไม่ต้องกรอก API Key
+       ของตัวเองอีกเลย เพราะ Key จริงถูกเก็บไว้ที่ Worker (ฝั่งเซิร์ฟเวอร์) เท่านั้น
+       ถ้าปล่อยว่างไว้ ระบบจะทำงานแบบเดิม คือแต่ละคนต้องกรอก API Key ของตัวเอง
+       ========================================================================= -->
+  <script>
+    const SHARED_PROXY_BASE_URL = "https://pea-verifier-proxy.patarakorn21ce.workers.dev";
+  </script>
 
   <!-- Header -->
   <header class="bg-gradient-to-r from-purple-950 via-indigo-900 to-slate-900 text-white shadow no-print">
@@ -33,43 +45,43 @@
         </span>
         <button onclick="openModal()" class="text-xs bg-indigo-700 hover:bg-indigo-600 border border-indigo-400/40 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
-          ตั้งค่า AI &amp; API Key
+          ตั้งค่า Gemini API Key
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Modal ตั้งค่า Provider / API Key / โมเดล -->
+  <!-- Modal ตั้งค่า API Key / โมเดล (Gemini เท่านั้น) -->
   <div id="keyModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
     <div class="bg-white rounded-xl max-w-md w-full p-5 shadow-2xl border border-slate-200 space-y-3.5">
       <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
         <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
-        ตั้งค่า AI &amp; API Key
+        ตั้งค่า Google Gemini API Key
       </h3>
-      <p class="text-[11px] text-slate-500 leading-relaxed">
-        API Key และโมเดลที่เลือกจะถูกบันทึกไว้ใน Browser ของเครื่องคุณเท่านั้น (Local Storage) แยกเก็บตามผู้ให้บริการแต่ละราย ไม่ถูกส่งไปที่ใดนอกจากผู้ให้บริการ AI ที่เลือกโดยตรง
+
+      <div id="sharedModeNotice" class="hidden text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-200 rounded p-2.5 leading-relaxed">
+        ✓ เว็บนี้ตั้งค่าให้ใช้งานผ่าน<strong>ระบบกลาง (Proxy)</strong> ไว้แล้ว ทุกคนใช้งานได้ทันทีโดยไม่ต้องกรอก API Key ของตัวเอง — เลือกโมเดลที่ต้องการแล้วกด "บันทึก" ได้เลย
+      </div>
+
+      <p id="ownKeyNotice" class="text-[11px] text-slate-500 leading-relaxed">
+        API Key และโมเดลที่เลือกจะถูกบันทึกไว้ใน Browser ของเครื่องคุณเท่านั้น (Local Storage) ไม่ถูกส่งไปที่ใดนอกจาก Google โดยตรง
       </p>
 
-      <div>
-        <label class="block text-xs font-semibold text-slate-700 mb-1">ผู้ให้บริการ AI (AI Provider)</label>
-        <select id="providerField" class="w-full rounded border border-slate-300 px-3 py-2 text-xs bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none" onchange="onProviderChange()">
-          <option value="google">Google Gemini</option>
-          <option value="anthropic">Anthropic Claude</option>
-          <option value="openai">OpenAI (ChatGPT)</option>
-        </select>
-      </div>
-
-      <div>
-        <label id="keyFieldLabel" class="block text-xs font-semibold text-slate-700 mb-1">Google AI Studio API Key</label>
+      <div id="keyFieldWrap">
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Google AI Studio API Key</label>
         <input type="password" id="keyField" placeholder="AIzaSy..." class="w-full rounded border border-slate-300 px-3 py-2 text-xs focus:ring-1 focus:ring-indigo-500 focus:outline-none">
-        <p id="keyFieldHelp" class="text-[10px] text-slate-400 mt-1">ขอ API Key ฟรีได้ที่ aistudio.google.com/apikey</p>
+        <p class="text-[10px] text-slate-400 mt-1">ขอ API Key ฟรีได้ที่ aistudio.google.com/apikey</p>
       </div>
 
       <div>
-        <label class="block text-xs font-semibold text-slate-700 mb-1">เลือกโมเดล AI ที่ใช้ตรวจสอบเอกสาร</label>
-        <select id="modelField" class="w-full rounded border border-slate-300 px-3 py-2 text-xs bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"></select>
-        <p class="text-[10px] text-slate-400 mt-1" id="fallbackNote">ถ้าโมเดลที่เลือกเรียกไม่สำเร็จ ระบบจะลองโมเดลสำรองในรายการให้อัตโนมัติ</p>
-        <p id="corsWarning" class="hidden text-[10.5px] text-amber-800 bg-amber-50 border border-amber-300 rounded p-2 mt-2 leading-relaxed"></p>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">เลือกโมเดล Gemini ที่ใช้ตรวจสอบเอกสาร</label>
+        <select id="modelField" class="w-full rounded border border-slate-300 px-3 py-2 text-xs bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+          <option value="gemini-3.6-flash">Gemini 3.6 Flash (แนะนำ — เสถียร เร็ว คุ้มราคา)</option>
+          <option value="gemini-3.8-flash">Gemini 3.8 Flash (รุ่นล่าสุด ฉลาดที่สุด)</option>
+          <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro Preview (แม่นยำสูงสุด)</option>
+          <option value="gemini-2.5-flash">Gemini 2.5 Flash (รุ่นเก่า สำรอง)</option>
+        </select>
+        <p class="text-[10px] text-slate-400 mt-1">ถ้าโมเดลที่เลือกเรียกไม่สำเร็จ ระบบจะลองโมเดลสำรองในรายการให้อัตโนมัติ</p>
       </div>
 
       <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
@@ -85,7 +97,7 @@
     <!-- ฝั่งซ้าย: ฟอร์มนำเข้าข้อมูล -->
     <div class="lg:col-span-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200 no-print space-y-3.5">
 
-      <!-- 1. แนบรูปถ่าย หรือ ไฟล์ PDF -->
+      <!-- 1. แนบเอกสารสเปก -->
       <div>
         <h2 class="text-xs font-bold text-slate-900 pb-1.5 border-b border-slate-100 flex items-center gap-1.5">
           <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -113,20 +125,42 @@
         </div>
       </div>
 
-      <!-- 2. แนบโลโก้หน่วยงาน -->
+      <!-- 2. แนบรูปภาพผลิตภัณฑ์ -->
+      <div>
+        <h2 class="text-xs font-bold text-slate-900 pb-1.5 border-b border-slate-100 flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V5z"/><circle cx="8.5" cy="9.5" r="1.5"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 15l-4.5-4.5a2 2 0 00-2.8 0L4 19"/></svg>
+          2. แนบรูปภาพผลิตภัณฑ์ / หน้างาน (ถ้ามี)
+        </h2>
+        <p class="text-[10px] text-slate-400 mt-1 mb-1.5">ใช้แสดงประกอบในรายงาน เช่น ภาพถ่ายสินค้าจริงหน้างาน หรือฉลากผลิตภัณฑ์ (แยกจากเอกสารสเปกด้านบน)</p>
+
+        <div class="border-2 border-dashed border-slate-300 rounded-lg p-3 text-center hover:border-indigo-500 transition-colors bg-slate-50/50">
+          <input type="file" id="productPhotoInput" accept="image/*" class="hidden" onchange="handleProductPhotoUpload(event)">
+          <label for="productPhotoInput" class="cursor-pointer block">
+            <svg class="w-6 h-6 text-indigo-500 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="3.5"/></svg>
+            <span class="text-xs font-semibold text-indigo-600">กดเพื่อเลือกรูปภาพผลิตภัณฑ์</span>
+          </label>
+        </div>
+        <div id="productPhotoNotice" class="text-[11px] text-emerald-700 mt-1.5 font-medium hidden flex items-center gap-1"></div>
+        <div id="productPhotoPreviewCard" class="hidden rounded border p-1 bg-slate-50 mt-2 relative">
+          <img id="productPhotoPreview" src="" class="max-h-36 rounded object-contain mx-auto" alt="ตัวอย่างรูปภาพผลิตภัณฑ์">
+          <button type="button" onclick="removeProductPhoto()" class="absolute top-1 right-1 bg-white/90 hover:bg-rose-50 text-rose-600 rounded-full w-6 h-6 text-xs font-bold shadow border border-rose-200">✕</button>
+        </div>
+      </div>
+
+      <!-- 3. แนบโลโก้หน่วยงาน -->
       <div>
         <h2 class="text-xs font-bold text-slate-900 pb-1.5 border-b border-slate-100 flex items-center gap-1.5">
           <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-          2. ใส่โลโก้หน่วยงาน / ตราโครงการ
+          3. ใส่โลโก้หน่วยงาน / ตราโครงการ
         </h2>
         <div class="mt-1.5">
           <input type="file" id="logoFileInput" accept="image/*" class="text-[11px] text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" onchange="handleLogoUpload(event)">
         </div>
       </div>
 
-      <!-- 3. ข้อมูลโครงการและหมวดงาน กฟภ. 2568 -->
+      <!-- 4. ข้อมูลโครงการและหมวดงาน กฟภ. 2568 -->
       <div>
-        <h2 class="text-xs font-bold text-slate-900 pb-1.5 border-b border-slate-100">3. ข้อมูลโครงการและหมวดงาน กฟภ. 2568</h2>
+        <h2 class="text-xs font-bold text-slate-900 pb-1.5 border-b border-slate-100">4. ข้อมูลโครงการและหมวดงาน กฟภ. 2568</h2>
 
         <div class="space-y-2 mt-2">
           <div class="grid grid-cols-2 gap-2">
@@ -273,7 +307,6 @@
           <!-- ตราสัญลักษณ์และหัวกระดาษทางการ -->
           <div class="border-b-2 border-slate-900 pb-3 mb-3">
             <div class="flex items-center gap-3">
-              <!-- กล่องแสดงโลโก้หน่วยงาน -->
               <div id="logoDisplayContainer" class="hidden flex-shrink-0">
                 <img id="agencyLogoImg" src="" alt="Agency Logo" class="h-14 w-auto max-w-[120px] object-contain">
               </div>
@@ -294,6 +327,22 @@
               <div><strong>ผู้รับจ้าง:</strong> <span id="outContractor">-</span></div>
               <div><strong>เลขที่เอกสาร:</strong> <span id="outDocNo">-</span></div>
               <div><strong>วันที่ตรวจสอบ:</strong> <span id="outDate">-</span></div>
+            </div>
+          </div>
+
+          <!-- ภาพประกอบ: ผลิตภัณฑ์ + เอกสารสเปก -->
+          <div id="outPhotosRow" class="hidden grid grid-cols-2 gap-3 mb-3">
+            <div id="outProductPhotoBox" class="hidden border border-slate-200 rounded-lg p-2 bg-slate-50">
+              <span class="text-[10px] font-bold text-slate-600 block mb-1.5">📷 ภาพผลิตภัณฑ์ / หน้างาน</span>
+              <img id="outProductPhotoImg" src="" class="w-full h-40 object-contain rounded bg-white border border-slate-100" alt="ภาพผลิตภัณฑ์">
+            </div>
+            <div id="outDocPhotoBox" class="hidden border border-slate-200 rounded-lg p-2 bg-slate-50">
+              <span class="text-[10px] font-bold text-slate-600 block mb-1.5">📄 เอกสารสเปกที่ใช้ตรวจสอบ</span>
+              <img id="outDocPhotoImg" src="" class="w-full h-40 object-contain rounded bg-white border border-slate-100 hidden" alt="เอกสารสเปก">
+              <div id="outDocPdfChip" class="hidden h-40 flex-col items-center justify-center gap-1.5 rounded bg-white border border-slate-100 text-slate-600">
+                <svg class="w-8 h-8 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                <span id="outDocPdfName" class="text-[11px] px-3 text-center">-</span>
+              </div>
             </div>
           </div>
 
@@ -322,16 +371,6 @@
 
           <!-- สรุปผลและการสั่งการของผู้ควบคุมงาน -->
           <div id="outAdviceBox" class="p-2.5 rounded border text-xs leading-relaxed mb-3 hidden"></div>
-
-          <!-- รูปถ่ายเอกสารแนบในรายงาน -->
-          <div id="outPhotoBox" class="hidden mb-3">
-            <span class="text-[10px] font-bold text-slate-600 block mb-1">ภาพเอกสาร/แค็ตตาล็อกที่นำมาเปรียบเทียบสเปก:</span>
-            <img id="outPhotoImg" src="" class="max-h-32 border rounded p-1 object-contain hidden" alt="เอกสารที่ใช้ตรวจสอบ">
-            <div id="outPhotoPdfChip" class="hidden inline-flex items-center gap-1.5 border rounded px-2.5 py-1.5 bg-slate-50 text-[11px] text-slate-700">
-              <svg class="w-4 h-4 text-rose-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-              <span id="outPhotoPdfName">-</span>
-            </div>
-          </div>
         </div>
 
         <!-- ช่องลงนามรับรองมาตรฐาน 3 ฝ่าย -->
@@ -377,9 +416,6 @@
   <script>
     // =========================================================================
     // ฐานข้อมูลเกณฑ์ข้อกำหนดมาตรฐาน กฟภ. ฉบับปี 2568
-    // หมายเหตุ: ข้อความในนี้เป็นการสรุปย่อจากรายการประกอบแบบเพื่อใช้เป็น prompt
-    // อ้างอิงให้ AI เท่านั้น ไม่ใช่สำเนาทางการ ก่อนใช้ตัดสินใจอนุมัติจริงต้อง
-    // ตรวจทานกับเอกสารต้นฉบับเสมอ
     // =========================================================================
     const PEA_MASTER_SPECS = {
       s011100: { name: "01 11 00 ขอบเขตงาน", desc: "ก่อสร้างถูกต้องตามแบบและรายการประกอบแบบ มีความมั่นคงถาวร ประณีตตามหลักวิชาช่างที่ดี" },
@@ -449,128 +485,47 @@
       s321313: { name: "32 13 13 บล็อกปูพื้นและขอบคันหิน", desc: "คอนกรีตบล็อก มอก. 827-2531 กำลังรับแรงอัด ≥ 350-400 ksc ปูบนทรายบดอัดแน่น แบรนด์: SCG, CPS" }
     };
 
-    // =========================================================================
-    // ฐานข้อมูลผู้ให้บริการ AI ที่รองรับ
-    // สำคัญ: OpenAI ไม่อนุญาตให้เว็บเบราว์เซอร์เรียก API ตรง (ไม่รองรับ CORS)
-    // ต่างจาก Google และ Anthropic ที่เปิดให้เรียกจากเบราว์เซอร์ได้โดยตรง
-    // (Anthropic ต้องส่ง header พิเศษ anthropic-dangerous-direct-browser-access)
-    // หากต้องการใช้ OpenAI จริง ต้องตั้ง Proxy Server กลาง (ดูคำแนะนำในหมายเหตุท้ายไฟล์)
-    // =========================================================================
-    const PROVIDER_INFO = {
-      google: {
-        label: 'Google Gemini',
-        keyLabel: 'Google AI Studio API Key',
-        keyPlaceholder: 'AIzaSy...',
-        keyHelp: 'ขอ API Key ฟรีได้ที่ aistudio.google.com/apikey',
-        models: [
-          { value: 'gemini-3.6-flash', label: 'Gemini 3.6 Flash (แนะนำ — เสถียร เร็ว คุ้มราคา)' },
-          { value: 'gemini-3.8-flash', label: 'Gemini 3.8 Flash (รุ่นล่าสุด ฉลาดที่สุด)' },
-          { value: 'gemini-3.1-pro-preview', label: 'Gemini 3.1 Pro Preview (แม่นยำสูงสุด)' },
-          { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash (รุ่นเก่า สำรอง)' }
-        ],
-        corsBlocked: false
-      },
-      anthropic: {
-        label: 'Anthropic Claude',
-        keyLabel: 'Anthropic API Key',
-        keyPlaceholder: 'sk-ant-...',
-        keyHelp: 'ขอ API Key ได้ที่ console.anthropic.com/settings/keys',
-        models: [
-          { value: 'claude-sonnet-5', label: 'Claude Sonnet 5 (แนะนำ — สมดุลความเร็ว/ความแม่นยำ)' },
-          { value: 'claude-opus-5', label: 'Claude Opus 5 (แม่นยำสูงสุด ช้ากว่า)' },
-          { value: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5 (เร็ว ประหยัดสุด)' }
-        ],
-        corsBlocked: false
-      },
-      openai: {
-        label: 'OpenAI (ChatGPT)',
-        keyLabel: 'OpenAI API Key',
-        keyPlaceholder: 'sk-...',
-        keyHelp: 'ขอ API Key ได้ที่ platform.openai.com/api-keys',
-        models: [
-          { value: 'gpt-5.6-sol', label: 'GPT-5.6 Sol' },
-          { value: 'gpt-6-astra', label: 'GPT-6 Astra (รุ่นใหม่ล่าสุด)' },
-          { value: 'gpt-5.2', label: 'GPT-5.2 (รุ่นเก่ากว่า)' }
-        ],
-        corsBlocked: true
-      }
-    };
+    const SHARED_MODE = !!(typeof SHARED_PROXY_BASE_URL === 'string' && SHARED_PROXY_BASE_URL.trim().length > 0);
+    const PROXY_URL = SHARED_MODE ? SHARED_PROXY_BASE_URL.trim().replace(/\/$/, '') : '';
 
     // ----- ตัวแปรสถานะหลัก -----
     let base64Data = null;
     let fileMimeType = "image/jpeg";
     let currentFileName = "";
+    let productPhotoBase64 = null;
+    let productPhotoDataUrl = null;
     let currentEvaluationResult = null;
-    let currentPdfObjectUrl = null; // ใช้แสดงตัวอย่าง PDF เท่านั้น (แยกจาก base64Data ที่ส่งให้ AI)
+    let currentPdfObjectUrl = null;
 
-    // ----- จัดการ Provider / API Key / โมเดล -----
-    function getActiveProvider() {
-      return localStorage.getItem('pea_active_provider') || 'google';
-    }
-
+    // ----- จัดการ API Key / โมเดล (Gemini เท่านั้น) -----
     function initKey() {
-      const provider = getActiveProvider();
-      const info = PROVIDER_INFO[provider];
-      const k = localStorage.getItem('pea_key_' + provider);
-      const model = localStorage.getItem('pea_model_' + provider) || info.models[0].value;
       const b = document.getElementById('apiKeyBadge');
+      const model = localStorage.getItem('pea_gemini_model') || 'gemini-3.6-flash';
+
+      if (SHARED_MODE) {
+        b.className = 'text-[11px] px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-200';
+        b.textContent = '✓ พร้อมใช้งานทันที ผ่านระบบกลาง (Gemini · ' + model + ')';
+        document.getElementById('sharedModeNotice').classList.remove('hidden');
+        document.getElementById('ownKeyNotice').classList.add('hidden');
+        document.getElementById('keyFieldWrap').classList.add('hidden');
+        return;
+      }
+
+      const k = localStorage.getItem('pea_gemini_key');
       if (k && k.length > 8) {
         b.className = 'text-[11px] px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-200';
-        b.textContent = '✓ พร้อมใช้งาน (' + info.label + ' · ' + model + ')';
+        b.textContent = '✓ พร้อมใช้งาน (Gemini · ' + model + ')';
       } else {
         b.className = 'text-[11px] px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-200';
         b.textContent = '⚠️ ยังไม่ได้ตั้งค่า API Key';
       }
     }
 
-    function populateModelOptions(provider) {
-      const sel = document.getElementById('modelField');
-      const info = PROVIDER_INFO[provider];
-      sel.innerHTML = '';
-      info.models.forEach(m => {
-        const opt = document.createElement('option');
-        opt.value = m.value;
-        opt.textContent = m.label;
-        sel.appendChild(opt);
-      });
-      const savedModel = localStorage.getItem('pea_model_' + provider);
-      if (savedModel && info.models.some(m => m.value === savedModel)) {
-        sel.value = savedModel;
-      }
-    }
-
-    function onProviderChange() {
-      const provider = document.getElementById('providerField').value;
-      const info = PROVIDER_INFO[provider];
-
-      document.getElementById('keyFieldLabel').textContent = info.keyLabel;
-      document.getElementById('keyField').placeholder = info.keyPlaceholder;
-      document.getElementById('keyField').value = localStorage.getItem('pea_key_' + provider) || '';
-      document.getElementById('keyFieldHelp').textContent = info.keyHelp;
-
-      populateModelOptions(provider);
-
-      const corsBox = document.getElementById('corsWarning');
-      const fallbackNote = document.getElementById('fallbackNote');
-      if (info.corsBlocked) {
-        corsBox.textContent = '⚠️ OpenAI ไม่อนุญาตให้เว็บเบราว์เซอร์เรียก API ตรง (ไม่รองรับ CORS) จึงยังใช้งานจากเว็บนี้ไม่ได้จริง เว้นแต่จะตั้งค่า Proxy Server กลางเพิ่มเติม (ต่างจาก Google และ Anthropic ที่เรียกตรงจากเบราว์เซอร์ได้)';
-        corsBox.classList.remove('hidden');
-        fallbackNote.classList.add('hidden');
-      } else {
-        corsBox.classList.add('hidden');
-        fallbackNote.classList.remove('hidden');
-        fallbackNote.textContent = provider === 'google'
-          ? 'ถ้าโมเดลที่เลือกเรียกไม่สำเร็จ ระบบจะลองโมเดลสำรองในรายการให้อัตโนมัติ'
-          : 'ระบบจะเรียกเฉพาะโมเดลที่เลือกไว้เท่านั้น';
-      }
-    }
-
     function openModal() {
-      const provider = getActiveProvider();
-      document.getElementById('providerField').value = provider;
-      onProviderChange();
-      const savedModel = localStorage.getItem('pea_model_' + provider);
-      if (savedModel) document.getElementById('modelField').value = savedModel;
+      if (!SHARED_MODE) {
+        document.getElementById('keyField').value = localStorage.getItem('pea_gemini_key') || '';
+      }
+      document.getElementById('modelField').value = localStorage.getItem('pea_gemini_model') || 'gemini-3.6-flash';
       document.getElementById('keyModal').classList.remove('hidden');
     }
 
@@ -579,18 +534,22 @@
     }
 
     function saveKey() {
-      const provider = document.getElementById('providerField').value;
-      const v = document.getElementById('keyField').value.trim();
-      const m = document.getElementById('modelField').value || PROVIDER_INFO[provider].models[0].value;
+      const m = document.getElementById('modelField').value || 'gemini-3.6-flash';
+      localStorage.setItem('pea_gemini_model', m);
 
+      if (SHARED_MODE) {
+        alert('บันทึกการตั้งค่าเรียบร้อย (Gemini · ' + m + ')');
+        closeModal();
+        initKey();
+        return;
+      }
+
+      const v = document.getElementById('keyField').value.trim();
       if (v) {
-        localStorage.setItem('pea_key_' + provider, v);
-        localStorage.setItem('pea_model_' + provider, m);
-        localStorage.setItem('pea_active_provider', provider);
-        alert('บันทึกการตั้งค่าเรียบร้อย (' + PROVIDER_INFO[provider].label + ' · ' + m + ')');
+        localStorage.setItem('pea_gemini_key', v);
+        alert('บันทึกการตั้งค่าเรียบร้อย (Gemini · ' + m + ')');
       } else {
-        localStorage.removeItem('pea_key_' + provider);
-        localStorage.removeItem('pea_model_' + provider);
+        localStorage.removeItem('pea_gemini_key');
       }
       closeModal();
       initKey();
@@ -609,21 +568,54 @@
       }
     }
 
+    // ----- อัปโหลดรูปภาพผลิตภัณฑ์ -----
+    function handleProductPhotoUpload(e) {
+      const file = e.target.files[0];
+      if (!file || !file.type.startsWith('image/')) return;
+
+      const notice = document.getElementById('productPhotoNotice');
+      notice.className = "text-[11px] text-indigo-700 mt-1.5 font-medium flex items-center gap-1";
+      notice.textContent = "⏳ กำลังโหลดรูปภาพ...";
+      notice.classList.remove('hidden');
+
+      const reader = new FileReader();
+      reader.onload = function (evt) {
+        productPhotoDataUrl = evt.target.result;
+        productPhotoBase64 = productPhotoDataUrl.split(',')[1];
+
+        document.getElementById('productPhotoPreview').src = productPhotoDataUrl;
+        document.getElementById('productPhotoPreviewCard').classList.remove('hidden');
+
+        notice.className = "text-[11px] text-emerald-700 mt-1.5 font-medium flex items-center gap-1";
+        notice.innerHTML = `<span>✓ แนบรูปภาพผลิตภัณฑ์: <strong>${escapeHtml(file.name)}</strong></span>`;
+      };
+      reader.onerror = function () {
+        notice.className = "text-[11px] text-rose-700 mt-1.5 font-medium flex items-center gap-1";
+        notice.textContent = "✗ โหลดรูปภาพไม่สำเร็จ กรุณาลองใหม่อีกครั้ง";
+        productPhotoBase64 = null; productPhotoDataUrl = null;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeProductPhoto() {
+      productPhotoBase64 = null;
+      productPhotoDataUrl = null;
+      document.getElementById('productPhotoInput').value = '';
+      document.getElementById('productPhotoPreviewCard').classList.add('hidden');
+      document.getElementById('productPhotoNotice').classList.add('hidden');
+    }
+
     // ----- อัปโหลดเอกสารสเปก (PDF/รูปภาพ) -----
     function handleFileUpload(e) {
       const file = e.target.files[0];
       if (!file) return;
 
-      // ล้างตัวอย่าง PDF เก่า (ถ้ามี) ก่อนโหลดไฟล์ใหม่ ป้องกันหน่วยความจำรั่ว
       if (currentPdfObjectUrl) {
         URL.revokeObjectURL(currentPdfObjectUrl);
         currentPdfObjectUrl = null;
       }
       document.getElementById('imgPreviewCard').classList.add('hidden');
       document.getElementById('pdfPreviewCard').classList.add('hidden');
-      document.getElementById('outPhotoBox').classList.add('hidden');
-      document.getElementById('outPhotoImg').classList.add('hidden');
-      document.getElementById('outPhotoPdfChip').classList.add('hidden');
 
       const notice = document.getElementById('fileStatusNotice');
       notice.className = "text-[11px] text-indigo-700 mt-1.5 font-medium flex items-center gap-1";
@@ -640,15 +632,10 @@
 
         if (isPdf) {
           fileMimeType = "application/pdf";
-
           currentPdfObjectUrl = URL.createObjectURL(file);
           document.getElementById('pdfPreviewEmbed').src = currentPdfObjectUrl;
           document.getElementById('pdfOpenNewTab').href = currentPdfObjectUrl;
           document.getElementById('pdfPreviewCard').classList.remove('hidden');
-
-          document.getElementById('outPhotoPdfName').textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
-          document.getElementById('outPhotoPdfChip').classList.remove('hidden');
-          document.getElementById('outPhotoBox').classList.remove('hidden');
 
           notice.className = "text-[11px] text-emerald-700 mt-1.5 font-medium flex items-center gap-1";
           notice.innerHTML = `<span>✓ แนบไฟล์ PDF: <strong>${escapeHtml(file.name)}</strong> (${(file.size / 1024).toFixed(1)} KB) พร้อมส่งตรวจ</span>`;
@@ -656,10 +643,6 @@
           fileMimeType = file.type || "image/jpeg";
           document.getElementById('imgPreview').src = resultStr;
           document.getElementById('imgPreviewCard').classList.remove('hidden');
-
-          document.getElementById('outPhotoImg').src = resultStr;
-          document.getElementById('outPhotoImg').classList.remove('hidden');
-          document.getElementById('outPhotoBox').classList.remove('hidden');
 
           notice.className = "text-[11px] text-emerald-700 mt-1.5 font-medium flex items-center gap-1";
           notice.innerHTML = `<span>✓ แนบรูปภาพ: <strong>${escapeHtml(file.name)}</strong> พร้อมส่งตรวจ</span>`;
@@ -679,28 +662,19 @@
       return div.innerHTML;
     }
 
-    // =========================================================================
-    // ----- ฟังก์ชันเรียก AI แยกตามผู้ให้บริการ -----
-    // แต่ละเจ้ามีรูปแบบ endpoint / payload / การตอบกลับไม่เหมือนกัน
-    // =========================================================================
-
-    // Google Gemini: รองรับ CORS โดยตรง ส่ง key ผ่าน header (ปลอดภัยกว่าใส่ใน URL)
+    // ----- เรียก Gemini API (ตรง หรือผ่าน Proxy กลาง) -----
     async function requestGemini(model, apiKey, promptText) {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
       const payload = {
-        contents: [{
-          parts: [
-            { text: promptText },
-            { inlineData: { mimeType: fileMimeType, data: base64Data } }
-          ]
-        }],
+        contents: [{ parts: [{ text: promptText }, { inlineData: { mimeType: fileMimeType, data: base64Data } }] }],
         generationConfig: { responseMimeType: "application/json", temperature: 0.1 }
       };
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
-        body: JSON.stringify(payload)
-      });
+      const url = SHARED_MODE
+        ? `${PROXY_URL}/gemini/${model}`
+        : `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+      const headers = { 'Content-Type': 'application/json' };
+      if (!SHARED_MODE) headers['x-goog-api-key'] = apiKey;
+
+      const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(payload) });
       const data = await res.json();
       if (!res.ok) {
         const msg = (data && data.error && data.error.message) ? data.error.message : `HTTP ${res.status}`;
@@ -712,77 +686,12 @@
       return data.candidates[0].content.parts[0].text;
     }
 
-    // Anthropic Claude: รองรับ CORS ได้ก็ต่อเมื่อส่ง header พิเศษนี้เท่านั้น
-    async function requestClaude(model, apiKey, promptText) {
-      const contentBlock = fileMimeType === 'application/pdf'
-        ? { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64Data } }
-        : { type: 'image', source: { type: 'base64', media_type: fileMimeType, data: base64Data } };
-      const payload = {
-        model: model,
-        max_tokens: 2048,
-        messages: [{ role: 'user', content: [{ type: 'text', text: promptText }, contentBlock] }]
-      };
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true'
-        },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        const msg = (data && data.error && data.error.message) ? data.error.message : `HTTP ${res.status}`;
-        const err = new Error(msg); err.status = res.status; throw err;
-      }
-      const block = (data.content || []).find(b => b.type === 'text');
-      if (!block) throw new Error('ไม่มีข้อความตอบกลับจาก Claude');
-      return block.text;
-    }
-
-    // OpenAI: เตรียมโค้ดไว้ให้ครบ แต่ในทางปฏิบัติเรียกตรงจากเบราว์เซอร์ไม่ได้ (CORS บล็อก)
-    // ฟังก์ชันนี้จะถูกเรียกก็ต่อเมื่อมีการตั้ง Proxy Server แล้วเปลี่ยน endpoint ด้านล่างเอง
-    async function requestOpenAI(model, apiKey, promptText) {
-      const content = [{ type: 'text', text: promptText }];
-      if (fileMimeType.startsWith('image/')) {
-        content.push({ type: 'image_url', image_url: { url: `data:${fileMimeType};base64,${base64Data}` } });
-      }
-      const payload = {
-        model: model,
-        messages: [{ role: 'user', content: content }],
-        response_format: { type: 'json_object' }
-      };
-      const res = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        const msg = (data && data.error && data.error.message) ? data.error.message : `HTTP ${res.status}`;
-        const err = new Error(msg); err.status = res.status; throw err;
-      }
-      if (!data.choices || !data.choices.length) throw new Error('ไม่มีผลลัพธ์จาก AI');
-      return data.choices[0].message.content;
-    }
-
-    async function callProviderAI(provider, model, apiKey, promptText) {
-      if (provider === 'google') return requestGemini(model, apiKey, promptText);
-      if (provider === 'anthropic') return requestClaude(model, apiKey, promptText);
-      if (provider === 'openai') return requestOpenAI(model, apiKey, promptText);
-      throw new Error('ไม่รู้จักผู้ให้บริการ AI: ' + provider);
-    }
-
     // ----- ตรวจสอบหลัก -----
     async function runAiVerification() {
-      const provider = getActiveProvider();
-      const info = PROVIDER_INFO[provider];
-      const apiKey = localStorage.getItem('pea_key_' + provider);
+      const apiKey = SHARED_MODE ? null : localStorage.getItem('pea_gemini_key');
 
-      if (!apiKey) {
-        alert('กรุณาคลิก "ตั้งค่า AI & API Key" ด้านบนขวาก่อน');
+      if (!SHARED_MODE && !apiKey) {
+        alert('กรุณาคลิก "ตั้งค่า Gemini API Key" ด้านบนขวาก่อน');
         openModal();
         return;
       }
@@ -790,18 +699,8 @@
         alert('กรุณาแนบไฟล์ PDF หรือรูปภาพสเปกสินค้าก่อน');
         return;
       }
-      if (info.corsBlocked) {
-        alert(
-          'ไม่สามารถเรียก ' + info.label + ' จากเว็บนี้ได้โดยตรงครับ\n\n' +
-          'สาเหตุ: OpenAI ไม่อนุญาตให้เว็บเบราว์เซอร์เรียก API ตรง (นโยบาย CORS ของ OpenAI เอง ไม่ใช่ข้อจำกัดของเว็บนี้)\n\n' +
-          'วิธีแก้: ต้องตั้ง Proxy Server ตรงกลาง (เช่น Cloudflare Worker ฟรี) ให้รับคำขอจากหน้านี้แล้วส่งต่อไป OpenAI แทน\n\n' +
-          'ระหว่างนี้แนะนำให้สลับไปใช้ Google Gemini หรือ Anthropic Claude ซึ่งเรียกตรงจากเบราว์เซอร์ได้จริงในหน้านี้'
-        );
-        openModal();
-        return;
-      }
 
-      const preferredModel = localStorage.getItem('pea_model_' + provider) || info.models[0].value;
+      const preferredModel = localStorage.getItem('pea_gemini_model') || 'gemini-3.6-flash';
       const catKey = document.getElementById('selCategory').value;
       const crit = PEA_MASTER_SPECS[catKey];
       const today = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -813,6 +712,7 @@
       document.getElementById('outDocNo').textContent = document.getElementById('fldDocNo').value || '-';
       document.getElementById('outDate').textContent = today;
       document.getElementById('outStandardCriteria').textContent = crit.desc;
+      renderPhotosRow();
 
       const loadingBox = document.getElementById('loadingIndicator');
       const loadingText = document.getElementById('loadingText');
@@ -843,31 +743,29 @@ ${crit.desc}
 หากเอกสารที่แนบมาไม่มีข้อมูลเพียงพอสำหรับหัวข้อใด ให้ใส่ "actual": "ไม่พบข้อมูลในเอกสารที่แนบ" และ "pass": false สำหรับหัวข้อนั้น แทนการเดาข้อมูล
 `;
 
-      // Gemini เท่านั้นที่มีลิสต์โมเดลสำรอง (เนื่องจาก Google ปลดระวางโมเดลบ่อย)
-      // Claude และ OpenAI จะเรียกเฉพาะโมเดลที่เลือกไว้เท่านั้น เพื่อความชัดเจนของผลลัพธ์
-      let modelsToTry = [preferredModel];
-      if (provider === 'google') {
-        const fallbackModels = ['gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-3.1-pro-preview', 'gemini-2.5-flash'];
-        modelsToTry = [preferredModel, ...fallbackModels].filter((v, i, arr) => v && arr.indexOf(v) === i);
-      }
+      // ลำดับโมเดลที่จะทดลองเรียก (เริ่มจากรุ่นที่เลือกไว้ ตามด้วยรุ่นสำรอง)
+      // หมายเหตุ: Google ปลดระวางรุ่นโมเดลเป็นระยะ หากพบว่ารุ่นในลิสต์นี้ใช้ไม่ได้แล้ว
+      // ให้ตรวจสอบรายชื่อรุ่นล่าสุดที่ https://ai.google.dev/gemini-api/docs/models แล้วแก้ไขค่าด้านล่างนี้
+      const fallbackModels = ['gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-3.1-pro-preview', 'gemini-2.5-flash'];
+      const modelsToTry = [preferredModel, ...fallbackModels].filter((v, i, arr) => v && arr.indexOf(v) === i);
 
       let rawText = null;
       let successModel = null;
       const errorsByModel = [];
 
       for (const m of modelsToTry) {
-        loadingText.textContent = `${info.label} (${m}) กำลังวิเคราะห์เอกสารและเทียบสเปก กฟภ. 2568...`;
+        loadingText.textContent = `Gemini (${m}) กำลังวิเคราะห์เอกสารและเทียบสเปก กฟภ. 2568...`;
         try {
-          rawText = await callProviderAI(provider, m, apiKey, prompt);
+          rawText = await requestGemini(m, apiKey, prompt);
           successModel = m;
           break;
         } catch (err) {
           let msg = err.message;
           if (err.message === 'Failed to fetch') {
-            msg = 'เชื่อมต่อ API ไม่สำเร็จ (Failed to fetch) — อาจเกิดจากปัญหาเครือข่าย, API Key ผิด, หรือผู้ให้บริการนี้บล็อกการเรียกจากเบราว์เซอร์ (CORS)';
+            msg = 'เชื่อมต่อ API ไม่สำเร็จ (Failed to fetch) — อาจเกิดจากปัญหาเครือข่ายหรือ API Key ผิด';
           }
           errorsByModel.push(`${m}: ${msg}`);
-          if (err.status === 400 && /API key|api_key|x-api-key/i.test(err.message)) break;
+          if (err.status === 400 && /API key/i.test(err.message)) break;
           if (err.status === 401 || err.status === 403) break;
         }
       }
@@ -890,12 +788,51 @@ ${crit.desc}
         }
       } else {
         console.error('เรียก AI ไม่สำเร็จทุกโมเดล:', errorsByModel);
-        alert('เกิดข้อผิดพลาดในการเชื่อมต่อ ' + info.label + ':\n\n' + errorsByModel.join('\n') + '\n\nตรวจสอบ API Key และการเชื่อมต่ออินเทอร์เน็ต แล้วลองใหม่อีกครั้ง');
+        alert('เกิดข้อผิดพลาดในการเชื่อมต่อ Gemini:\n\n' + errorsByModel.join('\n') + '\n\nตรวจสอบ API Key และการเชื่อมต่ออินเทอร์เน็ต แล้วลองใหม่อีกครั้ง');
       }
 
       loadingBox.classList.add('hidden');
       loadingText.textContent = 'AI กำลังวิเคราะห์ข้อมูลในเอกสารและเทียบสเปก กฟภ. 2568...';
       runBtn.disabled = false;
+    }
+
+    // ----- แสดงภาพผลิตภัณฑ์ + เอกสารสเปกในรายงาน -----
+    function renderPhotosRow() {
+      const row = document.getElementById('outPhotosRow');
+      const prodBox = document.getElementById('outProductPhotoBox');
+      const docBox = document.getElementById('outDocPhotoBox');
+      const prodImg = document.getElementById('outProductPhotoImg');
+      const docImg = document.getElementById('outDocPhotoImg');
+      const pdfChip = document.getElementById('outDocPdfChip');
+
+      let anyVisible = false;
+
+      if (productPhotoDataUrl) {
+        prodImg.src = productPhotoDataUrl;
+        prodBox.classList.remove('hidden');
+        anyVisible = true;
+      } else {
+        prodBox.classList.add('hidden');
+      }
+
+      if (base64Data && fileMimeType.startsWith('image/')) {
+        docImg.src = 'data:' + fileMimeType + ';base64,' + base64Data;
+        docImg.classList.remove('hidden');
+        pdfChip.classList.add('hidden');
+        docBox.classList.remove('hidden');
+        anyVisible = true;
+      } else if (fileMimeType === 'application/pdf' && currentFileName) {
+        docImg.classList.add('hidden');
+        document.getElementById('outDocPdfName').textContent = currentFileName;
+        pdfChip.classList.remove('hidden');
+        pdfChip.classList.add('flex');
+        docBox.classList.remove('hidden');
+        anyVisible = true;
+      } else {
+        docBox.classList.add('hidden');
+      }
+
+      row.classList.toggle('hidden', !anyVisible);
     }
 
     // ----- แสดงผลรายงานบนหน้าจอ -----
@@ -987,10 +924,6 @@ ${crit.desc}
 
     // =========================================================================
     // ----- พิมพ์รายงาน: สร้างหน้าต่างพิมพ์แยกต่างหาก (Bulletproof Print) -----
-    // เหตุผล: การสั่ง window.print() บนหน้าเว็บหลักที่โหลด Tailwind Play CDN
-    // (ซึ่งฉีด CSS แบบ async หลังโหลดหน้า) มักพิมพ์ออกมาผิดเพี้ยนไม่เท่ากันใน
-    // แต่ละเบราว์เซอร์ จึงสร้างเอกสาร HTML ใหม่ล้วนๆ ที่มี CSS ของตัวเองแยก
-    // ต่างหาก ไปเปิดในแท็บใหม่ แล้วค่อยสั่งพิมพ์แท็บนั้น ทำให้ผลลัพธ์เสถียรเสมอ
     // =========================================================================
     function buildPrintDocument() {
       const region = escapeHtml(document.getElementById('fldPeaRegion').value || '-');
@@ -1039,16 +972,24 @@ ${crit.desc}
         }
       }
 
-      let photoHtml = '';
-      if (fileMimeType === 'application/pdf' && currentFileName) {
-        photoHtml = `<div class="photobox"><span class="lbl">ภาพเอกสาร/แค็ตตาล็อกที่นำมาเปรียบเทียบสเปก</span>
-          <div class="pdfchip">📄 ${escapeHtml(currentFileName)}</div></div>`;
-      } else if (base64Data && fileMimeType.startsWith('image/')) {
-        photoHtml = `<div class="photobox"><span class="lbl">ภาพเอกสาร/แค็ตตาล็อกที่นำมาเปรียบเทียบสเปก</span>
-          <img src="data:${fileMimeType};base64,${base64Data}"></div>`;
-      }
+      let photosHtml = '';
+      const hasProductPhoto = !!productPhotoDataUrl;
+      const hasDocImage = !!(base64Data && fileMimeType.startsWith('image/'));
+      const hasDocPdf = !!(fileMimeType === 'application/pdf' && currentFileName);
 
-      const providerBadge = escapeHtml(PROVIDER_INFO[getActiveProvider()].label);
+      if (hasProductPhoto || hasDocImage || hasDocPdf) {
+        let leftCol = '';
+        let rightCol = '';
+        if (hasProductPhoto) {
+          leftCol = `<div class="photobox"><span class="lbl">📷 ภาพผลิตภัณฑ์ / หน้างาน</span><img src="${productPhotoDataUrl}"></div>`;
+        }
+        if (hasDocImage) {
+          rightCol = `<div class="photobox"><span class="lbl">📄 เอกสารสเปกที่ใช้ตรวจสอบ</span><img src="data:${fileMimeType};base64,${base64Data}"></div>`;
+        } else if (hasDocPdf) {
+          rightCol = `<div class="photobox"><span class="lbl">📄 เอกสารสเปกที่ใช้ตรวจสอบ</span><div class="pdfchip">📄 ${escapeHtml(currentFileName)}</div></div>`;
+        }
+        photosHtml = `<div class="photorow">${leftCol}${rightCol}</div>`;
+      }
 
       return `<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8">
         <title>รายงานตรวจสอบวัสดุ - ${docNo}</title>
@@ -1068,6 +1009,11 @@ ${crit.desc}
           .meta div{padding:6px 9px;border-right:1px solid #cbd5e1;border-bottom:1px solid #cbd5e1;}
           .meta div:nth-child(4n){border-right:none;}
           .meta b{display:block;color:#64748b;font-weight:600;font-size:9px;}
+          .photorow{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px;}
+          .photobox{border:1px solid #cbd5e1;border-radius:4px;padding:8px;background:#f8fafc;}
+          .photobox .lbl{font-size:9.5px;font-weight:700;color:#64748b;display:block;margin-bottom:6px;}
+          .photobox img{width:100%;height:130px;object-fit:contain;border:1px solid #e2e8f0;background:#fff;border-radius:3px;}
+          .pdfchip{height:130px;display:flex;align-items:center;justify-content:center;border:1px solid #e2e8f0;background:#fff;border-radius:3px;font-size:10px;color:#475569;text-align:center;padding:0 10px;}
           .crit{border:1px solid #c7d2fe;background:#eef2ff;padding:8px 11px;font-size:10.5px;margin-bottom:12px;border-radius:4px;}
           .crit .lbl{font-weight:700;color:#312e81;display:block;margin-bottom:2px;font-size:9.5px;}
           table{width:100%;border-collapse:collapse;font-size:10.5px;margin-bottom:12px;}
@@ -1080,9 +1026,6 @@ ${crit.desc}
           .advice.ok{border-color:#a7f3d0;background:#ecfdf5;} .advice.warn{border-color:#fde68a;background:#fffbeb;} .advice.bad{border-color:#fecaca;background:#fef2f2;}
           .advice strong{display:block;margin-bottom:3px;}
           .advice .sub{display:block;margin-top:5px;font-size:9.5px;color:#475569;}
-          .photobox{margin-bottom:14px;} .photobox .lbl{font-size:9.5px;font-weight:700;color:#64748b;display:block;margin-bottom:5px;}
-          .photobox img{max-height:110px;border:1px solid #cbd5e1;padding:3px;object-fit:contain;}
-          .pdfchip{display:inline-block;border:1px solid #cbd5e1;border-radius:4px;padding:6px 10px;background:#f8fafc;font-size:10px;}
           .signs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:center;font-size:9.5px;border-top:1px solid #cbd5e1;padding-top:16px;margin-top:6px;}
           .signs .role{color:#475569;margin-bottom:32px;min-height:24px;}
           .signline{border-bottom:1px dotted #64748b;width:82%;margin:0 auto;}
@@ -1093,7 +1036,7 @@ ${crit.desc}
         <div class="head">
           ${logoHtml}
           <div class="title"><h2>รายงานผลการตรวจสอบและทดสอบสเปกวัสดุ</h2>
-          <h3>กองออกแบบงานโยธา การไฟฟ้าส่วนภูมิภาค (PEA Standards Specification 2568) · ตรวจสอบโดย ${providerBadge}</h3>
+          <h3>กองออกแบบงานโยธา การไฟฟ้าส่วนภูมิภาค (PEA Standards Specification 2568) · ตรวจสอบโดย Google Gemini</h3>
           <div class="ref">กฟภ. เขต: ${region} &nbsp;|&nbsp; การไฟฟ้าสาขา: ${branch}</div></div>
           <div class="tag ${verdictClass}">${verdictLabel}</div>
         </div>
@@ -1103,10 +1046,10 @@ ${crit.desc}
           <div><b>เลขที่เอกสาร</b>${docNo}</div>
           <div><b>วันที่ตรวจสอบ</b>${dateStr}</div>
         </div>
+        ${photosHtml}
         <div class="crit"><span class="lbl">ข้อกำหนดอ้างอิงตามรายการประกอบแบบ กฟภ. ฉบับปี 2568</span>${catDesc}</div>
         <table><thead><tr><th style="width:24%;">รายการตรวจสอบ</th><th style="width:34%;">เกณฑ์สเปกตามเล่ม กฟภ. 2568</th><th style="width:26%;">ค่าที่ตรวจสอบได้จากเอกสาร/ภาพ</th><th style="width:16%;text-align:center;">ผลการประเมิน</th></tr></thead><tbody>${checksRows}</tbody></table>
         ${adviceHtml}
-        ${photoHtml}
         <div class="signs">
           <div><p class="role">ผู้เสนอขออนุมัติ<br>(วิศวกรผู้รับจ้าง)</p><p class="signline"></p><p class="signname">(......................................................)</p><p class="signpost">ตำแหน่ง: วิศวกรโครงการ</p></div>
           <div><p class="role">ผู้ตรวจสอบความสอดคล้อง<br>(ผู้ควบคุมงาน กฟภ.)</p><p class="signline"></p><p class="signname">(......................................................)</p><p class="signpost">ตำแหน่ง: ตัวแทนผู้ว่าจ้าง / กฟภ.</p></div>
