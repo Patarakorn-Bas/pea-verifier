@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบตรวจสอบการขออนุมัติวัสดุ กฟภ. 2568</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Sarabun', sans-serif; }
+    @media print {
+      body { background: white !important; font-size: 11px; margin: 0; padding: 0; }
+      .no-print { display: none !important; }
+      .print-full { width: 100% !important; border: none !important; box-shadow: none !important; padding: 0 !important; }
+      .page-break { page-break-after: always; }
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen">
+
+  <!-- แถบเมนูด้านบน -->
+  <header class="bg-gradient-to-r from-purple-950 via-indigo-900 to-slate-900 text-white shadow no-print">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-2">
+      <div>
+        <h1 class="text-base md:text-lg font-bold tracking-tight">ระบบตรวจสอบการขออนุมัติวัสดุ (PEA Material Verifier)</h1>
+        <p class="text-[11px] text-purple-200">รายการประกอบแบบมาตรฐาน กองออกแบบงานโยธา การไฟฟ้าส่วนภูมิภาค ฉบับปี 2568</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <span id="apiKeyBadge" class="text-[11px] px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-200">
+          ⚠️ ยังไม่ได้ตั้งค่า API Key
+        </span>
+        <button onclick="openModal()" class="text-xs bg-indigo-700 hover:bg-indigo-600 border border-indigo-400/40 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+          ตั้งค่า API Key
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- หน้าต่าง Modal สำหรับตั้งค่า API Key -->
+  <div id="keyModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
+    <div class="bg-white rounded-xl max-w-md w-full p-5 shadow-2xl border border-slate-200">
+      <h3 class="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
+        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>
+        บันทึก Gemini API Key สำหรับเครื่องของคุณ
+      </h3>
+      <p class="text-[11px] text-slate-500 mb-3 leading-relaxed">
+        Key จะถูกบันทึกไว้ใน Browser (Local Storage) ของคุณเท่านั้น ปลอดภัยต่อการใช้งานร่วมกันในทีม
+      </p>
+      <input type="password" id="keyField" placeholder="AIzaSy..." class="w-full rounded border border-slate-300 px-3 py-2 text-xs mb-3 focus:ring-1 focus:ring-indigo-500 focus:outline-none">
+      <div class="flex justify-end gap-2">
+        <button onclick="closeModal()" class="px-3 py-1.5 rounded border border-slate-300 text-xs font-semibold text-slate-600 hover:bg-slate-50">ยกเลิก</button>
+        <button onclick="saveKey()" class="px-4 py-1.5 rounded bg-indigo-700 hover:bg-indigo-800 text-xs font-semibold text-white shadow">บันทึก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- โครงสร้างหลัก -->
+  <main class="max-w-7xl mx-auto px-4 py-5 grid grid-cols-1 lg:grid-cols-12 gap-6">
+    
+    <!-- ฝั่งซ้าย: ฟอร์มนำเข้าข้อมูล -->
+    <div class="lg:col-span-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200 no-print space-y-3.5">
+      <h2 class="text-xs font-bold text-slate-900 pb-2 border-b border-slate-100 flex items-center gap-1.5">
+        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        1. แนบรูปถ่ายแค็ตตาล็อก / เอกสารสเปก
+      </h2>
+
+      <div class="border-2 border-dashed border-slate-300 rounded-lg p-3 text-center hover:border-indigo-500 transition-colors bg-slate-50/50">
+        <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="processImage(event)">
+        <label for="imageInput" class="cursor-pointer block">
+          <svg class="w-6 h-6 text-indigo-500 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+          <span class="text-xs font-semibold text-indigo-600">กดเพื่อถ่ายรูป หรืออัปโหลดภาพ</span>
+          <span class="text-[10px] text-slate-400 block">รองรับรูปถ่ายสเปก, ตาราง TDS, ฉลาก มอก.</span>
+        </label>
+      </div>
+
+      <div id="imgPreviewCard" class="hidden rounded border p-1.5 bg-slate-50">
+        <img id="imgPreview" src="" class="max-h-36 rounded object-contain mx-auto">
+      </div>
+
+      <h2 class="text-xs font-bold text-slate-900 pt-1 pb-1 border-b border-slate-100">2. ข้อมูลโครงการและหมวดงาน</h2>
+
+      <div class="space-y-2">
+        <div>
+          <label class="block text-[10px] font-semibold text-slate-600">ชื่อโครงการ</label>
+          <input type="text" id="fldProject" placeholder="เช่น อาคารสำนักงาน กฟภ." class="w-full rounded border border-slate-300 px-2 py-1 text-xs">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[10px] font-semibold text-slate-600">ผู้รับจ้าง</label>
+            <input type="text" id="fldContractor" placeholder="บริษัทคู่สัญญา" class="w-full rounded border border-slate-300 px-2 py-1 text-xs">
+          </div>
+          <div>
+            <label class="block text-[10px] font-semibold text-slate-600">เลขที่เอกสารขออนุมัติ</label>
+            <input type="text" id="fldDocNo" placeholder="เช่น MAT-001/2569" class="w-full rounded border border-slate-300 px-2 py-1 text-xs">
+          </div>
+        </div>
+        <div>
+          <label class="block text-[10px] font-semibold text-slate-600">หมวดหมู่วัสดุที่ต้องการตรวจสอบ</label>
+          <select id="selCategory" class="w-full rounded border border-slate-300 px-2 py-1.5 text-xs font-medium bg-white focus:outline-none">
+            <option value="aluminum">หมวด 08 11 16 & 08 51 13 ประตู-หน้าต่างอลูมิเนียม</option>
+            <option value="glass">หมวด 08 80 00 กระจก (Glazing)</option>
+            <option value="hardware">หมวด 08 71 00 อุปกรณ์ประตู / Hardware / โช้คอัพ</option>
+            <option value="rebar">หมวด 03 21 00 เหล็กเส้นเสริมคอนกรีต</option>
+            <option value="floor_hardener">หมวด 03 35 13 งานพื้นผิวแกร่ง (Floor Hardener)</option>
+            <option value="plaster">หมวด 09 24 00 งานฉาบปูนสำเร็จรูป</option>
+            <option value="tile">หมวด 09 30 13 กระเบื้องเซรามิก / พอร์ซเลน</option>
+            <option value="paint">หมวด 09 90 00 งานสีและการทำผิว</option>
+            <option value="acoustic">หมวด 09 51 00 ฝ้าเพดานกันเสียง (Acoustic)</option>
+            <option value="vinyl">หมวด 09 65 18 กระเบื้องยางชนิดม้วน</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="button" id="btnRun" onclick="runAiVerification()" class="w-full bg-indigo-700 hover:bg-indigo-800 text-white font-semibold py-2 rounded-lg text-xs transition-colors flex justify-center items-center gap-1.5 shadow">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        ให้ AI ตรวจสอบเทียบสเปก กฟภ. 2568
+      </button>
+
+      <div id="loadingIndicator" class="hidden text-center py-2 text-xs text-indigo-700 font-medium">
+        <svg class="animate-spin h-4 w-4 text-indigo-600 mx-auto mb-1" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+        AI กำลังอ่านข้อมูลในภาพและเทียบสเปก...
+      </div>
+    </div>
+
+    <!-- ฝั่งขวา: รายงานทางการสำหรับพิมพ์และตรวจรับงาน -->
+    <div class="lg:col-span-8">
+      <div id="reportSheet" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 min-h-[640px] flex flex-col justify-between print-full">
+        <div>
+          <!-- ตราสัญลักษณ์และหัวกระดาษทางการ -->
+          <div class="border-b-2 border-slate-900 pb-3 mb-3">
+            <div class="flex justify-between items-start">
+              <div>
+                <h2 class="text-base font-bold text-slate-900 tracking-tight">รายงานผลการตรวจสอบและทดสอบสเปกวัสดุ</h2>
+                <h3 class="text-xs font-semibold text-slate-700">กองออกแบบงานโยธา การไฟฟ้าส่วนภูมิภาค (PEA Standards Specification 2568)</h3>
+              </div>
+              <div class="text-right">
+                <span id="badgeVerdict" class="text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-600">รอผลการตรวจสอบ</span>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px] text-slate-600 mt-2 bg-slate-50 p-2 rounded border border-slate-200">
+              <div><strong>โครงการ:</strong> <span id="outProject">-</span></div>
+              <div><strong>ผู้รับจ้าง:</strong> <span id="outContractor">-</span></div>
+              <div><strong>เลขที่เอกสาร:</strong> <span id="outDocNo">-</span></div>
+              <div><strong>วันที่ตรวจสอบ:</strong> <span id="outDate">20 ก.ย. 2569</span></div>
+            </div>
+          </div>
+
+          <!-- เกณฑ์ข้อกำหนดตามเล่ม กฟภ. 2568 -->
+          <div class="mb-3 text-xs bg-indigo-50/60 border border-indigo-100 p-2 rounded">
+            <span class="font-bold text-indigo-950">ข้อกำหนดอ้างอิงตามรายการประกอบแบบ กฟภ. ฉบับปี 2568:</span>
+            <p id="outStandardCriteria" class="text-indigo-900 mt-0.5 text-[11px] leading-relaxed">กรุณาแนบรูปถ่ายและกดเริ่มการตรวจสอบ</p>
+          </div>
+
+          <!-- ตารางเปรียบเทียบผลการตรวจสอบ -->
+          <table class="w-full text-xs text-left border border-slate-300 rounded overflow-hidden mb-3">
+            <thead class="bg-slate-100 text-slate-700 border-b border-slate-300">
+              <tr>
+                <th class="px-2.5 py-1.5 font-bold w-1/4">รายการตรวจสอบ</th>
+                <th class="px-2.5 py-1.5 font-bold w-1/3">เกณฑ์สเปกตามเล่ม กฟภ. 2568</th>
+                <th class="px-2.5 py-1.5 font-bold w-1/4">ค่าที่ตรวจสอบได้จากเอกสาร/ภาพ</th>
+                <th class="px-2.5 py-1.5 font-bold text-center">ผลการประเมิน</th>
+              </tr>
+            </thead>
+            <tbody id="outTableBody" class="divide-y divide-slate-200 text-[11px]">
+              <tr>
+                <td colspan="4" class="px-3 py-10 text-center text-slate-400">ยังไม่มีข้อมูลการประเมิน</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- สรุปผลและการสั่งการของผู้ควบคุมงาน -->
+          <div id="outAdviceBox" class="p-2.5 rounded border text-xs leading-relaxed mb-3 hidden"></div>
+
+          <!-- รูปถ่ายเอกสารแนบในรายงาน -->
+          <div id="outPhotoBox" class="hidden mb-3">
+            <span class="text-[10px] font-bold text-slate-600 block mb-1">ภาพเอกสาร/แค็ตตาล็อกที่นำมาเปรียบเทียบสเปก:</span>
+            <img id="outPhotoImg" src="" class="max-h-32 border rounded p-1 object-contain">
+          </div>
+        </div>
+
+        <!-- ช่องลงนามรับรองมาตรฐาน 3 ฝ่าย -->
+        <div class="mt-4 pt-3 border-t border-slate-400">
+          <div class="grid grid-cols-3 gap-2 text-center text-[10px]">
+            <div>
+              <p class="text-slate-600 mb-7">ผู้เสนอขออนุมัติ (วิศวกรผู้รับจ้าง)</p>
+              <p class="border-b border-dotted border-slate-500 w-4/5 mx-auto"></p>
+              <p class="mt-1">(......................................................)</p>
+              <p class="text-slate-400 text-[9px]">ตำแหน่ง: วิศวกรโครงการ</p>
+            </div>
+            <div>
+              <p class="text-slate-600 mb-7">ผู้ตรวจสอบความสอดคล้อง (ผู้ควบคุมงาน กฟภ.)</p>
+              <p class="border-b border-dotted border-slate-500 w-4/5 mx-auto"></p>
+              <p class="mt-1">(......................................................)</p>
+              <p class="text-slate-400 text-[9px]">ตำแหน่ง: ตัวแทนผู้ว่าจ้าง / กฟภ.</p>
+            </div>
+            <div>
+              <p class="text-slate-600 mb-7">ความเห็นชอบการอนุมัติ (คณะกรรมการตรวจรับพัสดุ)</p>
+              <p class="border-b border-dotted border-slate-500 w-4/5 mx-auto"></p>
+              <p class="mt-1">(......................................................)</p>
+              <p class="text-slate-400 text-[9px]">ตำแหน่ง: ประธานกรรมการตรวจรับพัสดุ</p>
+            </div>
+          </div>
+          
+          <div class="flex justify-end mt-4 no-print">
+            <button onclick="window.print()" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded text-xs font-semibold flex items-center gap-1.5 shadow">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+              พิมพ์รายงานมาตรฐาน / บันทึก PDF (Print Report)
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // ฐานข้อมูลเกณฑ์ข้อกำหนด กฟภ. ฉบับปี 2568
+    const CRITERIA_DB = {
+      aluminum: {
+        name: "หมวด 08 11 16 & 08 51 13 ประตู-หน้าต่างอลูมิเนียม",
+        desc: "Alloy 6063-T5 หรือ 50S-T5 ตาม มอก. 284-2560 ความหนาวงกบ ≥ 1.75 มม., กรอบบานประตู/หน้าต่าง ≥ 2.00 มม. แบรนด์ที่ระบุ: ไทยเม็ททอล (ORM), ซิมเมอร์ (Building System), YKK AP (Nexsta), ทอสเท็ม (P7), ฟูจิ เมททอล"
+      },
+      glass: {
+        name: "หมวด 08 80 00 กระจก (Glazing)",
+        desc: "มอก. 880-2560 (โฟลตใส) / มอก. 1344-2560 (ตัดแสงเขียว ดูดความร้อน 35-50%) ความหนาทั่วไป ≥ 6.0 มม., ติดตาย 25-32 ตร.ฟุต หนา ≥ 8.0 มม., 32-40 ตร.ฟุต หนา ≥ 12.0 มม., Skylight ต้อง Laminated ≥ 8.0 มม. แบรนด์: การ์เดียน, บีจี โฟลต กล๊าส, ไทยอาซาฮี (AGC), ไทย-เยอรมัน, ทีวายเค"
+      },
+      hardware: {
+        name: "หมวด 08 71 00 อุปกรณ์ประตู-หน้าต่าง (Hardware)",
+        desc: "บานพับสเตนเลส SUS304 หนา ≥ 2.5-4.0 มม. กุญแจ Master Key 6 พิน โช้คอัพ Heavy Duty 2 จังหวะ แขนผลักหนีไฟ ANSI Grade 1 ทนไฟ 3 ชม. แบรนด์: ASSA ABLOY, CENZA, COLT, DORMA, JARTON, PENTACO, SKULTHAI, VVP"
+      },
+      rebar: {
+        name: "หมวด 03 21 00 เหล็กเส้นเสริมคอนกรีต",
+        desc: "เหล็กกลม RB ≤ 9 มม. SR24 (มอก. 20) / เหล็กข้ออ้อย DB 10-25 มม. SD40 (มอก. 24) / DB 28-32 มม. SD50 (มอก. 24) ข้อห้ามเด็ดขาด: ห้ามใช้เหล็กรีดซ้ำ (SRR) ทุกกรณี"
+      },
+      floor_hardener: {
+        name: "หมวด 03 35 13 งานพื้นผิวแกร่ง (Floor Hardener)",
+        desc: "ผงเพิ่มความแข็งชนิดไม่ผสมโลหะ (Non-Metallic) มอก. 2704-2559 ความแข็ง Mohs Scale ≥ 7 อัตราโปรย ≥ 5.0 กก./ตร.ม. แบรนด์: C-TOP (ดูรากรีต), Crocodile, Lanko 243, TPI M99, Nito Flor Hardtop"
+      },
+      plaster: {
+        name: "หมวด 09 24 00 งานฉาบปูนสำเร็จรูป",
+        desc: "มอร์ตาร์ฉาบทั่วไป มอก. 1776 / มวลเบา มอก. 2735 / สกิมโค้ท มอก. 3056 แบรนด์: ลูกดิ่งส้ม/แดง, ทีพีไอ, เสือ มอร์ตาร์, อินทรี มอร์ตาร์, Q-CON, จระเข้, แลงโก้"
+      },
+      tile: {
+        name: "หมวด 09 30 13 กระเบื้องเซรามิกและพอร์ซเลน",
+        desc: "เซรามิก เกรด A มอก. 2508 หนา ≥ 6.8 มม. / พอร์ซเลน Homogeneous ดูดซึมน้ำ < 0.5% ปูด้วยกาวซีเมนต์ (จระเข้, ตุ๊กแก Weber, เสือ, SikaTile) ห้ามปูซาลาเปา"
+      },
+      paint: {
+        name: "หมวด 09 90 00 งานสีและการทำผิว",
+        desc: "สีน้ำอะครีลิค 100% มอก. 2321-2564 / สีเคลือบเงา มอก. 2625 / รับประกันคุณภาพฟิล์มสีจากผู้ผลิตไม่น้อยกว่า 15 ปี แบรนด์: TOA, ICI DULUX, JOTUN, BEGER, CAPTAIN, NIPPON PAINT"
+      },
+      acoustic: {
+        name: "หมวด 09 51 00 ฝ้าเพดานกันเสียง (Acoustic)",
+        desc: "แผ่นใยแร่ Mineral Fiber หนา ≥ 15 มม. บังใบ NRC ≥ 0.50, CAC ≥ 34 dB รับประกันไม่แอ่นตัว 10 ปี แบรนด์: AMF (Knauf), ARMSTRONG, CELOTEX, DAIKEN, OWA, TRANDAR, USG"
+      },
+      vinyl: {
+        name: "หมวด 09 65 18 กระเบื้องยางชนิดม้วน (Vinyl Flooring)",
+        desc: "Homogeneous หนา ≥ 2.0 มม. กว้าง ≥ 2 ม. เชื่อมรอยต่อร้อน (Welding Rod) เคลือบ PUR ไม่ลามไฟ EN 13501-1 รับประกันวัสดุ 10 ปี แบรนด์: ARMSTRONG, TARKETT, GERFLOR, FORBO"
+      }
+    };
+
+    let base64Data = null;
+
+    function initKey() {
+      const k = localStorage.getItem('gemini_api_key');
+      const b = document.getElementById('apiKeyBadge');
+      if (k && k.length > 10) {
+        b.className = 'text-[11px] px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-200';
+        b.textContent = '✓ พร้อมใช้งาน (API Key เชื่อมต่อแล้ว)';
+      } else {
+        b.className = 'text-[11px] px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-200';
+        b.textContent = '⚠️ ยังไม่ได้ตั้งค่า API Key';
+      }
+    }
+
+    function openModal() {
+      document.getElementById('keyField').value = localStorage.getItem('gemini_api_key') || '';
+      document.getElementById('keyModal').classList.remove('hidden');
+    }
+    function closeModal() { document.getElementById('keyModal').classList.add('hidden'); }
+    function saveKey() {
+      const v = document.getElementById('keyField').value.trim();
+      if (v) {
+        localStorage.setItem('gemini_api_key', v);
+        alert('บันทึก API Key บนเครื่องนี้เรียบร้อย');
+      } else {
+        localStorage.removeItem('gemini_api_key');
+      }
+      closeModal();
+      initKey();
+    }
+
+    function processImage(e) {
+      const f = e.target.files[0];
+      if (f && f.type.startsWith('image/')) {
+        const r = new FileReader();
+        r.onload = function(evt) {
+          base64Data = evt.target.result.split(',')[1];
+          document.getElementById('imgPreview').src = evt.target.result;
+          document.getElementById('imgPreviewCard').classList.remove('hidden');
+          document.getElementById('outPhotoImg').src = evt.target.result;
+          document.getElementById('outPhotoBox').classList.remove('hidden');
+        };
+        r.readAsDataURL(f);
+      }
+    }
+
+    async function runAiVerification() {
+      const apiKey = localStorage.getItem('gemini_api_key');
+      if (!apiKey) {
+        alert('กรุณาคลิก "ตั้งค่า API Key" ที่แถบด้านบนขวาก่อน');
+        openModal();
+        return;
+      }
+      if (!base64Data) {
+        alert('กรุณาอัปโหลดรูปถ่ายสเปก หรือเอกสารแค็ตตาล็อกก่อน');
+        return;
+      }
+
+      const cat = document.getElementById('selCategory').value;
+      const crit = CRITERIA_DB[cat];
+
+      // อัปเดตข้อมูลหัวกระดาษรายงาน
+      document.getElementById('outProject').textContent = document.getElementById('fldProject').value || 'อาคารสำนักงาน กฟภ.';
+      document.getElementById('outContractor').textContent = document.getElementById('fldContractor').value || '-';
+      document.getElementById('outDocNo').textContent = document.getElementById('fldDocNo').value || '-';
+      document.getElementById('outStandardCriteria').textContent = crit.desc;
+
+      document.getElementById('loadingIndicator').classList.remove('hidden');
+      document.getElementById('btnRun').disabled = true;
+
+      const prompt = `
+คุณเป็นวิศวกรผู้เชี่ยวชาญการตรวจรับรองวัสดุของการไฟฟ้าส่วนภูมิภาค (กฟภ.)
+หน้าที่ของคุณคือ อ่านข้อมูลทางวิศวกรรมจากรูปภาพที่แนบมา (เช่น ตารางสเปก, สติกเกอร์ มอก., ตารางแค็ตตาล็อก หรือ Data Sheet) แล้วนำมาตรวจสอบเปรียบเทียบกับข้อกำหนดมาตรฐาน กฟภ. ฉบับปี 2568 ดังนี้:
+
+[เกณฑ์มาตรฐาน กฟภ. 2568 ในหมวด ${crit.name}]:
+${crit.desc}
+
+ให้ตอบกลับเป็นรูปแบบ JSON บริสุทธิ์ (ห้ามมี Markdown ครอบ) ตามโครงสร้างนี้:
+{
+  "verdict": "APPROVED" | "REVIEW" | "REJECTED",
+  "reason": "สรุปเหตุผลทางวิศวกรรมสั้นๆ ชัดเจน 2-3 บรรทัด",
+  "checks": [
+    {
+      "topic": "ยี่ห้อ / โรงงานผู้ผลิต",
+      "standard": "เกณฑ์ กฟภ. 2568",
+      "actual": "ค่าที่อ่านได้จากรูป",
+      "pass": true | false
+    },
+    {
+      "topic": "ความหนา / ขนาด / กำลังรับแรง",
+      "standard": "เกณฑ์ กฟภ. 2568",
+      "actual": "ค่าที่อ่านได้จากรูป",
+      "pass": true | false
+    },
+    {
+      "topic": "มาตรฐาน มอก. / มาตรฐานรับรอง",
+      "standard": "เกณฑ์ กฟภ. 2568",
+      "actual": "ค่าที่อ่านได้จากรูป",
+      "pass": true | false
+    },
+    {
+      "topic": "ระยะเวลารับประกัน / ข้อกำหนดพิเศษ",
+      "standard": "เกณฑ์ กฟภ. 2568",
+      "actual": "ค่าที่อ่านได้จากรูป",
+      "pass": true | false
+    }
+  ]
+}
+`;
+
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              parts: [
+                { text: prompt },
+                { inline_data: { mime_type: "image/jpeg", data: base64Data } }
+              ]
+            }],
+            generationConfig: {
+              response_mime_type: "application/json",
+              temperature: 0.1
+            }
+          })
+        });
+
+        const data = await res.json();
+        if (data.error) throw new Error(data.error.message);
+
+        const parsed = JSON.parse(data.candidates[0].content.parts[0].text);
+        renderReport(parsed);
+
+      } catch (err) {
+        console.error(err);
+        alert('เกิดข้อผิดพลาดในการวิเคราะห์ AI: ' + err.message);
+      } finally {
+        document.getElementById('loadingIndicator').classList.add('hidden');
+        document.getElementById('btnRun').disabled = false;
+      }
+    }
+
+    function renderReport(r) {
+      const tbody = document.getElementById('outTableBody');
+      const badge = document.getElementById('badgeVerdict');
+      const box = document.getElementById('outAdviceBox');
+      tbody.innerHTML = '';
+
+      r.checks.forEach(c => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="px-2.5 py-2 font-semibold text-slate-800">${c.topic}</td>
+          <td class="px-2.5 py-2 text-slate-600">${c.standard}</td>
+          <td class="px-2.5 py-2 font-semibold ${c.pass ? 'text-slate-800' : 'text-rose-600'}">${c.actual}</td>
+          <td class="px-2.5 py-2 text-center">
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${c.pass ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+              ${c.pass ? 'ผ่านเกณฑ์' : 'ไม่ผ่านเกณฑ์'}
+            </span>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      box.classList.remove('hidden');
+      if (r.verdict === 'APPROVED') {
+        badge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800';
+        badge.textContent = 'ผลการตรวจ: อนุมัติ (Approved)';
+        box.className = 'p-2.5 rounded border border-emerald-200 bg-emerald-50 text-emerald-950 text-xs leading-relaxed';
+        box.innerHTML = `<strong>สรุปผลการพิจารณา: สอดคล้องตามรายการประกอบแบบ กฟภ. ฉบับปี 2568</strong><br>${r.reason}<br><span class="text-[10px] text-emerald-800 mt-1 block">ความเห็นผู้ควบคุมงาน: คุณสมบัติครบถ้วนตามข้อกำหนด อนุมัติให้จัดหาและใช้งานได้</span>`;
+      } else if (r.verdict === 'REVIEW') {
+        badge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-amber-100 text-amber-800';
+        badge.textContent = 'ผลการตรวจ: ขอเอกสารเทียบเท่า (Review Required)';
+        box.className = 'p-2.5 rounded border border-amber-200 bg-amber-50 text-amber-950 text-xs leading-relaxed';
+        box.innerHTML = `<strong>สรุปผลการพิจารณา: ต้องเสนอเอกสารรับรองคุณสมบัติเทียบเท่าเพิ่มเติม</strong><br>${r.reason}<br><span class="text-[10px] text-amber-800 mt-1 block">ความเห็นผู้ควบคุมงาน: ให้ผู้รับจ้างแนบผลทดสอบจากสถาบันที่ กฟภ. รับรองตามหมวด 01 60 00 เพื่อเสนอผู้ออกแบบพิจารณา</span>`;
+      } else {
+        badge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-rose-100 text-rose-800';
+        badge.textContent = 'ผลการตรวจ: ไม่อนุมัติ (Rejected)';
+        box.className = 'p-2.5 rounded border border-rose-200 bg-rose-50 text-rose-950 text-xs leading-relaxed';
+        box.innerHTML = `<strong>สรุปผลการพิจารณา: ไม่อนุญาตให้นำมาใช้ในงานก่อสร้าง</strong><br>${r.reason}<br><span class="text-[10px] text-rose-800 mt-1 block">ความเห็นผู้ควบคุมงาน: คุณสมบัติต่ำกว่าเกณฑ์ขั้นต่ำตามสเปก ปฏิเสธการขออนุมัติและให้ผู้รับจ้างเสนอผลิตภัณฑ์ใหม่</span>`;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', initKey);
+  </script>
+</body>
+</html>
+```<FollowUp>
+- หากต้องการผูก Custom Domain Name (เช่น `material-check.yourdomain.com`) แทนชื่อ `.github.io` ต้องการให้แนะนำขั้นตอนเพิ่มเติมหรือไม่
+- ต้องการให้เพิ่มปุ่มดาวน์โหลดรายงานออกมาเป็นไฟล์ Microsoft Excel (.xlsx) นอกเหนือจากการพิมพ์ PDF หรือไม่
+</FollowUp>
+
+<ElicitationsGroup>
+- หากมีขั้นตอนการอัปโหลดไฟล์ขึ้น GitHub ติดขัดตรงส่วนใด สามารถแจ้งจุดที่ต้องการคำแนะนำเพิ่มเติมได้ทันทีครับ
+</ElicitationsGroup>
