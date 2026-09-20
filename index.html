@@ -10,7 +10,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Sarabun', sans-serif; }
-    /* สำรองไว้เผื่อผู้ใช้กด Ctrl+P ตรงๆ บนหน้าเว็บหลัก (ปกติปุ่มพิมพ์จะเปิดหน้าต่างรายงานแยกต่างหากซึ่งเสถียรกว่า) */
     @media print {
       body { background: white !important; font-size: 11px; margin: 0; padding: 0; }
       .no-print { display: none !important; }
@@ -47,7 +46,7 @@
         ตั้งค่า AI &amp; API Key
       </h3>
       <p class="text-[11px] text-slate-500 leading-relaxed">
-        API Key และโมเดลที่เลือกจะถูกบันทึกไว้ใน Browser ของเครื่องคุณเท่านั้น (Local Storage) แยกเก็บตามผู้ให้บริการแต่ละราย ไม่ถูกส่งไปที่ใดนอกจากผู้ให้บริการ AI ที่เลือกโดยตรง
+        ระบบมี API Key กลางของโครงการติดตั้งไว้แล้ว หรือคุณสามารถระบุ Key ส่วนตัวเพื่อใช้งานเฉพาะเครื่องนี้ได้
       </p>
 
       <div>
@@ -68,8 +67,7 @@
       <div>
         <label class="block text-xs font-semibold text-slate-700 mb-1">เลือกโมเดล AI ที่ใช้ตรวจสอบเอกสาร</label>
         <select id="modelField" class="w-full rounded border border-slate-300 px-3 py-2 text-xs bg-white focus:ring-1 focus:ring-indigo-500 focus:outline-none"></select>
-        <p class="text-[10px] text-slate-400 mt-1" id="fallbackNote">ถ้าโมเดลที่เลือกเรียกไม่สำเร็จ ระบบจะลองโมเดลสำรองในรายการให้อัตโนมัติ</p>
-        <p id="corsWarning" class="hidden text-[10.5px] text-amber-800 bg-amber-50 border border-amber-300 rounded p-2 mt-2 leading-relaxed"></p>
+        <p class="text-[10px] text-slate-400 mt-1" id="fallbackNote">ถ้าโมเดลที่เลือกเรียกไม่สำเร็จ ระบบจะลองโมเดลสำรองให้อัตโนมัติ</p>
       </div>
 
       <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
@@ -89,7 +87,7 @@
       <div>
         <h2 class="text-xs font-bold text-slate-900 pb-1.5 border-b border-slate-100 flex items-center gap-1.5">
           <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-          1. แนบเอกสารสเปก (ไฟล์ PDF หรือ รูปภาพ)
+          1. แนบเอกสารสเปกหลัก (ไฟล์ PDF หรือ รูปภาพสเปก)
         </h2>
 
         <div class="mt-2 border-2 border-dashed border-slate-300 rounded-lg p-3 text-center hover:border-indigo-500 transition-colors bg-slate-50/50">
@@ -97,7 +95,7 @@
           <label for="docFileInput" class="cursor-pointer block">
             <svg class="w-7 h-7 text-indigo-500 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
             <span class="text-xs font-semibold text-indigo-600">กดเพื่อเลือกไฟล์ PDF หรือรูปภาพ</span>
-            <span class="text-[10px] text-slate-400 block mt-0.5">รองรับไฟล์ .pdf, .jpg, .png (ตารางสเปก, ใบรับรอง มอก.)</span>
+            <span class="text-[10px] text-slate-400 block mt-0.5">รองรับไฟล์ .pdf, .jpg, .png (ตารางสเปก, แค็ตตาล็อก)</span>
           </label>
         </div>
 
@@ -111,6 +109,15 @@
           <embed id="pdfPreviewEmbed" src="" type="application/pdf" class="w-full h-48 rounded bg-white">
           <a id="pdfOpenNewTab" href="#" target="_blank" rel="noopener" class="text-[10px] text-indigo-600 hover:underline block text-center mt-1">เปิดไฟล์ PDF เต็มจอในแท็บใหม่ ↗</a>
         </div>
+      </div>
+
+      <!-- แนบภาพถ่ายผลิตภัณฑ์สำหรับรีพอร์ต (กรณีใช้ PDF แล้วต้องการรูปผลิตภัณฑ์ลงในรีพอร์ตด้วย) -->
+      <div class="bg-indigo-50/40 p-2.5 rounded-lg border border-indigo-100">
+        <label class="block text-[11px] font-bold text-indigo-950 mb-1 flex items-center gap-1">
+          📷 ภาพถ่ายสินค้า/แค็ตตาล็อก (สำหรับแสดงในใบรายงาน)
+        </label>
+        <input type="file" id="productPhotoInput" accept="image/*" class="text-[10px] text-slate-600 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-indigo-100 file:text-indigo-800 hover:file:bg-indigo-200" onchange="handleProductPhotoUpload(event)">
+        <span class="text-[9.5px] text-slate-500 block mt-1">*กรณีแนบ PDF สามารถแนบภาพสินค้าที่นี่ เพื่อให้ภาพไปปรากฏในใบพิมพ์รีพอร์ต A4</span>
       </div>
 
       <!-- 2. แนบโลโก้หน่วยงาน -->
@@ -288,7 +295,7 @@
                 <span id="badgeVerdict" class="text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-600">รอผลการตรวจสอบ</span>
               </div>
             </div>
-
+            
             <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-[11px] text-slate-600 mt-3 bg-slate-50 p-2 rounded border border-slate-200">
               <div><strong>โครงการ:</strong> <span id="outProject">-</span></div>
               <div><strong>ผู้รับจ้าง:</strong> <span id="outContractor">-</span></div>
@@ -323,13 +330,16 @@
           <!-- สรุปผลและการสั่งการของผู้ควบคุมงาน -->
           <div id="outAdviceBox" class="p-2.5 rounded border text-xs leading-relaxed mb-3 hidden"></div>
 
-          <!-- รูปถ่ายเอกสารแนบในรายงาน -->
-          <div id="outPhotoBox" class="hidden mb-3">
-            <span class="text-[10px] font-bold text-slate-600 block mb-1">ภาพเอกสาร/แค็ตตาล็อกที่นำมาเปรียบเทียบสเปก:</span>
-            <img id="outPhotoImg" src="" class="max-h-32 border rounded p-1 object-contain hidden" alt="เอกสารที่ใช้ตรวจสอบ">
-            <div id="outPhotoPdfChip" class="hidden inline-flex items-center gap-1.5 border rounded px-2.5 py-1.5 bg-slate-50 text-[11px] text-slate-700">
-              <svg class="w-4 h-4 text-rose-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-              <span id="outPhotoPdfName">-</span>
+          <!-- กล่องแสดงรูปถ่ายผลิตภัณฑ์ในรีพอร์ตฝั่งขวา -->
+          <div id="outPhotoBox" class="hidden mb-3 p-2 border rounded bg-slate-50">
+            <span class="text-[10px] font-bold text-slate-700 block mb-1.5">ภาพตัวอย่างผลิตภัณฑ์ / แค็ตตาล็อกที่ขออนุมัติ:</span>
+            <div class="flex items-center gap-3">
+              <img id="outPhotoImg" src="" class="max-h-36 border rounded p-1 bg-white object-contain hidden" alt="รูปผลิตภัณฑ์">
+              <div id="outPhotoPdfChip" class="hidden text-[11px] text-slate-600">
+                <span class="inline-flex items-center gap-1 bg-white border px-2.5 py-1 rounded font-medium text-indigo-900">
+                  📄 เอกสาร PDF: <span id="outPhotoPdfName">-</span>
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -356,7 +366,7 @@
               <p class="text-slate-400 text-[9px]">ตำแหน่ง: ประธานกรรมการตรวจรับพัสดุ</p>
             </div>
           </div>
-
+          
           <!-- ปุ่มพิมพ์ PDF และ ปุ่ม Export Excel -->
           <div class="flex justify-end gap-2 mt-4 no-print">
             <button onclick="exportToExcel()" class="px-3.5 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded text-xs font-semibold flex items-center gap-1.5 shadow">
@@ -376,32 +386,32 @@
 
   <script>
     // =========================================================================
-    // ฐานข้อมูลเกณฑ์ข้อกำหนดมาตรฐาน กฟภ. ฉบับปี 2568
-    // หมายเหตุ: ข้อความในนี้เป็นการสรุปย่อจากรายการประกอบแบบเพื่อใช้เป็น prompt
-    // อ้างอิงให้ AI เท่านั้น ไม่ใช่สำเนาทางการ ก่อนใช้ตัดสินใจอนุมัติจริงต้อง
-    // ตรวจทานกับเอกสารต้นฉบับเสมอ
+    // กุญแจ API กลางของโครงการ (สามารถนำ API Key ของคุณมาใส่ตรงนี้ได้เลย)
+    // เพื่อให้ทีมงานเปิดเว็บแล้วเริ่มใช้งานได้ทันที โดยไม่ต้องกรอก Key เอง
     // =========================================================================
+    const DEFAULT_GEMINI_KEY = ""; // ตัวอย่าง: "AIzaSyDxxxxxxxxxxxxxxxxxxxxxxxxx"
+
     const PEA_MASTER_SPECS = {
-      s011100: { name: "01 11 00 ขอบเขตงาน", desc: "ก่อสร้างถูกต้องตามแบบและรายการประกอบแบบ มีความมั่นคงถาวร ประณีตตามหลักวิชาช่างที่ดี" },
-      s013000: { name: "01 30 00 การดำเนินงานและส่งตัวอย่าง", desc: "ส่งตัวอย่าง 3 ชุด และ Shop Drawing ล่วงหน้า 15-30 วัน มีสถาปนิกและวิศวกรประจำไซต์งาน" },
-      s014000: { name: "01 40 00 คุณภาพและสถาบันทดสอบ", desc: "สถาบันทดสอบที่รับรอง: มอก., วสท., จุฬาฯ, มก., AIT, มจธ., สจล., กรมวิทยาศาสตร์บริการ" },
-      s015000: { name: "01 50 00 สิ่งอำนวยความสะดวกชั่วคราว", desc: "รั้วสังกะสีเขียวสูง ≥ 2.40 ม., ถังดับเพลิงประจำทุกชั้น, สำนักงานสนามและห้องประชุม 4x6 ม." },
-      s016000: { name: "01 60 00 วัสดุและการขอเทียบเท่า", desc: "ต้องเลิกผลิตหรือขาดตลาดจริง พร้อมมีเอกสารและผลทดสอบยืนยันเทียบเท่า อนุมัติโดยผู้ออกแบบ" },
-      s017000: { name: "01 70 00 การส่งมอบงานและ As-Built", desc: "แบบจริงพิมพ์เขียวไข 1 ชุด สำเนา 2 ชุด CD CAD .dwg 1 ชุด กุญแจ Master Key ส่งมอบครบ" },
-      s020000: { name: "02 00 00 สภาพพื้นที่เดิมและการรื้อถอน", desc: "สำรวจรังวัดระดับ ถ่ายรูปอาคารข้างเคียง ป้องกันความเสียหายต่อทรัพย์สินข้างเคียงและสาธารณูปโภค" },
-      s023000: { name: "02 30 00 งานดิน (Earthwork)", desc: "ขุดดินตามพิกัด รองทรายหนา 25 ซม. ใต้โครงสร้างสัมผัสดิน ถมดินเป็นชั้นๆ หนาไม่เกิน 30 ซม. บดอัดแน่น" },
-      s024501: { name: "02 45 00 เสาเข็มตอก คอนกรีตอัดแรง", desc: "มอก. 396-2549 / ลูกตุ้มตอก ≥ 70% น้ำหนักเข็ม / นับ Blow Count 10 ฟุตสุดท้าย / ทำ Dynamic Load Test ≥ 2 ต้น" },
-      s024502: { name: "02 45 00 เสาเข็มเจาะ", desc: "คอนกรีต fc' 28 วัน ≥ 280 ksc (Cube) หรือ 240 ksc (Cylinder) / Static Test 2 ต้น (มยผ.1251) + Seismic Test ทุกต้น 100% (มยผ.1551)" },
-      s031100: { name: "03 11 00 แบบหล่อและการถอดแบบ", desc: "อายุคอนกรีตขั้นต่ำก่อนถอดแบบ: ข้างเสา/คาน 2 วัน, ท้องพื้น/คาน 14 วัน, ท้องคานยาวเกิน 6 ม. 21 วัน และบ่มน้ำต่ออย่างน้อย 7 วัน" },
-      s032101: { name: "03 21 00 เหล็กเส้นกลม (RB) ≤ 9 มม.", desc: "มอก. 20-2559 ชั้นคุณภาพ SR24 กำลังคราก ≥ 2,400 ksc ห้ามนำเหล็กรีดซ้ำ (SRR) มาใช้เด็ดขาด" },
-      s032102: { name: "03 21 00 เหล็กข้ออ้อย (DB) 10-25 มม.", desc: "มอก. 24-2559 ชั้นคุณภาพ SD40 กำลังคราก ≥ 4,000 ksc ห้ามนำเหล็กรีดซ้ำ (SRR) มาใช้เด็ดขาด" },
-      s032103: { name: "03 21 00 เหล็กข้ออ้อย (DB) 28-32 มม.", desc: "มอก. 24-2559 ชั้นคุณภาพ SD50 กำลังคราก ≥ 5,000 ksc ห้ามนำเหล็กรีดซ้ำ (SRR) มาใช้เด็ดขาด" },
-      s033100: { name: "03 31 00 งานคอนกรีตโครงสร้าง", desc: "คอนกรีตผสมเสร็จ มอก. 213-2552 ค่า Slump ฐานราก 4-7.5 ซม. เสา/คาน/พื้น 5-10 ซม. คอนกรีตสัมผัสดินและหลังคาต้องผสมน้ำยากันซึม" },
-      s033513: { name: "03 35 13 ผงขัดผิวแกร่ง (Floor Hardener)", desc: "มอก. 2704-2559 ชนิดไม่ผสมโลหะ (Non-Metallic) ความแข็ง Mohs Scale ≥ 7 อัตราโปรย ≥ 5.0 กก./ตร.ม. แบรนด์: C-TOP (ดูรากรีต), Crocodile, Lanko 243, TPI M99, Nito Flor Hardtop" },
-      s033900: { name: "03 39 00 การเทและการบ่มคอนกรีต", desc: "ห้ามทิ้งเกิน 30 นาที เทชั้นละไม่เกิน 45 ซม. สั่นเขย่า 5-15 วินาที/จุด บ่มชื้นต่อเนื่องไม่น้อยกว่า 7-28 วัน" },
-      s034100: { name: "03 41 00 แผ่นพื้นสำเร็จรูป (Precast Slab)", desc: "มอก. 828-2546 หรือ มอก. 576-2546 คอนกรีตทับหน้า Topping หนา 5 ซม. พร้อมตะแกรงเหล็ก มอก. 737 บ่มน้ำอย่างน้อย 3 วัน" },
-      s042113: { name: "04 21 13 ผนังก่ออิฐมอญ", desc: "อิฐมอญ มอก. 77-2545 ชั้นคุณภาพ ก สุกแกร่ง มีเสาเอ็น-ทับหลังทุกความยาว 2.00 ม. และความสูงไม่เกิน 2.00 ม. เสียบเหล็ก 6 มม. ยึดเสาทุก 30 ซม." },
-      s042219: { name: "04 22 19 คอนกรีตมวลเบาอบไอน้ำ", desc: "มอก. 1505-2541 ชั้นคุณภาพ 4 (G4) ปูนก่อบาง มอก. 2706 ยึดเสาด้วย Metal Strap ทุก 2 ชั้น แบรนด์: INSEE SUPERBLOCK, Q-CON, SMART BLOCK, THAICON" },
+      s011100: { name: "01 11 00 ขอบเขตงาน", desc: "ก่อสร้างถูกต้องตามแบบและรายการประกอบแบบ มีความมั่นคงถาวร ประณีตตามหลักวิชาช่างที่ดี"[cite: 2] },
+      s013000: { name: "01 30 00 การดำเนินงานและส่งตัวอย่าง", desc: "ส่งตัวอย่าง 3 ชุด และ Shop Drawing ล่วงหน้า 15-30 วัน มีสถาปนิกและวิศวกรประจำไซต์งาน"[cite: 2] },
+      s014000: { name: "01 40 00 คุณภาพและสถาบันทดสอบ", desc: "สถาบันทดสอบที่รับรอง: มอก., วสท., จุฬาฯ, มก., AIT, มจธ., สจล., กรมวิทยาศาสตร์บริการ"[cite: 2] },
+      s015000: { name: "01 50 00 สิ่งอำนวยความสะดวกชั่วคราว", desc: "รั้วสังกะสีเขียวสูง ≥ 2.40 ม., ถังดับเพลิงประจำทุกชั้น, สำนักงานสนามและห้องประชุม 4x6 ม."[cite: 2] },
+      s016000: { name: "01 60 00 วัสดุและการขอเทียบเท่า", desc: "ต้องเลิกผลิตหรือขาดตลาดจริง พร้อมมีเอกสารและผลทดสอบยืนยันเทียบเท่า อนุมัติโดยผู้ออกแบบ"[cite: 2] },
+      s017000: { name: "01 70 00 การส่งมอบงานและ As-Built", desc: "แบบจริงพิมพ์เขียวไข 1 ชุด สำเนา 2 ชุด CD CAD .dwg 1 ชุด กุญแจ Master Key ส่งมอบครบ"[cite: 2] },
+      s020000: { name: "02 00 00 สภาพพื้นที่เดิมและการรื้อถอน", desc: "สำรวจรังวัดระดับ ถ่ายรูปอาคารข้างเคียง ป้องกันความเสียหายต่อทรัพย์สินข้างเคียงและสาธารณูปโภค"[cite: 2] },
+      s023000: { name: "02 30 00 งานดิน (Earthwork)", desc: "ขุดดินตามพิกัด รองทรายหนา 25 ซม. ใต้โครงสร้างสัมผัสดิน ถมดินเป็นชั้นๆ หนาไม่เกิน 30 ซม. บดอัดแน่น"[cite: 2] },
+      s024501: { name: "02 45 00 เสาเข็มตอก คอนกรีตอัดแรง", desc: "มอก. 396-2549 / ลูกตุ้มตอก ≥ 70% น้ำหนักเข็ม / นับ Blow Count 10 ฟุตสุดท้าย / ทำ Dynamic Load Test ≥ 2 ต้น"[cite: 2] },
+      s024502: { name: "02 45 00 เสาเข็มเจาะ", desc: "คอนกรีต fc' 28 วัน ≥ 280 ksc (Cube) หรือ 240 ksc (Cylinder) / Static Test 2 ต้น (มยผ.1251) + Seismic Test ทุกต้น 100% (มยผ.1551)"[cite: 2] },
+      s031100: { name: "03 11 00 แบบหล่อและการถอดแบบ", desc: "อายุคอนกรีตขั้นต่ำก่อนถอดแบบ: ข้างเสา/คาน 2 วัน, ท้องพื้น/คาน 14 วัน, ท้องคานยาวเกิน 6 ม. 21 วัน และบ่มน้ำต่ออย่างน้อย 7 วัน"[cite: 2] },
+      s032101: { name: "03 21 00 เหล็กเส้นกลม (RB) ≤ 9 มม.", desc: "มอก. 20-2559 ชั้นคุณภาพ SR24 กำลังคราก ≥ 2,400 ksc ห้ามนำเหล็กรีดซ้ำ (SRR) มาใช้เด็ดขาด"[cite: 2] },
+      s032102: { name: "03 21 00 เหล็กข้ออ้อย (DB) 10-25 มม.", desc: "มอก. 24-2559 ชั้นคุณภาพ SD40 กำลังคราก ≥ 4,000 ksc ห้ามนำเหล็กรีดซ้ำ (SRR) มาใช้เด็ดขาด"[cite: 2] },
+      s032103: { name: "03 21 00 เหล็กข้ออ้อย (DB) 28-32 มม.", desc: "มอก. 24-2559 ชั้นคุณภาพ SD50 กำลังคราก ≥ 5,000 ksc ห้ามนำเหล็กรีดซ้ำ (SRR) มาใช้เด็ดขาด"[cite: 2] },
+      s033100: { name: "03 31 00 งานคอนกรีตโครงสร้าง", desc: "คอนกรีตผสมเสร็จ มอก. 213-2552 ค่า Slump ฐานราก 4-7.5 ซม. เสา/คาน/พื้น 5-10 ซม. คอนกรีตสัมผัสดินและหลังคาต้องผสมน้ำยากันซึม"[cite: 2] },
+      s033513: { name: "03 35 13 ผงขัดผิวแกร่ง (Floor Hardener)", desc: "มอก. 2704-2559 ชนิดไม่ผสมโลหะ (Non-Metallic) ความแข็ง Mohs Scale ≥ 7 อัตราโปรย ≥ 5.0 กก./ตร.ม. แบรนด์: C-TOP (ดูรากรีต), Crocodile, Lanko 243, TPI M99, Nito Flor Hardtop"[cite: 2] },
+      s033900: { name: "03 39 00 การเทและการบ่มคอนกรีต", desc: "ห้ามทิ้งเกิน 30 นาที เทชั้นละไม่เกิน 45 ซม. สั่นเขย่า 5-15 วินาที/จุด บ่มชื้นต่อเนื่องไม่น้อยกว่า 7-28 วัน"[cite: 2] },
+      s034100: { name: "03 41 00 แผ่นพื้นสำเร็จรูป (Precast Slab)", desc: "มอก. 828-2546 หรือ มอก. 576-2546 คอนกรีตทับหน้า Topping หนา 5 ซม. พร้อมตะแกรงเหล็ก มอก. 737 บ่มน้ำอย่างน้อย 3 วัน"[cite: 2] },
+      s042113: { name: "04 21 13 ผนังก่ออิฐมอญ", desc: "อิฐมอญ มอก. 77-2545 ชั้นคุณภาพ ก สุกแกร่ง มีเสาเอ็น-ทับหลังทุกความยาว 2.00 ม. และความสูงไม่เกิน 2.00 ม. เสียบเหล็ก 6 มม. ยึดเสาทุก 30 ซม."[cite: 2] },
+      s042219: { name: "04 22 19 คอนกรีตมวลเบาอบไอน้ำ", desc: "มอก. 1505-2541 ชั้นคุณภาพ 4 (G4) ปูนก่อบาง มอก. 2706 ยึดเสาด้วย Metal Strap ทุก 2 ชั้น แบรนด์: INSEE SUPERBLOCK, Q-CON, SMART BLOCK, THAICON"[cite: 2] },
       s051200: { name: "05 12 00 เหล็กโครงสร้าง (Structural Steel)", desc: "มอก. 1227-2558 หรือ JIS G3101 SS400 ไร้สนิม ทาสีรองพื้นกันสนิม Zinc Chromate / Red Lead 2 ชั้น สลักเกลียวตาม ASTM A325/A490" },
       s055000: { name: "05 50 00 โลหะตกแต่ง สเตนเลส SUS304", desc: "สเตนเลสเกรด SUS304 ผิว Satin เชื่อมขัดเรียบ ไร้รอยคม แข็งแรงปลอดภัยตามมาตรฐานวิศวกรรม" },
       s061000: { name: "06 10 00 งานไม้โครงสร้าง", desc: "ไม้เนื้อแข็งชั้น 1 ผึ่งแห้ง ความชื้น ≤ 16-18% ทาน้ำยากันปลวกและเชื้อรา ไสเรียบได้ฉาก" },
@@ -417,11 +427,11 @@
       s076500: { name: "07 65 00 แผ่นปิดรอยต่อ (Flexible Flashing)", desc: "เนื้อยางบิทูเมน ทน UV ทนความร้อน ≥ 80°C ยึดติดแน่น ป้องกันน้ำรั่วซึม แบรนด์: Sika Multiseal AP, SCG, ซีเท็กซ์" },
       s079000: { name: "07 90 00 การยาแนวรอยต่อ (Joint Sealant)", desc: "ภายนอกซิลิโคน Neutral 100% (ASTM C920) ทน UV / ภายใน PU Sealant ไม่เป็นคราบน้ำมัน แบรนด์: Sika, Dow Corning, GE, Tremco" },
       s081100: { name: "08 11 00 ประตูและวงกบเหล็ก", desc: "เหล็กชุบสังกะสี (Galvanized) หนา ≥ 1.6 มม. พ่นสีอบ Powder Coated รุ่นทนไฟตาม มอก. 1220-2541" },
-      s081116: { name: "08 11 16 ประตูและวงกบอลูมิเนียม", desc: "Alloy 6063-T5 หรือ 50S-T5 มอก. 284-2560 ความหนาวงกบ ≥ 1.75 มม., กรอบบานประตู ≥ 2.0 มม. สี Anodized ≥ 10-25 ไมครอน / Powder Coat ≥ 60 ไมครอน / PVDF ≥ 30 ไมครอน แบรนด์: ไทยเม็ททอล (ORM), ซิมเมอร์ (Building System), วายเคเค (Nexsta), ทอสเท็ม (P7), ฟูจิ เมททอล" },
-      s085113: { name: "08 51 13 หน้าต่างอลูมิเนียม", desc: "Alloy 6063-T5 มอก. 284-2560 ความหนากรอบบาน ≥ 2.0 มม. รางล่างกันน้ำล้น 300-500 Pa มีรูระบายน้ำ แบรนด์: ไทยเม็ททอล (ORM), ซิมเมอร์, วายเคเค, ทอสเท็ม (P7), ฟูจิ เมททอล" },
-      s081400: { name: "08 14 00 ประตูไม้อัดสำเร็จรูปทนน้ำ", desc: "มอก. 192-2549 โครงไม้เนื้อแข็ง ผิวชั้นภายนอกทนน้ำ หนา 35 มม. แบรนด์: ไม้อัดไทย, สามชัยพนา, บำรุงไทยเคหะภัณฑ์, ไพร์ซ ออฟ วู้ด" },
+      s081116: { name: "08 11 16 ประตูและวงกบอลูมิเนียม", desc: "Alloy 6063-T5 หรือ 50S-T5 มอก. 284-2560 ความหนาวงกบ ≥ 1.75 มม., กรอบบานประตู ≥ 2.0 มม. สี Anodized ≥ 10-25 ไมครอน / Powder Coat ≥ 60 ไมครอน / PVDF ≥ 30 ไมครอน แบรนด์: ไทยเม็ททอล (ORM), ซิมเมอร์ (Building System), วายเคเค (Nexsta), ทอสเท็ม (P7), ฟูจิ เมททอล"[cite: 1] },
+      s085113: { name: "08 51 13 หน้าต่างอลูมิเนียม", desc: "Alloy 6063-T5 มอก. 284-2560 ความหนากรอบบาน ≥ 2.0 มม. รางล่างกันน้ำล้น 300-500 Pa มีรูระบายน้ำ แบรนด์: ไทยเม็ททอล (ORM), ซิมเมอร์, วายเคเค, ทอสเท็ม (P7), ฟูจิ เมททอล"[cite: 1] },
+      s081400: { name: "08 14 00 ประตูไม้อัดสำเร็จรูปทนน้ำ", desc: "มอก. 192-2549 โครงไม้เนื้อแข็ง ผิวชั้นภายนอกทนน้ำ หนา 35 มม. แบรนด์: ไม้อัดไทย, สามชัยพนา, บำรุงไทยเคหะภัณฑ์, ไพร์ซ ออฟ วู้ด"[cite: 1] },
       s085200: { name: "08 52 00 งานหน้าต่างไม้", desc: "ไม้เนื้อแข็งคัดเกรดตาม มอก. 424-2530 บังใบมุมฉากป้องกันแสงลอด ไสเรียบได้ฉาก" },
-      s084229: { name: "08 42 29 ประตูบานเลื่อนอัตโนมัติ", desc: "มอเตอร์ DC Belt ควบคุมด้วยไมโครโปรเซสเซอร์ บานเดี่ยว ≥ 90 กก. บานคู่ ≥ 80 กก. มี Safety Beam รับประกันอุปกรณ์ 2 ปี แบรนด์: DORMA, KARTA, NABCO" },
+      s084229: { name: "08 42 29 ประตูบานเลื่อนอัตโนมัติ", desc: "มอเตอร์ DC Belt ควบคุมด้วยไมโครโปรเซสเซอร์ บานเดี่ยว ≥ 90 กก. บานคู่ ≥ 80 กก. มี Safety Beam รับประกันอุปกรณ์ 2 ปี แบรนด์: DORMA, KARTA, NABCO"[cite: 1] },
       s087100: { name: "08 71 00 อุปกรณ์ประตู (Door Hardware)", desc: "บานพับ SUS304 หนา 2.5-4 มม. (มอก.759-2531), กุญแจ Master Key ≥ 6 พิน (มอก.756-2533), โช้คอัพ Heavy Duty 2 จังหวะ เปิดค้าง 90°, บาร์ผลักหนีไฟ ANSI Gr.1 ทนไฟ ≥ 3 ชม. แบรนด์: ASSA ABLOY, CENZA, COLT, DORMA, JARTON, PENTACO, SKULTHAI, VVP" },
       s087500: { name: "08 75 00 อุปกรณ์หน้าต่าง (Window Hardware)", desc: "บานพับปรับมุม 4 แขน SUS304 มอก. 862-2532 ปรับความฝืดได้, มือจับบานกระทุ้ง Handle Lock สีเดียวกับบาน" },
       s088000: { name: "08 80 00 งานกระจก (Glazing)", desc: "มอก. 880-2560 (โฟลตใส) / มอก. 1344-2560 (ตัดแสง) หนาทั่วไป ≥ 6 มม., ติดตาย 25-32 ตร.ฟุต หนา ≥ 8 มม., 32-40 ตร.ฟุต หนา ≥ 12 มม., Skylight ต้อง Laminated (มอก.1222) ≥ 8 มม. แบรนด์: การ์เดียน, บีจี โฟลต กล๊าส, ไทยอาซาฮี, ไทย-เยอรมัน, ทีวายเค" },
@@ -449,26 +459,17 @@
       s321313: { name: "32 13 13 บล็อกปูพื้นและขอบคันหิน", desc: "คอนกรีตบล็อก มอก. 827-2531 กำลังรับแรงอัด ≥ 350-400 ksc ปูบนทรายบดอัดแน่น แบรนด์: SCG, CPS" }
     };
 
-    // =========================================================================
-    // ฐานข้อมูลผู้ให้บริการ AI ที่รองรับ
-    // สำคัญ: OpenAI ไม่อนุญาตให้เว็บเบราว์เซอร์เรียก API ตรง (ไม่รองรับ CORS)
-    // ต่างจาก Google และ Anthropic ที่เปิดให้เรียกจากเบราว์เซอร์ได้โดยตรง
-    // (Anthropic ต้องส่ง header พิเศษ anthropic-dangerous-direct-browser-access)
-    // หากต้องการใช้ OpenAI จริง ต้องตั้ง Proxy Server กลาง (ดูคำแนะนำในหมายเหตุท้ายไฟล์)
-    // =========================================================================
-    const PROVIDER_INFO = {
+    const DEFAULT_GEMINI_KEY = "AIzaAb8RN6IVXvSgt_NZy1eJ7G_CESC9jBZ4mi01hopPKeXoUwmoHQ"; {
       google: {
         label: 'Google Gemini',
         keyLabel: 'Google AI Studio API Key',
         keyPlaceholder: 'AIzaSy...',
         keyHelp: 'ขอ API Key ฟรีได้ที่ aistudio.google.com/apikey',
         models: [
-          { value: 'gemini-3.6-flash', label: 'Gemini 3.6 Flash (แนะนำ — เสถียร เร็ว คุ้มราคา)' },
-          { value: 'gemini-3.8-flash', label: 'Gemini 3.8 Flash (รุ่นล่าสุด ฉลาดที่สุด)' },
-          { value: 'gemini-3.1-pro-preview', label: 'Gemini 3.1 Pro Preview (แม่นยำสูงสุด)' },
-          { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash (รุ่นเก่า สำรอง)' }
-        ],
-        corsBlocked: false
+          { value: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash (แนะนำ — เสถียรและเร็ว)' },
+          { value: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' },
+          { value: 'gemini-2.0-flash-lite', label: 'Gemini 2.0 Flash-Lite' }
+        ]
       },
       anthropic: {
         label: 'Anthropic Claude',
@@ -476,11 +477,9 @@
         keyPlaceholder: 'sk-ant-...',
         keyHelp: 'ขอ API Key ได้ที่ console.anthropic.com/settings/keys',
         models: [
-          { value: 'claude-sonnet-5', label: 'Claude Sonnet 5 (แนะนำ — สมดุลความเร็ว/ความแม่นยำ)' },
-          { value: 'claude-opus-5', label: 'Claude Opus 5 (แม่นยำสูงสุด ช้ากว่า)' },
-          { value: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5 (เร็ว ประหยัดสุด)' }
-        ],
-        corsBlocked: false
+          { value: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet' },
+          { value: 'claude-3-5-haiku-20241022', label: 'Claude 3.5 Haiku' }
+        ]
       },
       openai: {
         label: 'OpenAI (ChatGPT)',
@@ -488,35 +487,41 @@
         keyPlaceholder: 'sk-...',
         keyHelp: 'ขอ API Key ได้ที่ platform.openai.com/api-keys',
         models: [
-          { value: 'gpt-5.6-sol', label: 'GPT-5.6 Sol' },
-          { value: 'gpt-6-astra', label: 'GPT-6 Astra (รุ่นใหม่ล่าสุด)' },
-          { value: 'gpt-5.2', label: 'GPT-5.2 (รุ่นเก่ากว่า)' }
-        ],
-        corsBlocked: true
+          { value: 'gpt-4o', label: 'GPT-4o' },
+          { value: 'gpt-4o-mini', label: 'GPT-4o-mini' }
+        ]
       }
     };
 
-    // ----- ตัวแปรสถานะหลัก -----
     let base64Data = null;
     let fileMimeType = "image/jpeg";
     let currentFileName = "";
+    let productPhotoBase64 = null; // ภาพถ่ายตัวสินค้าที่จะนำไปลงรีพอร์ต
     let currentEvaluationResult = null;
-    let currentPdfObjectUrl = null; // ใช้แสดงตัวอย่าง PDF เท่านั้น (แยกจาก base64Data ที่ส่งให้ AI)
+    let currentPdfObjectUrl = null;
 
-    // ----- จัดการ Provider / API Key / โมเดล -----
     function getActiveProvider() {
       return localStorage.getItem('pea_active_provider') || 'google';
+    }
+
+    function getEffectiveKey(provider) {
+      const stored = localStorage.getItem('pea_key_' + provider);
+      if (stored && stored.length > 8) return stored;
+      if (provider === 'google' && DEFAULT_GEMINI_KEY && DEFAULT_GEMINI_KEY.length > 8) {
+        return DEFAULT_GEMINI_KEY;
+      }
+      return '';
     }
 
     function initKey() {
       const provider = getActiveProvider();
       const info = PROVIDER_INFO[provider];
-      const k = localStorage.getItem('pea_key_' + provider);
+      const k = getEffectiveKey(provider);
       const model = localStorage.getItem('pea_model_' + provider) || info.models[0].value;
       const b = document.getElementById('apiKeyBadge');
       if (k && k.length > 8) {
         b.className = 'text-[11px] px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-200';
-        b.textContent = '✓ พร้อมใช้งาน (' + info.label + ' · ' + model + ')';
+        b.textContent = '✓ พร้อมใช้งาน (' + info.label + ')';
       } else {
         b.className = 'text-[11px] px-2.5 py-1 rounded-full bg-amber-500/20 border border-amber-400/40 text-amber-200';
         b.textContent = '⚠️ ยังไม่ได้ตั้งค่า API Key';
@@ -545,24 +550,10 @@
 
       document.getElementById('keyFieldLabel').textContent = info.keyLabel;
       document.getElementById('keyField').placeholder = info.keyPlaceholder;
-      document.getElementById('keyField').value = localStorage.getItem('pea_key_' + provider) || '';
+      document.getElementById('keyField').value = localStorage.getItem('pea_key_' + provider) || (provider === 'google' ? DEFAULT_GEMINI_KEY : '');
       document.getElementById('keyFieldHelp').textContent = info.keyHelp;
 
       populateModelOptions(provider);
-
-      const corsBox = document.getElementById('corsWarning');
-      const fallbackNote = document.getElementById('fallbackNote');
-      if (info.corsBlocked) {
-        corsBox.textContent = '⚠️ OpenAI ไม่อนุญาตให้เว็บเบราว์เซอร์เรียก API ตรง (ไม่รองรับ CORS) จึงยังใช้งานจากเว็บนี้ไม่ได้จริง เว้นแต่จะตั้งค่า Proxy Server กลางเพิ่มเติม (ต่างจาก Google และ Anthropic ที่เรียกตรงจากเบราว์เซอร์ได้)';
-        corsBox.classList.remove('hidden');
-        fallbackNote.classList.add('hidden');
-      } else {
-        corsBox.classList.add('hidden');
-        fallbackNote.classList.remove('hidden');
-        fallbackNote.textContent = provider === 'google'
-          ? 'ถ้าโมเดลที่เลือกเรียกไม่สำเร็จ ระบบจะลองโมเดลสำรองในรายการให้อัตโนมัติ'
-          : 'ระบบจะเรียกเฉพาะโมเดลที่เลือกไว้เท่านั้น';
-      }
     }
 
     function openModal() {
@@ -574,9 +565,7 @@
       document.getElementById('keyModal').classList.remove('hidden');
     }
 
-    function closeModal() {
-      document.getElementById('keyModal').classList.add('hidden');
-    }
+    function closeModal() { document.getElementById('keyModal').classList.add('hidden'); }
 
     function saveKey() {
       const provider = document.getElementById('providerField').value;
@@ -587,7 +576,7 @@
         localStorage.setItem('pea_key_' + provider, v);
         localStorage.setItem('pea_model_' + provider, m);
         localStorage.setItem('pea_active_provider', provider);
-        alert('บันทึกการตั้งค่าเรียบร้อย (' + PROVIDER_INFO[provider].label + ' · ' + m + ')');
+        alert('บันทึกการตั้งค่าเรียบร้อย (' + PROVIDER_INFO[provider].label + ')');
       } else {
         localStorage.removeItem('pea_key_' + provider);
         localStorage.removeItem('pea_model_' + provider);
@@ -596,7 +585,6 @@
       initKey();
     }
 
-    // ----- อัปโหลดโลโก้ -----
     function handleLogoUpload(e) {
       const file = e.target.files[0];
       if (file && file.type.startsWith('image/')) {
@@ -609,21 +597,31 @@
       }
     }
 
-    // ----- อัปโหลดเอกสารสเปก (PDF/รูปภาพ) -----
+    // อัปโหลดภาพถ่ายสินค้าสำหรับรีพอร์ตโดยเฉพาะ
+    function handleProductPhotoUpload(e) {
+      const file = e.target.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function (evt) {
+          productPhotoBase64 = evt.target.result;
+          document.getElementById('outPhotoImg').src = productPhotoBase64;
+          document.getElementById('outPhotoImg').classList.remove('hidden');
+          document.getElementById('outPhotoBox').classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
     function handleFileUpload(e) {
       const file = e.target.files[0];
       if (!file) return;
 
-      // ล้างตัวอย่าง PDF เก่า (ถ้ามี) ก่อนโหลดไฟล์ใหม่ ป้องกันหน่วยความจำรั่ว
       if (currentPdfObjectUrl) {
         URL.revokeObjectURL(currentPdfObjectUrl);
         currentPdfObjectUrl = null;
       }
       document.getElementById('imgPreviewCard').classList.add('hidden');
       document.getElementById('pdfPreviewCard').classList.add('hidden');
-      document.getElementById('outPhotoBox').classList.add('hidden');
-      document.getElementById('outPhotoImg').classList.add('hidden');
-      document.getElementById('outPhotoPdfChip').classList.add('hidden');
 
       const notice = document.getElementById('fileStatusNotice');
       notice.className = "text-[11px] text-indigo-700 mt-1.5 font-medium flex items-center gap-1";
@@ -640,7 +638,6 @@
 
         if (isPdf) {
           fileMimeType = "application/pdf";
-
           currentPdfObjectUrl = URL.createObjectURL(file);
           document.getElementById('pdfPreviewEmbed').src = currentPdfObjectUrl;
           document.getElementById('pdfOpenNewTab').href = currentPdfObjectUrl;
@@ -657,8 +654,11 @@
           document.getElementById('imgPreview').src = resultStr;
           document.getElementById('imgPreviewCard').classList.remove('hidden');
 
+          // ถ้าเป็นรูปภาพ ให้นำภาพนี้ไปลงกล่องรีพอร์ตฝั่งขวาทันที
+          productPhotoBase64 = resultStr;
           document.getElementById('outPhotoImg').src = resultStr;
           document.getElementById('outPhotoImg').classList.remove('hidden');
+          document.getElementById('outPhotoPdfChip').classList.add('hidden');
           document.getElementById('outPhotoBox').classList.remove('hidden');
 
           notice.className = "text-[11px] text-emerald-700 mt-1.5 font-medium flex items-center gap-1";
@@ -667,7 +667,7 @@
       };
       reader.onerror = function () {
         notice.className = "text-[11px] text-rose-700 mt-1.5 font-medium flex items-center gap-1";
-        notice.textContent = "✗ อ่านไฟล์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง (ไฟล์อาจใหญ่เกินไปหรือเสียหาย)";
+        notice.textContent = "✗ อ่านไฟล์ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง";
         base64Data = null;
       };
       reader.readAsDataURL(file);
@@ -679,12 +679,6 @@
       return div.innerHTML;
     }
 
-    // =========================================================================
-    // ----- ฟังก์ชันเรียก AI แยกตามผู้ให้บริการ -----
-    // แต่ละเจ้ามีรูปแบบ endpoint / payload / การตอบกลับไม่เหมือนกัน
-    // =========================================================================
-
-    // Google Gemini: รองรับ CORS โดยตรง ส่ง key ผ่าน header (ปลอดภัยกว่าใส่ใน URL)
     async function requestGemini(model, apiKey, promptText) {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
       const payload = {
@@ -706,13 +700,9 @@
         const msg = (data && data.error && data.error.message) ? data.error.message : `HTTP ${res.status}`;
         const err = new Error(msg); err.status = res.status; throw err;
       }
-      if (!data.candidates || !data.candidates.length || !data.candidates[0].content) {
-        throw new Error('ไม่มีผลลัพธ์จาก AI (อาจถูกบล็อกด้วยตัวกรองความปลอดภัย)');
-      }
       return data.candidates[0].content.parts[0].text;
     }
 
-    // Anthropic Claude: รองรับ CORS ได้ก็ต่อเมื่อส่ง header พิเศษนี้เท่านั้น
     async function requestClaude(model, apiKey, promptText) {
       const contentBlock = fileMimeType === 'application/pdf'
         ? { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64Data } }
@@ -737,49 +727,19 @@
         const msg = (data && data.error && data.error.message) ? data.error.message : `HTTP ${res.status}`;
         const err = new Error(msg); err.status = res.status; throw err;
       }
-      const block = (data.content || []).find(b => b.type === 'text');
-      if (!block) throw new Error('ไม่มีข้อความตอบกลับจาก Claude');
-      return block.text;
-    }
-
-    // OpenAI: เตรียมโค้ดไว้ให้ครบ แต่ในทางปฏิบัติเรียกตรงจากเบราว์เซอร์ไม่ได้ (CORS บล็อก)
-    // ฟังก์ชันนี้จะถูกเรียกก็ต่อเมื่อมีการตั้ง Proxy Server แล้วเปลี่ยน endpoint ด้านล่างเอง
-    async function requestOpenAI(model, apiKey, promptText) {
-      const content = [{ type: 'text', text: promptText }];
-      if (fileMimeType.startsWith('image/')) {
-        content.push({ type: 'image_url', image_url: { url: `data:${fileMimeType};base64,${base64Data}` } });
-      }
-      const payload = {
-        model: model,
-        messages: [{ role: 'user', content: content }],
-        response_format: { type: 'json_object' }
-      };
-      const res = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        const msg = (data && data.error && data.error.message) ? data.error.message : `HTTP ${res.status}`;
-        const err = new Error(msg); err.status = res.status; throw err;
-      }
-      if (!data.choices || !data.choices.length) throw new Error('ไม่มีผลลัพธ์จาก AI');
-      return data.choices[0].message.content;
+      return data.content[0].text;
     }
 
     async function callProviderAI(provider, model, apiKey, promptText) {
       if (provider === 'google') return requestGemini(model, apiKey, promptText);
       if (provider === 'anthropic') return requestClaude(model, apiKey, promptText);
-      if (provider === 'openai') return requestOpenAI(model, apiKey, promptText);
-      throw new Error('ไม่รู้จักผู้ให้บริการ AI: ' + provider);
+      throw new Error('ผู้ให้บริการนี้ยังไม่รองรับการเรียกจากเบราว์เซอร์โดยตรง');
     }
 
-    // ----- ตรวจสอบหลัก -----
     async function runAiVerification() {
       const provider = getActiveProvider();
       const info = PROVIDER_INFO[provider];
-      const apiKey = localStorage.getItem('pea_key_' + provider);
+      const apiKey = getEffectiveKey(provider);
 
       if (!apiKey) {
         alert('กรุณาคลิก "ตั้งค่า AI & API Key" ด้านบนขวาก่อน');
@@ -788,16 +748,6 @@
       }
       if (!base64Data) {
         alert('กรุณาแนบไฟล์ PDF หรือรูปภาพสเปกสินค้าก่อน');
-        return;
-      }
-      if (info.corsBlocked) {
-        alert(
-          'ไม่สามารถเรียก ' + info.label + ' จากเว็บนี้ได้โดยตรงครับ\n\n' +
-          'สาเหตุ: OpenAI ไม่อนุญาตให้เว็บเบราว์เซอร์เรียก API ตรง (นโยบาย CORS ของ OpenAI เอง ไม่ใช่ข้อจำกัดของเว็บนี้)\n\n' +
-          'วิธีแก้: ต้องตั้ง Proxy Server ตรงกลาง (เช่น Cloudflare Worker ฟรี) ให้รับคำขอจากหน้านี้แล้วส่งต่อไป OpenAI แทน\n\n' +
-          'ระหว่างนี้แนะนำให้สลับไปใช้ Google Gemini หรือ Anthropic Claude ซึ่งเรียกตรงจากเบราว์เซอร์ได้จริงในหน้านี้'
-        );
-        openModal();
         return;
       }
 
@@ -822,13 +772,13 @@
 
       const prompt = `
 คุณเป็นวิศวกรและสถาปนิกผู้เชี่ยวชาญการตรวจรับรองวัสดุของการไฟฟ้าส่วนภูมิภาค (กฟภ.)
-หน้าที่ของคุณคือ อ่านข้อมูลทางวิศวกรรมจากเอกสาร/รูปภาพที่แนบมา (เช่น ตารางสเปก, สติกเกอร์ มอก., ตารางแค็ตตาล็อก หรือ Data Sheet) แล้วนำมาตรวจสอบเปรียบเทียบกับข้อกำหนดมาตรฐาน กฟภ. ฉบับปี 2568 ดังนี้:
+หน้าที่ของคุณคือ อ่านข้อมูลทางวิศวกรรมจากเอกสาร/รูปภาพที่แนบมา แล้วนำมาตรวจสอบเปรียบเทียบกับข้อกำหนดมาตรฐาน กฟภ. ฉบับปี 2568 ดังนี้:
 
 [หมวดงานที่ตรวจสอบ: ${crit.name}]
 [เกณฑ์มาตรฐาน กฟภ. 2568 ที่ต้องยึดถือ]:
 ${crit.desc}
 
-ให้ตอบกลับเป็นรูปแบบ JSON บริสุทธิ์เท่านั้น (ห้ามมี Markdown code fence ครอบ ห้ามมีข้อความอื่นนอกเหนือจาก JSON) ตามโครงสร้างนี้:
+ให้ตอบกลับเป็นรูปแบบ JSON บริสุทธิ์เท่านั้น ตามโครงสร้างนี้:
 {
   "verdict": "APPROVED" | "REVIEW" | "REJECTED",
   "reason": "สรุปเหตุผลทางวิศวกรรมสั้นๆ ชัดเจน 2-3 บรรทัด",
@@ -839,36 +789,24 @@ ${crit.desc}
     { "topic": "ระยะเวลารับประกัน / ข้อกำหนดทางเทคนิคพิเศษ", "standard": "เกณฑ์ กฟภ. 2568", "actual": "ค่าที่อ่านได้จากรูป/เอกสาร", "pass": true }
   ]
 }
-
-หากเอกสารที่แนบมาไม่มีข้อมูลเพียงพอสำหรับหัวข้อใด ให้ใส่ "actual": "ไม่พบข้อมูลในเอกสารที่แนบ" และ "pass": false สำหรับหัวข้อนั้น แทนการเดาข้อมูล
 `;
 
-      // Gemini เท่านั้นที่มีลิสต์โมเดลสำรอง (เนื่องจาก Google ปลดระวางโมเดลบ่อย)
-      // Claude และ OpenAI จะเรียกเฉพาะโมเดลที่เลือกไว้เท่านั้น เพื่อความชัดเจนของผลลัพธ์
       let modelsToTry = [preferredModel];
       if (provider === 'google') {
-        const fallbackModels = ['gemini-3.6-flash', 'gemini-3.8-flash', 'gemini-3.1-pro-preview', 'gemini-2.5-flash'];
+        const fallbackModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.0-flash-lite'];
         modelsToTry = [preferredModel, ...fallbackModels].filter((v, i, arr) => v && arr.indexOf(v) === i);
       }
 
       let rawText = null;
-      let successModel = null;
-      const errorsByModel = [];
+      let lastErr = "";
 
       for (const m of modelsToTry) {
-        loadingText.textContent = `${info.label} (${m}) กำลังวิเคราะห์เอกสารและเทียบสเปก กฟภ. 2568...`;
+        loadingText.textContent = `${info.label} (${m}) กำลังวิเคราะห์เอกสารเทียบสเปก กฟภ. 2568...`;
         try {
           rawText = await callProviderAI(provider, m, apiKey, prompt);
-          successModel = m;
           break;
         } catch (err) {
-          let msg = err.message;
-          if (err.message === 'Failed to fetch') {
-            msg = 'เชื่อมต่อ API ไม่สำเร็จ (Failed to fetch) — อาจเกิดจากปัญหาเครือข่าย, API Key ผิด, หรือผู้ให้บริการนี้บล็อกการเรียกจากเบราว์เซอร์ (CORS)';
-          }
-          errorsByModel.push(`${m}: ${msg}`);
-          if (err.status === 400 && /API key|api_key|x-api-key/i.test(err.message)) break;
-          if (err.status === 401 || err.status === 403) break;
+          lastErr = err.message;
         }
       }
 
@@ -876,29 +814,19 @@ ${crit.desc}
         try {
           const cleanJson = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
           const parsed = JSON.parse(cleanJson);
-          if (!parsed.checks || !Array.isArray(parsed.checks)) {
-            throw new Error('รูปแบบผลลัพธ์ไม่มี "checks" เป็น array');
-          }
           currentEvaluationResult = parsed;
           renderReport(parsed);
-          if (successModel !== preferredModel) {
-            console.warn(`โมเดล "${preferredModel}" เรียกไม่สำเร็จ ระบบสลับไปใช้ "${successModel}" แทน`);
-          }
         } catch (e) {
-          console.error('JSON parse error:', e, rawText);
-          alert('AI ตอบกลับในรูปแบบที่ไม่ถูกต้อง (' + e.message + ') กรุณาลองส่งตรวจอีกครั้ง');
+          alert('AI ตอบกลับในรูปแบบที่ไม่ถูกต้อง กรุณาลองส่งตรวจอีกครั้ง');
         }
       } else {
-        console.error('เรียก AI ไม่สำเร็จทุกโมเดล:', errorsByModel);
-        alert('เกิดข้อผิดพลาดในการเชื่อมต่อ ' + info.label + ':\n\n' + errorsByModel.join('\n') + '\n\nตรวจสอบ API Key และการเชื่อมต่ออินเทอร์เน็ต แล้วลองใหม่อีกครั้ง');
+        alert('เกิดข้อผิดพลาดในการเชื่อมต่อ AI: ' + lastErr);
       }
 
       loadingBox.classList.add('hidden');
-      loadingText.textContent = 'AI กำลังวิเคราะห์ข้อมูลในเอกสารและเทียบสเปก กฟภ. 2568...';
       runBtn.disabled = false;
     }
 
-    // ----- แสดงผลรายงานบนหน้าจอ -----
     function renderReport(r) {
       const tbody = document.getElementById('outTableBody');
       const badge = document.getElementById('badgeVerdict');
@@ -927,27 +855,25 @@ ${crit.desc}
         badge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800';
         badge.textContent = 'ผลการตรวจ: อนุมัติ (Approved)';
         box.className = 'p-2.5 rounded border border-emerald-200 bg-emerald-50 text-emerald-950 text-xs leading-relaxed';
-        box.innerHTML = `<strong>สรุปผลการพิจารณา: สอดคล้องตามรายการประกอบแบบ กฟภ. ฉบับปี 2568</strong><br>${reasonText}<br><span class="text-[10px] text-emerald-800 mt-1 block">ความเห็นผู้ควบคุมงาน: คุณสมบัติครบถ้วนตามข้อกำหนด อนุมัติให้จัดหาและใช้งานได้ (ควรตรวจทานกับเอกสารต้นฉบับก่อนลงนามจริง)</span>`;
+        box.innerHTML = `<strong>สรุปผลการพิจารณา: สอดคล้องตามรายการประกอบแบบ กฟภ. ฉบับปี 2568</strong><br>${reasonText}`;
       } else if (r.verdict === 'REVIEW') {
         badge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-amber-100 text-amber-800';
         badge.textContent = 'ผลการตรวจ: ขอเอกสารเทียบเท่า (Review Required)';
         box.className = 'p-2.5 rounded border border-amber-200 bg-amber-50 text-amber-950 text-xs leading-relaxed';
-        box.innerHTML = `<strong>สรุปผลการพิจารณา: ต้องเสนอเอกสารรับรองคุณสมบัติเทียบเท่าเพิ่มเติม</strong><br>${reasonText}<br><span class="text-[10px] text-amber-800 mt-1 block">ความเห็นผู้ควบคุมงาน: ให้ผู้รับจ้างแนบผลทดสอบจากสถาบันที่ กฟภ. รับรองตามหมวด 01 60 00 เพื่อเสนอผู้ออกแบบพิจารณา</span>`;
+        box.innerHTML = `<strong>สรุปผลการพิจารณา: ต้องเสนอเอกสารรับรองคุณสมบัติเทียบเท่าเพิ่มเติม</strong><br>${reasonText}`;
       } else {
         badge.className = 'text-xs font-bold px-3 py-1 rounded-full bg-rose-100 text-rose-800';
         badge.textContent = 'ผลการตรวจ: ไม่อนุมัติ (Rejected)';
         box.className = 'p-2.5 rounded border border-rose-200 bg-rose-50 text-rose-950 text-xs leading-relaxed';
-        box.innerHTML = `<strong>สรุปผลการพิจารณา: ไม่อนุญาตให้นำมาใช้ในงานก่อสร้าง</strong><br>${reasonText}<br><span class="text-[10px] text-rose-800 mt-1 block">ความเห็นผู้ควบคุมงาน: คุณสมบัติต่ำกว่าเกณฑ์ขั้นต่ำตามสเปก ปฏิเสธการขออนุมัติและให้ผู้รับจ้างเสนอผลิตภัณฑ์ใหม่</span>`;
+        box.innerHTML = `<strong>สรุปผลการพิจารณา: ไม่อนุญาตให้นำมาใช้ในงานก่อสร้าง</strong><br>${reasonText}`;
       }
     }
 
-    // ----- ส่งออก Excel -----
     function exportToExcel() {
       if (!currentEvaluationResult) {
         alert('กรุณาทำการตรวจสอบสเปกก่อนส่งออกเป็น Excel');
         return;
       }
-
       const pRegion = document.getElementById('fldPeaRegion').value || '-';
       const pBranch = document.getElementById('fldPeaBranch').value || '-';
       const pName = document.getElementById('fldProject').value || 'อาคารสำนักงาน กฟภ.';
@@ -981,24 +907,17 @@ ${crit.desc}
       XLSX.utils.book_append_sheet(wb, ws, "PEA_Material_Report");
 
       const safeDocName = pDoc.replace(/[^a-zA-Z0-9ก-๙_-]/g, '_') || 'report';
-      const fileName = `PEA_Material_Check_${safeDocName}.xlsx`;
-      XLSX.writeFile(wb, fileName);
+      XLSX.writeFile(wb, `PEA_Material_Check_${safeDocName}.xlsx`);
     }
 
-    // =========================================================================
-    // ----- พิมพ์รายงาน: สร้างหน้าต่างพิมพ์แยกต่างหาก (Bulletproof Print) -----
-    // เหตุผล: การสั่ง window.print() บนหน้าเว็บหลักที่โหลด Tailwind Play CDN
-    // (ซึ่งฉีด CSS แบบ async หลังโหลดหน้า) มักพิมพ์ออกมาผิดเพี้ยนไม่เท่ากันใน
-    // แต่ละเบราว์เซอร์ จึงสร้างเอกสาร HTML ใหม่ล้วนๆ ที่มี CSS ของตัวเองแยก
-    // ต่างหาก ไปเปิดในแท็บใหม่ แล้วค่อยสั่งพิมพ์แท็บนั้น ทำให้ผลลัพธ์เสถียรเสมอ
-    // =========================================================================
+    // ฟังก์ชันสร้างหน้าต่างพิมพ์ A4 พร้อมภาพผลิตภัณฑ์
     function buildPrintDocument() {
       const region = escapeHtml(document.getElementById('fldPeaRegion').value || '-');
       const branch = escapeHtml(document.getElementById('fldPeaBranch').value || '-');
       const project = escapeHtml(document.getElementById('fldProject').value || 'อาคารสำนักงาน กฟภ.');
       const contractor = escapeHtml(document.getElementById('fldContractor').value || '-');
       const docNo = escapeHtml(document.getElementById('fldDocNo').value || '-');
-      const dateStr = escapeHtml(document.getElementById('outDate').textContent || new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }));
+      const dateStr = escapeHtml(document.getElementById('outDate').textContent || '-');
       const catKey = document.getElementById('selCategory').value;
       const catDesc = escapeHtml(PEA_MASTER_SPECS[catKey].desc);
 
@@ -1010,7 +929,7 @@ ${crit.desc}
 
       const r = currentEvaluationResult;
       let verdictLabel = 'รอผลการตรวจสอบ', verdictClass = '';
-      let checksRows = '<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:30px 10px;font-style:italic;">ยังไม่มีข้อมูลการประเมิน</td></tr>';
+      let checksRows = '<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:30px 10px;">ยังไม่มีข้อมูลการประเมิน</td></tr>';
       let adviceHtml = '';
 
       if (r) {
@@ -1026,29 +945,28 @@ ${crit.desc}
         const reasonText = escapeHtml(r.reason || '-');
         if (r.verdict === 'APPROVED') {
           verdictClass = 'ok'; verdictLabel = 'ผลการตรวจ: อนุมัติ (Approved)';
-          adviceHtml = `<div class="advice ok"><strong>สรุปผลการพิจารณา: สอดคล้องตามรายการประกอบแบบ กฟภ. ฉบับปี 2568</strong>${reasonText}
-            <div class="sub">ความเห็นผู้ควบคุมงาน: คุณสมบัติครบถ้วนตามข้อกำหนด อนุมัติให้จัดหาและใช้งานได้ (ควรตรวจทานกับเอกสารต้นฉบับก่อนลงนามจริง)</div></div>`;
+          adviceHtml = `<div class="advice ok"><strong>สรุปผลการพิจารณา: สอดคล้องตามรายการประกอบแบบ กฟภ. ฉบับปี 2568</strong>${reasonText}</div>`;
         } else if (r.verdict === 'REVIEW') {
           verdictClass = 'warn'; verdictLabel = 'ผลการตรวจ: ขอเอกสารเทียบเท่า (Review Required)';
-          adviceHtml = `<div class="advice warn"><strong>สรุปผลการพิจารณา: ต้องเสนอเอกสารรับรองคุณสมบัติเทียบเท่าเพิ่มเติม</strong>${reasonText}
-            <div class="sub">ความเห็นผู้ควบคุมงาน: ให้ผู้รับจ้างแนบผลทดสอบจากสถาบันที่ กฟภ. รับรองตามหมวด 01 60 00 เพื่อเสนอผู้ออกแบบพิจารณา</div></div>`;
+          adviceHtml = `<div class="advice warn"><strong>สรุปผลการพิจารณา: ต้องเสนอเอกสารรับรองคุณสมบัติเทียบเท่าเพิ่มเติม</strong>${reasonText}</div>`;
         } else {
           verdictClass = 'bad'; verdictLabel = 'ผลการตรวจ: ไม่อนุมัติ (Rejected)';
-          adviceHtml = `<div class="advice bad"><strong>สรุปผลการพิจารณา: ไม่อนุญาตให้นำมาใช้ในงานก่อสร้าง</strong>${reasonText}
-            <div class="sub">ความเห็นผู้ควบคุมงาน: คุณสมบัติต่ำกว่าเกณฑ์ขั้นต่ำตามสเปก ปฏิเสธการขออนุมัติและให้ผู้รับจ้างเสนอผลิตภัณฑ์ใหม่</div></div>`;
+          adviceHtml = `<div class="advice bad"><strong>สรุปผลการพิจารณา: ไม่อนุญาตให้นำมาใช้ในงานก่อสร้าง</strong>${reasonText}</div>`;
         }
       }
 
+      // ดึงภาพผลิตภัณฑ์มาใส่ในเอกสารพิมพ์ A4 เสมอ
       let photoHtml = '';
-      if (fileMimeType === 'application/pdf' && currentFileName) {
-        photoHtml = `<div class="photobox"><span class="lbl">ภาพเอกสาร/แค็ตตาล็อกที่นำมาเปรียบเทียบสเปก</span>
-          <div class="pdfchip">📄 ${escapeHtml(currentFileName)}</div></div>`;
-      } else if (base64Data && fileMimeType.startsWith('image/')) {
-        photoHtml = `<div class="photobox"><span class="lbl">ภาพเอกสาร/แค็ตตาล็อกที่นำมาเปรียบเทียบสเปก</span>
-          <img src="data:${fileMimeType};base64,${base64Data}"></div>`;
+      if (productPhotoBase64) {
+        photoHtml = `
+          <div class="photobox">
+            <span class="lbl">ภาพตัวอย่างผลิตภัณฑ์ / แค็ตตาล็อกที่ขออนุมัติ:</span>
+            <img src="${productPhotoBase64}" style="max-height:130px; border:1px solid #cbd5e1; padding:3px; border-radius:4px; object-fit:contain;">
+          </div>
+        `;
+      } else if (fileMimeType === 'application/pdf' && currentFileName) {
+        photoHtml = `<div class="photobox"><span class="lbl">เอกสารอ้างอิง:</span><div class="pdfchip">📄 ${escapeHtml(currentFileName)}</div></div>`;
       }
-
-      const providerBadge = escapeHtml(PROVIDER_INFO[getActiveProvider()].label);
 
       return `<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8">
         <title>รายงานตรวจสอบวัสดุ - ${docNo}</title>
@@ -1062,7 +980,7 @@ ${crit.desc}
           .title h2{margin:0;font-size:16px;color:#1e1b4b;}
           .title h3{margin:2px 0 0;font-size:11px;font-weight:600;color:#475569;}
           .title .ref{margin-top:5px;font-size:10.5px;font-weight:600;color:#4338ca;}
-          .tag{flex-shrink:0;font-size:11px;font-weight:700;padding:5px 12px;border-radius:999px;white-space:nowrap;}
+          .tag{flex-shrink:0;font-size:11px;font-weight:700;padding:5px 12px;border-radius:999px;}
           .tag.ok{background:#d1fae5;color:#065f46;} .tag.warn{background:#fef3c7;color:#92400e;} .tag.bad{background:#fee2e2;color:#991b1b;}
           .meta{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid #cbd5e1;font-size:10.5px;margin-bottom:12px;background:#f8fafc;}
           .meta div{padding:6px 9px;border-right:1px solid #cbd5e1;border-bottom:1px solid #cbd5e1;}
@@ -1078,22 +996,18 @@ ${crit.desc}
           .chip.pass{color:#065f46;background:#d1fae5;} .chip.fail{color:#991b1b;background:#fee2e2;}
           .advice{border:1px solid #cbd5e1;padding:9px 12px;font-size:10.5px;line-height:1.6;margin-bottom:12px;border-radius:4px;}
           .advice.ok{border-color:#a7f3d0;background:#ecfdf5;} .advice.warn{border-color:#fde68a;background:#fffbeb;} .advice.bad{border-color:#fecaca;background:#fef2f2;}
-          .advice strong{display:block;margin-bottom:3px;}
-          .advice .sub{display:block;margin-top:5px;font-size:9.5px;color:#475569;}
-          .photobox{margin-bottom:14px;} .photobox .lbl{font-size:9.5px;font-weight:700;color:#64748b;display:block;margin-bottom:5px;}
-          .photobox img{max-height:110px;border:1px solid #cbd5e1;padding:3px;object-fit:contain;}
+          .photobox{margin-bottom:12px;} .photobox .lbl{font-size:10px;font-weight:700;color:#475569;margin-bottom:4px;display:block;}
           .pdfchip{display:inline-block;border:1px solid #cbd5e1;border-radius:4px;padding:6px 10px;background:#f8fafc;font-size:10px;}
           .signs{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:center;font-size:9.5px;border-top:1px solid #cbd5e1;padding-top:16px;margin-top:6px;}
           .signs .role{color:#475569;margin-bottom:32px;min-height:24px;}
           .signline{border-bottom:1px dotted #64748b;width:82%;margin:0 auto;}
           .signname{margin-top:5px;} .signpost{color:#94a3b8;font-size:9px;margin-top:2px;}
-          .foot{font-size:9px;color:#94a3b8;text-align:center;margin-top:16px;line-height:1.6;}
           @media print{ .no-print{display:none !important;} }
         </style></head><body>
         <div class="head">
           ${logoHtml}
           <div class="title"><h2>รายงานผลการตรวจสอบและทดสอบสเปกวัสดุ</h2>
-          <h3>กองออกแบบงานโยธา การไฟฟ้าส่วนภูมิภาค (PEA Standards Specification 2568) · ตรวจสอบโดย ${providerBadge}</h3>
+          <h3>กองออกแบบงานโยธา การไฟฟ้าส่วนภูมิภาค (PEA Standards Specification 2568)</h3>
           <div class="ref">กฟภ. เขต: ${region} &nbsp;|&nbsp; การไฟฟ้าสาขา: ${branch}</div></div>
           <div class="tag ${verdictClass}">${verdictLabel}</div>
         </div>
@@ -1112,7 +1026,6 @@ ${crit.desc}
           <div><p class="role">ผู้ตรวจสอบความสอดคล้อง<br>(ผู้ควบคุมงาน กฟภ.)</p><p class="signline"></p><p class="signname">(......................................................)</p><p class="signpost">ตำแหน่ง: ตัวแทนผู้ว่าจ้าง / กฟภ.</p></div>
           <div><p class="role">ความเห็นชอบการอนุมัติ<br>(คณะกรรมการตรวจรับพัสดุ)</p><p class="signline"></p><p class="signname">(......................................................)</p><p class="signpost">ตำแหน่ง: ประธานกรรมการตรวจรับพัสดุ</p></div>
         </div>
-        <div class="foot">รายงานฉบับนี้จัดทำโดยระบบผู้ช่วย AI เพื่อเทียบเคียงข้อมูลเบื้องต้นเท่านั้น มิใช่การอนุมัติอย่างเป็นทางการ<br>การอนุมัติใช้วัสดุจริงต้องผ่านการพิจารณาและลงนามโดยผู้ควบคุมงาน/คณะกรรมการตรวจรับพัสดุของ กฟภ.</div>
         <div class="no-print" style="text-align:center;margin-top:18px;">
           <button onclick="window.print()" style="font-family:Sarabun,sans-serif;font-size:13px;font-weight:700;padding:9px 22px;background:#312e81;color:#fff;border:none;border-radius:6px;cursor:pointer;">🖨️ พิมพ์ / บันทึก PDF</button>
         </div>
@@ -1121,8 +1034,7 @@ ${crit.desc}
 
     function printReport() {
       if (!currentEvaluationResult) {
-        const proceed = confirm('ยังไม่ได้ทำการตรวจสอบสเปกด้วย AI ต้องการพิมพ์แบบฟอร์มเปล่าไว้ก่อนหรือไม่?');
-        if (!proceed) return;
+        if (!confirm('ยังไม่ได้ทำการตรวจสอบสเปกด้วย AI ต้องการพิมพ์แบบฟอร์มเปล่าไว้ก่อนหรือไม่?')) return;
       }
       const html = buildPrintDocument();
       const blob = new Blob([html], { type: 'text/html' });
@@ -1130,15 +1042,12 @@ ${crit.desc}
       const printWin = window.open(url, '_blank');
 
       if (!printWin) {
-        alert('เบราว์เซอร์บล็อกการเปิดหน้าต่างพิมพ์ (Pop-up Blocked)\n\nวิธีแก้: คลิกไอคอนบล็อก popup บนแถบที่อยู่เว็บ (มุมขวาบนของ address bar) แล้วเลือก "อนุญาตเสมอ" สำหรับเว็บไซต์นี้ จากนั้นลองกดพิมพ์อีกครั้ง');
+        alert('เบราว์เซอร์บล็อกการเปิดหน้าต่างพิมพ์ กรุณากดอนุญาต Pop-up บนเบราว์เซอร์ของคุณ');
         URL.revokeObjectURL(url);
         return;
       }
-
       printWin.addEventListener('load', () => {
-        setTimeout(() => {
-          try { printWin.focus(); printWin.print(); } catch (e) { console.warn('เรียก print() อัตโนมัติไม่สำเร็จ ผู้ใช้สามารถกดปุ่มพิมพ์ในหน้าต่างใหม่แทนได้', e); }
-        }, 350);
+        setTimeout(() => { try { printWin.focus(); printWin.print(); } catch (e) {} }, 350);
       });
     }
 
